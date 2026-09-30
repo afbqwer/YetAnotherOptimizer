@@ -21,13 +21,6 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 			yield return AccessTools.Method(
 				typeof(ListerBuildings),
 				nameof(ListerBuildings.AllBuildingsColonistOfGroup));
-
-			if (YaOptGlobal.HasMod("Vortex.Kingfisher"))
-			{
-				yield return AccessTools.Method(
-					AccessTools.TypeByName("Kingfisher.Features.ListerBuildingsRewrite"),
-					"AllBuildingsColonistOfDef");
-			}
 		}
 
 		static bool Prepare()
@@ -41,7 +34,6 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 			var local = generator.DeclareLocal(typeof(List<Building>));
 			var tlaType = typeof(ThreadLocalAllocator<List<Building>>);
 			int key = -1;
-			var isKingfisher = method.FullName().Contains("Kingfisher");
 			if (method.Name == "AllBuildingsColonistOfDef")
 			{
 				key = ThreadLocalAllocator<List<Building>>.TryAllocate(
@@ -61,8 +53,12 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 			yield return CodeInstruction.StoreLocal(local.LocalIndex);
 			foreach (var instruction in instructions)
 			{
-				// Replace listerBuildings.ColonistBuildingsOfDefResult with the thread local
-				if (isKingfisher && instruction.Calls("ColonistBuildingsOfDefResult"))
+				// Replace listerBuildings.ColonistBuildingsOfDefResult with the thread local.
+				// Kingfisher reaches this buffer through its own accessor instead of the vanilla field,
+				// and copies its body into the vanilla method via PurePatcher's [ReplaceMethod].
+				// The replacement has the same stack effect as the accessor call, so it stays valid
+				// in any context.
+				if (instruction.Calls("ColonistBuildingsOfDefResult"))
 				{
 					yield return new CodeInstruction(OpCodes.Pop);
 					yield return CodeInstruction.LoadLocal(local.LocalIndex);
