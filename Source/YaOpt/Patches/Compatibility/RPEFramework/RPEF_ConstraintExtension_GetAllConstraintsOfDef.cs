@@ -13,7 +13,15 @@ namespace YaOpt.Patches.Compatibility.RPEFramework
 		static MethodBase TargetMethod()
 		{
 			var type = AccessTools.TypeByName("RPEF.ConstraintExtension");
-			//var method = AccessTools.Method(type, "GetAllConstraintsOfDef");
+			// Newer RPEF versions replaced the iterator with a plain method backed by a
+			// static cache, so the shared state lives in that method itself.
+			foreach (var method in type.GetMethods(BindingFlags.Public | BindingFlags.Static))
+			{
+				if (method.Name == "GetAllConstraintsOfDef" && method.ReturnType == typeof(void))
+					return method;
+			}
+			// Older RPEF versions expose it as an iterator, whose state machine is what
+			// actually touches the shared buffers.
 			foreach (var nested in type.GetNestedTypes(BindingFlags.NonPublic))
 			{
 				if (!nested.Name.Contains("GetAllConstraintsOfDef"))
@@ -23,7 +31,7 @@ namespace YaOpt.Patches.Compatibility.RPEFramework
 					return moveNext;
 			}
 			throw new MissingMethodException(
-				"Cannot find GetAllConstraintsOfDef.MoveNext for RPEF.ConstraintExtension. " +
+				"Cannot find GetAllConstraintsOfDef for RPEF.ConstraintExtension. " +
 				"This may be due to the mod update. Please report this to the YaOpt developers.");
 		}
 
@@ -44,39 +52,5 @@ namespace YaOpt.Patches.Compatibility.RPEFramework
 			if (__state)
 				_spinLock.Exit();
 		}
-
-		// For the next version of RPE Framework
-		/*
-		private const int WRITE = 1;
-		private const int READ = -1;
-
-		private static UnfairRwLock _rwLock = new UnfairRwLock();
-
-		static void Prefix(Def def, IDictionary ____defConstraintCache, out int __state)
-		{
-			if (def == null)
-			{
-				__state = 0;
-				return;
-			}
-			_rwLock.EnterReadLock();
-			__state = READ;
-			if (!____defConstraintCache.Contains(def))
-			{
-				_rwLock.ExitReadLock();
-				__state = 0;
-				_rwLock.EnterWriteLock();
-				__state = WRITE;
-			}
-		}
-
-		static void Finalizer(int __state)
-		{
-			if (__state == READ)
-				_rwLock.ExitReadLock();
-			else if (__state == WRITE)
-				_rwLock.ExitWriteLock();
-		}
-		*/
 	}
 }
