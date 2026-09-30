@@ -3,9 +3,13 @@
 	<YaOpt.CompatibilityDef MayRequire="Vortex.Kingfisher">
 		<defName>Kingfisher</defName>
 		<lockPatches>
+			<!-- Since 0.6, Kingfisher pastes the body of its rewrite methods into the vanilla methods
+			     via PurePatcher's [ReplaceMethod], so its own methods are dead code and the locks
+			     have to target the vanilla method that actually runs. -->
 			<LockPatch>
-				<method>Kingfisher.Features.AttackTargetFinderRewrite:BestAttackTarget</method>
+				<method>Verse.AI.AttackTargetFinder:BestAttackTarget</method>
 			</LockPatch>
+			<!-- These two are helper methods, still called by the pasted bodies. -->
 			<LockPatch>
 				<method>Kingfisher.Features.RefuelWorkCandidates:CandidatesFor</method>
 			</LockPatch>
