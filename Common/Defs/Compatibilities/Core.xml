@@ -524,6 +524,36 @@
 			<LockPatch>
 				<method>Verse.HediffSet:GetCoverageOfNotMissingNaturalParts</method>
 			</LockPatch>
+
+			<!-- ChildcareUtility -->
+			<!-- Fixed: CanBreastfeedMothers is an iterator mutating the static
+			     tmpAutoBreastfeedOpportunisticMoms/tmpAutoBreastfeedOffMoms lists, and
+			     ImmobileBreastfeederAvailable also writes the static
+			     cachedHaulerBabyMotherImmobile dictionary. Both run concurrently on work
+			     giver scan threads via WorkGiver_BreastfeedCarryToMom.JobOnThing,
+			     WorkGiver_FeedBabyManually (CanCreateManualFeedingJob/AutoBreastfeederAvailable)
+			     and ChildcareUtility.CanHaulBaby. These three direct callers of
+			     CanBreastfeedMothers share one key so every enumeration and dictionary
+			     write is mutually exclusive. Recursion is required: ImmobileBreastfeederAvailable
+			     reaches BabyHasFeederInCompatibleFaction via CanHaulBabyToDownedMomToBreastfeedNow. -->
+			<LockPatch>
+				<method>RimWorld.ChildcareUtility:ImmobileBreastfeederAvailable</method>
+				<scope>Key</scope>
+				<key>___ChildcareBreastfeeders</key>
+				<supportRecursion>true</supportRecursion>
+			</LockPatch>
+			<LockPatch>
+				<method>RimWorld.ChildcareUtility:BabyHasFeederInCompatibleFaction</method>
+				<scope>Key</scope>
+				<key>___ChildcareBreastfeeders</key>
+				<supportRecursion>true</supportRecursion>
+			</LockPatch>
+			<LockPatch>
+				<method>RimWorld.WorkGiver_FeedBabyManually:AutoBreastfeederAvailable</method>
+				<scope>Key</scope>
+				<key>___ChildcareBreastfeeders</key>
+				<supportRecursion>true</supportRecursion>
+			</LockPatch>
 		</lockPatches>
 	</YaOpt.CompatibilityDef>
 </Defs>
