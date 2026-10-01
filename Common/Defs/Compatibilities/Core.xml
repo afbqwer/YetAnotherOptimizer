@@ -210,6 +210,12 @@
 				<method>RimWorld.Medicine:GetMedicineCountToFullyHeal</method>
 				<replace>tendableHediffsInTendPriorityOrder</replace>
 			</ThreadLocalPatch>
+
+			<!-- ChildcareUtility -->
+			<ThreadLocalPatch>
+				<method>RimWorld.ChildcareUtility:FindUnsafeBaby</method>
+				<replace>tmpBabyList</replace>
+			</ThreadLocalPatch>
 		</threadLocalPatches>
 		
 		<lockPatches>
@@ -505,6 +511,18 @@
 			<!-- RegionTraverser -->
 			<LockPatch>
 				<method>Verse.RegionTraverser:MarkRegionsBFS</method>
+			</LockPatch>
+
+			<!-- HediffSet -->
+			<!-- Fixed: GetCoverageOfNotMissingNaturalParts mutates the per-instance scratch
+			     collections coverageRejectedPartsSet/coveragePartsStack and lazily builds
+			     cachedMissingPartsCommonAncestors. The StatWorker.GetValue lock only covers
+			     the cache read/write, not the StatPart computation path, so two threads
+			     computing Mass/Nutrition/MeatAmount/LeatherAmount of the same pawn/corpse
+			     race on them (NRE in HashSet.AddIfNotPresent). Instance-scoped lock keeps
+			     different pawns fully parallel. -->
+			<LockPatch>
+				<method>Verse.HediffSet:GetCoverageOfNotMissingNaturalParts</method>
 			</LockPatch>
 		</lockPatches>
 	</YaOpt.CompatibilityDef>
