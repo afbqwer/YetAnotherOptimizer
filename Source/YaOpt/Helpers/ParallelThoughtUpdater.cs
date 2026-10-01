@@ -52,6 +52,17 @@ namespace YaOpt.Helpers
 					map.mapPawns.SpawnedPawnsInFaction(null);
 				}
 
+				// Force the wealth recount to run here, on the main thread, before workers start.
+				// The first recount after loading a save evaluates every thing on the map with
+				// cold stat caches and can take seconds; letting it happen under a running job
+				// would make all workers read zeroed wealth or starve the recount thread
+				// (GitHub issue #7).
+				var pawnMap = pawn.MapHeld;
+				if (pawnMap != null)
+				{
+					_ = pawnMap.wealthWatcher.WealthTotal;
+				}
+
 				var situationalNonSocialThoughtDefs = ThoughtUtility.situationalNonSocialThoughtDefs;
 				var batchSize = ParallelThoughtUpdaterManualBatch
 					? ParallelThoughtUpdaterBatchSize
