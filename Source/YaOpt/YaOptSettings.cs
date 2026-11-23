@@ -458,6 +458,13 @@ namespace YaOpt
 		/// If the prediction passes (no interruption), the main thread skips the redundant check.
 		/// Otherwise, the main thread performs the standard check.
 		/// </summary>
+		/// <remarks>
+		/// Locked off on this branch: the option is listed in <see cref="LockedOffOptimizations"/>, so
+		/// <see cref="OptimizationOption.Enabled"/> always returns false and every patch gated on it is
+		/// skipped, together with <see cref="YaOptGlobal.NeedThreadSafe"/>. 1.7 is maintained
+		/// single-threaded: <c>ParallelPawnTickManager</c> and <c>JobPredictor</c> are neither exercised
+		/// nor tested here. Re-verify them in-game before removing the entry from the lock list.
+		/// </remarks>
 		/// <seealso cref="Patches.Verse_AI_JobDriver_DriverTick"/>
 		/// <seealso cref="Patches.Verse_AI_Pawn_JobTracker_JobTrackerTickInterval"/>
 		/// <seealso cref="Patches.Verse_TickList_Tick"/>
@@ -497,6 +504,14 @@ namespace YaOpt
 		/// and waits for threads checking higher priority works to finish.
 		/// Finally, the valid work with the highest priority is selected.
 		/// </summary>
+		/// <remarks>
+		/// Locked off on this branch: listed in <see cref="LockedOffOptimizations"/>, so
+		/// <see cref="OptimizationOption.Enabled"/> is always false. This is the switch that keeps the
+		/// entire <c>Helpers/ThreadLocal</c> and <c>Helpers/ThreadSafe</c> machinery dormant:
+		/// <see cref="YaOptGlobal.NeedThreadSafe"/> is false without it, and every ThreadSafe/Reach patch
+		/// gates on these two. <c>ParallelWorkGiver</c>, <c>JobPredictor</c> and the per-thread
+		/// <c>Reachability</c> state are untested on 1.7 — re-test in-game before unlocking.
+		/// </remarks>
 		/// <seealso cref="Patches.RimWorld_JobGiver_Work_TryIssueJobPackage"/>
 		/// <seealso cref="YaOptGlobal.NeedThreadSafe"/>
 		public OptimizationOption OptParallelWorkGiver { get; } = new OptimizationOption
@@ -511,8 +526,14 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// 
+		/// Moves situational thought creation for the mood update onto worker threads.
 		/// </summary>
+		/// <remarks>
+		/// Locked off on this branch: listed in <see cref="LockedOffOptimizations"/>, so
+		/// <see cref="OptimizationOption.Enabled"/> is always false and
+		/// <see cref="Helpers.ParallelThoughtUpdater"/> never runs. The option only exists to keep
+		/// settings files from the 1.6 branch loadable; the code path itself is unmaintained on 1.7.
+		/// </remarks>
 		/// <seealso cref="Patches.RimWorld_SituationalThoughtHandler_UpdateAllMoodThoughts"/>
 		public OptimizationOption OptParallelThoughtUpdate { get; } = new OptimizationOption
 		{
@@ -528,6 +549,14 @@ namespace YaOpt
 		/// Optimizes map post-tick processing by running independent updates in parallel.
 		/// Supports steady environment effects, temp terrain and gas updates.
 		/// </summary>
+		/// <remarks>
+		/// Locked off on this branch: listed in <see cref="LockedOffOptimizations"/>, so
+		/// <see cref="OptimizationOption.Enabled"/> is always false. Consequently
+		/// <see cref="Patches.Verse_Map_MapPostTick"/> is never applied (steady environment effects,
+		/// temp terrain and gas keep ticking inline inside <c>Map.MapPostTick</c>) and
+		/// <see cref="Patches.Verse_TickManager_DoSingleTick"/> skips its
+		/// <c>ParallelMapTickManager.FinishPostMapTick</c> injection.
+		/// </remarks>
 		/// <seealso cref="Patches.Verse_Map_MapPostTick"/>
 		/// <seealso cref="Patches.Verse_TickManager_DoSingleTick"/>
 		public OptimizationOption OptParallelPostMapTick { get; } = new OptimizationOption

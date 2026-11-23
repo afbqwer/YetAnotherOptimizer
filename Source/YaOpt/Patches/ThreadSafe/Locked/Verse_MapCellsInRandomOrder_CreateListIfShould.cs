@@ -63,7 +63,7 @@ namespace YaOpt.Patches.ThreadSafe.Locked
 				{
 					yield return CodeInstruction.LoadArgument(0);
 					yield return CodeInstruction.LoadLocal(local.LocalIndex);
-					yield return CodeInstruction.StoreField(typeof(MapCellsInRandomOrder), "randomizedCells");
+					yield return CodeInstruction.StoreField(typeof(MapCellsInRandomOrder), nameof(MapCellsInRandomOrder.randomizedCells));
 				}
 			}
 		}

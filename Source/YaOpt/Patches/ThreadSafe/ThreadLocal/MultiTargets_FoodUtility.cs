@@ -15,11 +15,11 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 	{
 		static IEnumerable<MethodBase> TargetMethods()
 		{
-			yield return AccessTools.Method(typeof(FoodUtility), "BestFoodSourceOnMap");
-			yield return AccessTools.Method(typeof(FoodUtility), "BestPawnToHuntForPredator");
-			yield return AccessTools.Method(typeof(FoodUtility), "AddThoughtsFromIdeo");
-			yield return AccessTools.Method(typeof(FoodUtility), "ThoughtsFromIngesting");
-			yield return AccessTools.Method(typeof(FoodUtility), "AddIngestThoughtsFromIngredient");
+			yield return AccessTools.Method(typeof(FoodUtility), nameof(FoodUtility.BestFoodSourceOnMap));
+			yield return AccessTools.Method(typeof(FoodUtility), nameof(FoodUtility.BestPawnToHuntForPredator));
+			yield return AccessTools.Method(typeof(FoodUtility), nameof(FoodUtility.AddThoughtsFromIdeo));
+			yield return AccessTools.Method(typeof(FoodUtility), nameof(FoodUtility.ThoughtsFromIngesting));
+			yield return AccessTools.Method(typeof(FoodUtility), nameof(FoodUtility.AddIngestThoughtsFromIngredient));
 
 			foreach (var nestedType in typeof(FoodUtility).GetNestedTypes(
 						 BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic))
@@ -61,7 +61,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalFoodUtility),
 						nameof(ThreadLocalFoodUtility.Filtered)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<HashSet<Thing>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<HashSet<Thing>>), nameof(ThreadLocal<HashSet<Thing>>.Value)));
 				yield return CodeInstruction.StoreLocal(localFiltered.LocalIndex);
 			}
 
@@ -74,7 +74,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalFoodUtility),
 						nameof(ThreadLocalFoodUtility.TmpPredatorCandidates)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<Pawn>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<Pawn>>), nameof(ThreadLocal<List<Pawn>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTmpPredatorCandidates.LocalIndex);
 			}
 
@@ -89,7 +89,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalFoodUtility),
 						nameof(ThreadLocalFoodUtility.IngestThoughts)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<FoodUtility.ThoughtFromIngesting>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<FoodUtility.ThoughtFromIngesting>>), nameof(ThreadLocal<List<FoodUtility.ThoughtFromIngesting>>.Value)));
 				yield return CodeInstruction.StoreLocal(localIngestThoughts.LocalIndex);
 
 				yield return new CodeInstruction(OpCodes.Ldsfld,
@@ -98,7 +98,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						nameof(ThreadLocalFoodUtility.IdeoIngestThoughtsCache)));
 				yield return new CodeInstruction(OpCodes.Call,
 					AccessTools.PropertyGetter(
-						typeof(ThreadLocal<Dictionary<Ideo, Dictionary<HistoryEventDef, List<Precept>>>>), "Value"));
+						typeof(ThreadLocal<Dictionary<Ideo, Dictionary<HistoryEventDef, List<Precept>>>>), nameof(ThreadLocal<Dictionary<Ideo, Dictionary<HistoryEventDef, List<Precept>>>>.Value)));
 				yield return CodeInstruction.StoreLocal(localIdeoIngestThoughtsCache.LocalIndex);
 			}
 
@@ -112,7 +112,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalFoodUtility),
 						nameof(ThreadLocalFoodUtility.IngestThoughts)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<FoodUtility.ThoughtFromIngesting>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<FoodUtility.ThoughtFromIngesting>>), nameof(ThreadLocal<List<FoodUtility.ThoughtFromIngesting>>.Value)));
 				yield return CodeInstruction.StoreLocal(localIngestThoughts.LocalIndex);
 
 				yield return new CodeInstruction(OpCodes.Ldsfld,
@@ -120,7 +120,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalFoodUtility),
 						nameof(ThreadLocalFoodUtility.ExtraIngestThoughtsFromTraits)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<ThoughtDef>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<ThoughtDef>>), nameof(ThreadLocal<List<ThoughtDef>>.Value)));
 				yield return CodeInstruction.StoreLocal(localExtraIngestThoughtsFromTraits.LocalIndex);
 			}
 
@@ -133,7 +133,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalFoodUtility),
 						nameof(ThreadLocalFoodUtility.ExtraIngestThoughtsFromTraits)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<ThoughtDef>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<ThoughtDef>>), nameof(ThreadLocal<List<ThoughtDef>>.Value)));
 				yield return CodeInstruction.StoreLocal(localExtraIngestThoughtsFromTraits.LocalIndex);
 			}
 

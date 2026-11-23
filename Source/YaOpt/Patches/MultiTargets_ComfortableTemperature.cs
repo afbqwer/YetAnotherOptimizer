@@ -23,7 +23,7 @@ namespace YaOpt.Patches
 			yield return AccessTools.Method(typeof(GenTemperature),
 				nameof(GenTemperature.ComfortableTemperatureRange),
 				new[] { typeof(Pawn), typeof(List<ThingStuffPair>) });
-			yield return AccessTools.Method(typeof(Alert_NeedWarmClothes), "AnyColonistsNeedWarmClothes");
+			yield return AccessTools.Method(typeof(Alert_NeedWarmClothes), nameof(Alert_NeedWarmClothes.AnyColonistsNeedWarmClothes));
 		}
 
 		static bool Prepare()

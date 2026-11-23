@@ -22,7 +22,7 @@ namespace YaOpt.Patches
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
 		{
-			var typeThingCullDetails = AccessTools.TypeByName("Verse.DynamicDrawManager/ThingCullDetails");
+			var typeThingCullDetails = typeof(DynamicDrawManager.ThingCullDetails);
 			var typeNativeArrayThingCullDetails = typeof(NativeArray<>).MakeGenericType(typeThingCullDetails);
 			var local = generator.DeclareLocal(typeNativeArrayThingCullDetails);
 			// var nativeArray = new NativeArray<DynamicDrawManager.ThingCullDetails>(
@@ -31,9 +31,9 @@ namespace YaOpt.Patches
 			yield return new CodeInstruction(OpCodes.Call,
 				AccessTools.PropertyGetter(typeof(Find), nameof(Find.CurrentMap)));
 			yield return CodeInstruction.LoadField(typeof(Map), nameof(Map.dynamicDrawManager));
-			yield return CodeInstruction.LoadField(typeof(DynamicDrawManager), "drawThings");
+			yield return CodeInstruction.LoadField(typeof(DynamicDrawManager), nameof(DynamicDrawManager.drawThings));
 			yield return new CodeInstruction(OpCodes.Callvirt,
-				AccessTools.PropertyGetter(typeof(List<Thing>), "Count"));
+				AccessTools.PropertyGetter(typeof(List<Thing>), nameof(List<Thing>.Count)));
 			yield return new CodeInstruction(OpCodes.Ldc_I4_3);
 			yield return new CodeInstruction(OpCodes.Ldc_I4_1);
 			yield return new CodeInstruction(OpCodes.Call,
@@ -51,7 +51,7 @@ namespace YaOpt.Patches
 				AccessTools.PropertyGetter(typeof(Find), nameof(Find.CurrentMap)));
 			yield return CodeInstruction.LoadField(typeof(Map), nameof(Map.dynamicDrawManager));
 			yield return CodeInstruction.LoadLocal(local.LocalIndex);
-			yield return CodeInstruction.Call(typeof(DynamicDrawManager), "ComputeCulledThings");
+			yield return CodeInstruction.Call(typeof(DynamicDrawManager), nameof(DynamicDrawManager.ComputeCulledThings));
 
 			yield return new CodeInstruction(OpCodes.Ret);
 		}

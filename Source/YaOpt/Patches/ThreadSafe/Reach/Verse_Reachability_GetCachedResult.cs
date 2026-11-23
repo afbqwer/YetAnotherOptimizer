@@ -42,11 +42,11 @@ namespace YaOpt.Patches.ThreadSafe.Reach
 			yield return new CodeInstruction(OpCodes.Brfalse_S, labelIfMainThreadElse);
 			//     var startingRegions = this.startingRegions;
 			yield return CodeInstruction.LoadArgument(0);
-			yield return CodeInstruction.LoadField(typeof(Reachability), "startingRegions");
+			yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.startingRegions));
 			yield return CodeInstruction.StoreLocal(localStartingRegions.LocalIndex);
 			//     var destRegions = this.destRegions;
 			yield return CodeInstruction.LoadArgument(0);
-			yield return CodeInstruction.LoadField(typeof(Reachability), "destRegions");
+			yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.destRegions));
 			yield return CodeInstruction.StoreLocal(localDestRegions.LocalIndex);
 			// }
 			yield return new CodeInstruction(OpCodes.Br_S, labelIfMainThreadEnd);

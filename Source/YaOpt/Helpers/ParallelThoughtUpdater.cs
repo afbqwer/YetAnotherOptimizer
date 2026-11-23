@@ -25,14 +25,6 @@ namespace YaOpt.Helpers
 		private static readonly ConcurrentBag<Exception> _exceptionInWorkers =
 			new ConcurrentBag<Exception>();
 
-		private delegate Thought_Situational TryCreateThoughtDelegate(
-			SituationalThoughtHandler instance, ThoughtDef def);
-
-		private static readonly TryCreateThoughtDelegate _tryCreateThought =
-			AccessTools.MethodDelegate<TryCreateThoughtDelegate>(
-				AccessTools.Method(typeof(SituationalThoughtHandler), "TryCreateThought"),
-				null, false, null);
-
 		public static void Update(SituationalThoughtHandler thoughtHandler, List<Thought_Situational> cachedThoughts)
 		{
 			JobHandle handleCreating = default;
@@ -141,7 +133,7 @@ namespace YaOpt.Helpers
 					var thoughtDef = _situationalNonSocialThoughtDefs[index];
 					if (!_createdThoughtDefs.Contains(thoughtDef))
 					{
-						var thought = _tryCreateThought(_thoughtHandler, thoughtDef);
+						var thought = _thoughtHandler.TryCreateThought(thoughtDef);
 						if (thought != null)
 						{
 							_thoughtsToAdd.Enqueue(thought);

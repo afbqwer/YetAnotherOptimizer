@@ -37,7 +37,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 					typeof(ThreadLocalThingOwnerUtility),
 					nameof(ThreadLocalThingOwnerUtility.TmpHolders)));
 			yield return new CodeInstruction(OpCodes.Call,
-				AccessTools.PropertyGetter(typeof(ThreadLocal<List<IThingHolder>>), "Value"));
+				AccessTools.PropertyGetter(typeof(ThreadLocal<List<IThingHolder>>), nameof(ThreadLocal<List<IThingHolder>>.Value)));
 			yield return CodeInstruction.StoreLocal(localTmpHolders.LocalIndex);
 
 			if (methodBase.Name == nameof(ThingOwnerUtility.GetAllThingsRecursively))
@@ -48,7 +48,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalThingOwnerUtility),
 						nameof(ThreadLocalThingOwnerUtility.TmpStack)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<Stack<IThingHolder>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<Stack<IThingHolder>>), nameof(ThreadLocal<Stack<IThingHolder>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTmpStack.LocalIndex);
 			}
 

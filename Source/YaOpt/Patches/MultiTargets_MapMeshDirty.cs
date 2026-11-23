@@ -18,11 +18,11 @@ namespace YaOpt.Patches
 	{
 		static IEnumerable<MethodBase> TargetMethods()
 		{
-			yield return AccessTools.Method(typeof(SandGrid), "CheckVisualOrPathCostChange");
-			yield return AccessTools.Method(typeof(SandGrid), "MakeMeshDirty");
-			yield return AccessTools.Method(typeof(SnowGrid), "CheckVisualOrPathCostChange");
-			yield return AccessTools.Method(typeof(SnowGrid), "MakeMeshDirty");
-			//yield return AccessTools.Method(typeof(PollutionGrid), "SetPolluted");
+			yield return AccessTools.Method(typeof(SandGrid), nameof(SandGrid.CheckVisualOrPathCostChange));
+			yield return AccessTools.Method(typeof(SandGrid), nameof(SandGrid.MakeMeshDirty));
+			yield return AccessTools.Method(typeof(SnowGrid), nameof(SnowGrid.CheckVisualOrPathCostChange));
+			yield return AccessTools.Method(typeof(SnowGrid), nameof(SnowGrid.MakeMeshDirty));
+			//yield return AccessTools.Method(typeof(PollutionGrid), nameof(PollutionGrid.SetPolluted));
 		}
 
 		static bool Prepare()

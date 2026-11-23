@@ -45,10 +45,6 @@ namespace YaOpt.Helpers
 
 		private static Stopwatch debugStopwatch;
 
-		private delegate bool PawnCanUseWorkGiverDelegate(JobGiver_Work instance, Pawn pawn, WorkGiver giver);
-
-		private static readonly PawnCanUseWorkGiverDelegate pawnCanUseWorkGiver;
-
 		private struct JobResult
 		{
 			public Job ResultJob;
@@ -79,12 +75,6 @@ namespace YaOpt.Helpers
 						$"{pawn.ToStringSafe()} threw exception in WorkGiver " +
 						$"{Giver}: {CaughtException}");
 			}
-		}
-
-		static ParallelWorkGiver()
-		{
-			pawnCanUseWorkGiver = AccessTools.MethodDelegate<PawnCanUseWorkGiverDelegate>(
-					AccessTools.Method(typeof(JobGiver_Work), "PawnCanUseWorkGiver"), null, false, null);
 		}
 
 		public static ThinkResult ParellellyIssueJobPackage(JobGiver_Work jgw, Pawn pawn, List<WorkGiver> jobList)
@@ -539,7 +529,9 @@ namespace YaOpt.Helpers
 			Job job = null;
 			try
 			{
-				if (!pawnCanUseWorkGiver(_jobGiverWork, pawn, workGiver))
+				// JobGiver_Work.PawnCanUseWorkGiver is private in vanilla; publicizer allows a direct call
+				// (used to be a reflection-bound delegate).
+				if (!_jobGiverWork.PawnCanUseWorkGiver(pawn, workGiver))
 					return;
 				threadWorkGiverIndex = workGiverIndex;
 				job = workGiver.NonScanJob(pawn);

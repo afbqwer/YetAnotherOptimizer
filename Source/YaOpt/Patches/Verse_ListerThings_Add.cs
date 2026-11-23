@@ -28,8 +28,8 @@ namespace YaOpt.Patches
 			var localUse = generator.DeclareLocal(typeof(ListerThingsUse));
 			var localIndexer = generator.DeclareLocal(typeof(ListerThingsIndexer));
 			var localRecord = generator.DeclareLocal(typeof(ThingRecord));
-			var methodListAddThing = AccessTools.Method(typeof(List<Thing>), "Add");
-			var methodListAddHaul = AccessTools.Method(typeof(List<IHaulSource>), "Add");
+			var methodListAddThing = AccessTools.Method(typeof(List<Thing>), nameof(List<Thing>.Add));
+			var methodListAddHaul = AccessTools.Method(typeof(List<IHaulSource>), nameof(List<IHaulSource>.Add));
 
 			foreach (var instruction in instructions)
 			{

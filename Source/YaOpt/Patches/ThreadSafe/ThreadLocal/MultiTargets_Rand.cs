@@ -31,8 +31,8 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 		static IEnumerable<MethodBase> TargetMethods()
 		{
 			yield return AccessTools.PropertySetter(typeof(Rand), nameof(Rand.Seed));
-			yield return AccessTools.PropertySetter(typeof(Rand), "StateCompressed");
-			yield return AccessTools.PropertyGetter(typeof(Rand), "StateCompressed");
+			yield return AccessTools.PropertySetter(typeof(Rand), nameof(Rand.StateCompressed));
+			yield return AccessTools.PropertyGetter(typeof(Rand), nameof(Rand.StateCompressed));
 			yield return AccessTools.PropertyGetter(typeof(Rand), nameof(Rand.Int));
 			yield return AccessTools.PropertyGetter(typeof(Rand), nameof(Rand.Value));
 			yield return AccessTools.Method(typeof(Rand), nameof(Rand.TryRangeInclusiveWhere));
@@ -56,7 +56,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 		private static void InitDo()
 		{
 			_inited = true;
-			_seed = (uint)AccessTools.Field(typeof(Rand), "seed").GetValue(null);
+			_seed = Rand.seed;
 			_iterations = YaOptGlobal.IsInMainThread ? 0 : (uint)Thread.CurrentThread.ManagedThreadId;
 		}
 
@@ -89,7 +89,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 				yield return CodeInstruction.LoadField(
 					typeof(MultiTargets_Rand), nameof(_threadLocalStateStack));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<Stack<ulong>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<Stack<ulong>>), nameof(ThreadLocal<Stack<ulong>>.Value)));
 				yield return CodeInstruction.StoreLocal(localStateStack.LocalIndex);
 			}
 			if (usedTmpRange)
@@ -98,7 +98,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 				yield return CodeInstruction.LoadField(
 					typeof(MultiTargets_Rand), nameof(_threadLocalTmpRange));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<int>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<int>>), nameof(ThreadLocal<List<int>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTmpRange.LocalIndex);
 			}
 			foreach (var instruction in list)

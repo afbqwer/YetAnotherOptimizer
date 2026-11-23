@@ -22,7 +22,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadStatic
 			yield return AccessTools.Method(typeof(WorkGiver_GrowerSow),
 				nameof(WorkGiver_GrowerSow.JobOnCell));
 			yield return AccessTools.Method(typeof(WorkGiver_GrowerSow),
-				"ExtraRequirements");
+				nameof(WorkGiver_GrowerSow.ExtraRequirements));
 			foreach (var nestedType in typeof(WorkGiver_Grower).GetNestedTypes(
 						 BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic))
 			{

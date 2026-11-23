@@ -26,10 +26,10 @@ namespace YaOpt.Patches.ThreadSafe
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
 		{
 			var localList = generator.DeclareLocal(typeof(List<Region>));
-			var fieldList = AccessTools.Field(typeof(Room), "tmpRegions");
+			var fieldList = AccessTools.Field(typeof(Room), nameof(Room.tmpRegions));
 			// var localList = TransientPool.BorrowIfNotMainThread(this.tmpRegions);
 			yield return CodeInstruction.LoadArgument(0);
-			yield return CodeInstruction.LoadField(typeof(Room), "tmpRegions");
+			yield return CodeInstruction.LoadField(typeof(Room), nameof(Room.tmpRegions));
 			yield return CodeInstruction.Call(
 				typeof(TransientPool<List<Region>>),
 				nameof(TransientPool<List<Region>>.BorrowIfNotMainThread));

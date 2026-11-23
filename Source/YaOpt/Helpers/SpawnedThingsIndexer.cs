@@ -18,26 +18,9 @@ namespace YaOpt.Helpers
 		private static readonly Dictionary<Map, Dictionary<Thing, int>> Indices =
 			new Dictionary<Map, Dictionary<Thing, int>>();
 
-		/// <summary>
-		/// Cached open delegate for the protected virtual <c>ThingOwner.NotifyRemoved</c>.
-		/// The mod already uses this pattern elsewhere; it avoids per-call reflection and does not
-		/// depend on the engine's access-check bypass.
-		/// </summary>
-		private static readonly Action<ThingOwner<Thing>, Thing> NotifyRemoved;
-
 		static SpawnedThingsIndexer()
 		{
 			UpdateCallbackHelper.RegisterClearCacheCallback(ClearAll);
-			try
-			{
-				NotifyRemoved = AccessTools.MethodDelegate<Action<ThingOwner<Thing>, Thing>>(
-					AccessTools.Method(typeof(ThingOwner<Thing>), "NotifyRemoved"));
-			}
-			catch (Exception ex)
-			{
-				YaOptMod.Error("Failed to bind ThingOwner.NotifyRemoved; " +
-							   "fast spawned-thing removal will fall back to vanilla.\n" + ex);
-			}
 		}
 
 		/// <summary>
@@ -46,7 +29,7 @@ namespace YaOpt.Helpers
 		public static bool TryRemove(ThingOwner<Thing> owner, Thing item, out bool result)
 		{
 			result = false;
-			if (NotifyRemoved == null || !IsTargetOwner(owner, out var map))
+			if (!IsTargetOwner(owner, out var map))
 				return false;
 
 			// ThingOwner.Contains is an O(1) holdingOwner check.
@@ -75,7 +58,8 @@ namespace YaOpt.Helpers
 
 			list.RemoveAt(last);
 			index.Remove(item);
-			NotifyRemoved(owner, item);
+			// ThingOwner.NotifyRemoved is protected in vanilla; publicizer lets us call it directly.
+			owner.NotifyRemoved(item);
 			result = true;
 			return true;
 		}

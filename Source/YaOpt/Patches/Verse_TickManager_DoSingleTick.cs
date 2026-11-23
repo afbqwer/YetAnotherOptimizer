@@ -35,7 +35,7 @@ namespace YaOpt.Patches
 				if (ppmt && instruction.Calls("get_History"))
 				{
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(TickManager), "ticksGameInt");
+					yield return CodeInstruction.LoadField(typeof(TickManager), nameof(TickManager.ticksGameInt));
 					yield return CodeInstruction.Call(
 						typeof(ParallelMapTickManager), nameof(ParallelMapTickManager.FinishPostMapTick));
 				}

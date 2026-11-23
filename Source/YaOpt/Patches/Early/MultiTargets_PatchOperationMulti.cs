@@ -16,12 +16,12 @@ namespace YaOpt.Patches.Early
 	{
 		static IEnumerable<MethodBase> TargetMethods()
 		{
-			yield return AccessTools.Method(typeof(PatchOperationAdd), "ApplyWorker");
-			yield return AccessTools.Method(typeof(PatchOperationAddModExtension), "ApplyWorker");
-			yield return AccessTools.Method(typeof(PatchOperationAttributeAdd), "ApplyWorker");
-			yield return AccessTools.Method(typeof(PatchOperationAttributeRemove), "ApplyWorker");
-			yield return AccessTools.Method(typeof(PatchOperationAttributeSet), "ApplyWorker");
-			yield return AccessTools.Method(typeof(PatchOperationInsert), "ApplyWorker");
+			yield return AccessTools.Method(typeof(PatchOperationAdd), nameof(PatchOperationAdd.ApplyWorker));
+			yield return AccessTools.Method(typeof(PatchOperationAddModExtension), nameof(PatchOperationAddModExtension.ApplyWorker));
+			yield return AccessTools.Method(typeof(PatchOperationAttributeAdd), nameof(PatchOperationAttributeAdd.ApplyWorker));
+			yield return AccessTools.Method(typeof(PatchOperationAttributeRemove), nameof(PatchOperationAttributeRemove.ApplyWorker));
+			yield return AccessTools.Method(typeof(PatchOperationAttributeSet), nameof(PatchOperationAttributeSet.ApplyWorker));
+			yield return AccessTools.Method(typeof(PatchOperationInsert), nameof(PatchOperationInsert.ApplyWorker));
 		}
 
 		static bool Prepare()

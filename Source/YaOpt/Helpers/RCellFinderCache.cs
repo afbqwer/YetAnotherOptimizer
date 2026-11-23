@@ -1,4 +1,3 @@
-using HarmonyLib;
 using RimWorld;
 using System.Collections.Generic;
 using System.Threading;
@@ -9,17 +8,11 @@ namespace YaOpt.Helpers
 {
 	internal class RCellFinderCache
 	{
-		private delegate bool IsGoodDestinationForDelegate(IntVec3 c, Pawn pawn, bool careAboutDanger);
-
-		private static readonly IsGoodDestinationForDelegate IsGoodDestinationFor;
-
 		public static ThreadLocal<RCellFinderCache> _threadLocalCache =
 			new ThreadLocal<RCellFinderCache>(() => new RCellFinderCache());
 
 		static RCellFinderCache()
 		{
-			IsGoodDestinationFor = AccessTools.MethodDelegate<IsGoodDestinationForDelegate>(
-				AccessTools.Method(typeof(RCellFinder), "IsGoodDestinationFor"), null, false, null);
 			UpdateCallbackHelper.RegisterClearCacheCallback(ClearCache);
 		}
 
@@ -70,7 +63,7 @@ namespace YaOpt.Helpers
 				value = new Result();
 			}
 			value.GoodDestinationHasSet = true;
-			value.GoodDestinationResult = IsGoodDestinationFor(c, pawn, careAboutDanger);
+			value.GoodDestinationResult = RCellFinder.IsGoodDestinationFor(c, pawn, careAboutDanger);
 			cache._resultCache[c] = value;
 			return value.GoodDestinationResult;
 		}

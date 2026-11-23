@@ -17,13 +17,13 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 		static IEnumerable<MethodBase> TargetMethods()
 		{
 			yield return AccessTools.Method(typeof(WorkGiver_DoBill),
-				"StartOrResumeBillJob");
+				nameof(WorkGiver_DoBill.StartOrResumeBillJob));
 			yield return AccessTools.Method(typeof(WorkGiver_DoBill),
-				"TryFindBestIngredientsHelper");
+				nameof(WorkGiver_DoBill.TryFindBestIngredientsHelper));
 			yield return AccessTools.Method(typeof(WorkGiver_DoBill),
-				"AddEveryMedicineToRelevantThings");
+				nameof(WorkGiver_DoBill.AddEveryMedicineToRelevantThings));
 			yield return AccessTools.Method(typeof(WorkGiver_DoBill),
-				"TryFindBestIngredientsInSet_NoMixHelper");
+				nameof(WorkGiver_DoBill.TryFindBestIngredientsInSet_NoMixHelper));
 			foreach (var nestedType in typeof(WorkGiver_DoBill).GetNestedTypes(
 						 BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic))
 			{
@@ -59,7 +59,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 				instructions = ThreadLocalHelper.ThreadLocalTranspiler(instructions, generator, "relevantThings");
 				// PerformanceFish will rewrite this and remove processedThings.
 				instructions = ThreadLocalHelper.ThreadLocalTranspiler(instructions, generator,
-					AccessTools.Field(typeof(WorkGiver_DoBill), "processedThings"));
+					AccessTools.Field(typeof(WorkGiver_DoBill), nameof(WorkGiver_DoBill.processedThings)));
 				return ThreadLocalHelper.ThreadLocalTranspiler(instructions, generator, "newRelevantThings");
 			}
 			if (methodBase.Name == "AddEveryMedicineToRelevantThings")

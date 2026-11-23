@@ -15,9 +15,9 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 		static IEnumerable<MethodBase> TargetMethods()
 		{
 			yield return AccessTools.Method(typeof(WorkGiver_ConstructDeliverResources),
-				"ResourceDeliverJobFor");
+				nameof(WorkGiver_ConstructDeliverResources.ResourceDeliverJobFor));
 			yield return AccessTools.Method(typeof(WorkGiver_ConstructDeliverResources),
-				"FindAvailableNearbyResources");
+				nameof(WorkGiver_ConstructDeliverResources.FindAvailableNearbyResources));
 		}
 
 		static bool Prepare()
@@ -36,7 +36,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 					typeof(ThreadLocalConstructDeliverResources),
 					nameof(ThreadLocalConstructDeliverResources.ResourcesAvailable)));
 			yield return new CodeInstruction(OpCodes.Call,
-				AccessTools.PropertyGetter(typeof(ThreadLocal<List<Thing>>), "Value"));
+				AccessTools.PropertyGetter(typeof(ThreadLocal<List<Thing>>), nameof(ThreadLocal<List<Thing>>.Value)));
 			yield return CodeInstruction.StoreLocal(localResourcesAvailable.LocalIndex);
 
 			if (methodBase.Name == "ResourceDeliverJobFor")
@@ -47,7 +47,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalConstructDeliverResources),
 						nameof(ThreadLocalConstructDeliverResources.MissingResources)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<Dictionary<ThingDef, int>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<Dictionary<ThingDef, int>>), nameof(ThreadLocal<Dictionary<ThingDef, int>>.Value)));
 				yield return CodeInstruction.StoreLocal(localMissingResources.LocalIndex);
 			}
 

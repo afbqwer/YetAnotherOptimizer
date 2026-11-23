@@ -36,17 +36,17 @@ namespace YaOpt.Patches
 				var label = generator.DefineLabel();
 				// if (tickType == TickerType.Normal) {
 				yield return CodeInstruction.LoadArgument(0);
-				yield return CodeInstruction.LoadField(typeof(TickList), "tickType");
+				yield return CodeInstruction.LoadField(typeof(TickList), nameof(TickList.tickType));
 				yield return new CodeInstruction(OpCodes.Ldc_I4_1); // TickerType.Normal
 				yield return new CodeInstruction(OpCodes.Bne_Un_S, label);
 				//   ParallelPawnTickManager.AddThings(thingsToRegister);
 				yield return CodeInstruction.LoadArgument(0);
-				yield return CodeInstruction.LoadField(typeof(TickList), "thingsToRegister");
+				yield return CodeInstruction.LoadField(typeof(TickList), nameof(TickList.thingsToRegister));
 				yield return CodeInstruction.Call(
 					typeof(ParallelPawnTickManager), nameof(ParallelPawnTickManager.AddThings));
 				//   ParallelPawnTickManager.RemoveThings(thingsToDeregister);
 				yield return CodeInstruction.LoadArgument(0);
-				yield return CodeInstruction.LoadField(typeof(TickList), "thingsToDeregister");
+				yield return CodeInstruction.LoadField(typeof(TickList), nameof(TickList.thingsToDeregister));
 				yield return CodeInstruction.Call(
 					typeof(ParallelPawnTickManager), nameof(ParallelPawnTickManager.RemoveThings));
 				// }
@@ -70,7 +70,7 @@ namespace YaOpt.Patches
 					var label = generator.DefineLabel();
 					// if (tickType == TickerType.Normal) {
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(TickList), "tickType");
+					yield return CodeInstruction.LoadField(typeof(TickList), nameof(TickList.tickType));
 					yield return new CodeInstruction(OpCodes.Ldc_I4_1); // TickerType.Normal
 					yield return new CodeInstruction(OpCodes.Bne_Un_S, label);
 					//   ParallelPawnTickManager.ParellellyTickPawns();

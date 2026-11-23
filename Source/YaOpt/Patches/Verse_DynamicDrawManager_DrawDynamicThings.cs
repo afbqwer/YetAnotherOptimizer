@@ -59,7 +59,7 @@ namespace YaOpt.Patches
 				}
 				else if (instruction.opcode == OpCodes.Ldstr && "Draw Visible".Equals(instruction.operand))
 				{
-					var typeThingCullDetails = AccessTools.TypeByName("Verse.DynamicDrawManager/ThingCullDetails");
+					var typeThingCullDetails = typeof(DynamicDrawManager.ThingCullDetails);
 					var typeNativeArrayThingCullDetails = typeof(NativeArray<>).MakeGenericType(typeThingCullDetails);
 					skip = false;
 					yield return CodeInstruction.Call(typeof(ParallelPreDrawHelper),

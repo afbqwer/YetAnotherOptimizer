@@ -1,4 +1,3 @@
-using HarmonyLib;
 using RimWorld;
 using System.Collections;
 using System.Collections.Generic;
@@ -25,10 +24,6 @@ namespace YaOpt.Helpers
 		/// </summary>
 		private static bool _banHaulSourceIndex = false;
 
-		private static readonly AccessTools.FieldRef<ListerThings, List<Thing>[]> _fieldRefListsByGroup =
-			AccessTools.FieldRefAccess<ListerThings, List<Thing>[]>(
-				AccessTools.Field(typeof(ListerThings), "listsByGroup"));
-
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void AddToThingList(List<Thing> list, Thing thing,
 			ThingRecord record, ListerThingsUse use, int indexType)
@@ -50,7 +45,8 @@ namespace YaOpt.Helpers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static List<Thing>[] GetListsByGroup(ListerThings lister)
 		{
-			return _fieldRefListsByGroup(lister);
+			// ListerThings.listsByGroup is private in vanilla; publicizer gives us the direct field.
+			return lister.listsByGroup;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

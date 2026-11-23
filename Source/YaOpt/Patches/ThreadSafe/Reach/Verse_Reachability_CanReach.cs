@@ -64,15 +64,15 @@ namespace YaOpt.Patches.ThreadSafe.Reach
 					yield return new CodeInstruction(OpCodes.Brfalse_S, labelIfMainThreadElse);
 					//     var openQueue = this.openQueue;
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(Reachability), "openQueue");
+					yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.openQueue));
 					yield return CodeInstruction.StoreLocal(localOpenQueue.LocalIndex);
 					//     var startingRegions = this.startingRegions;
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(Reachability), "startingRegions");
+					yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.startingRegions));
 					yield return CodeInstruction.StoreLocal(localStartingRegions.LocalIndex);
 					//     var destRegions = this.destRegions;
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(Reachability), "destRegions");
+					yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.destRegions));
 					yield return CodeInstruction.StoreLocal(localDestRegions.LocalIndex);
 				}
 				else if (beginFieldReplace)
@@ -116,7 +116,7 @@ namespace YaOpt.Patches.ThreadSafe.Reach
 					yield return new CodeInstruction(OpCodes.Dup);
 					//     tlr.Setup(this.map, traverseParams);
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(Reachability), "map");
+					yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.map));
 					yield return CodeInstruction.LoadArgument(ARG_TRAVERSE_PARAMS, true);
 					yield return CodeInstruction.Call(
 						typeof(ThreadLocalReachability),

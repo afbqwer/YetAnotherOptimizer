@@ -33,9 +33,9 @@ namespace YaOpt.Patches.ThreadSafe.Delayed
 				if (instruction.opcode == OpCodes.Stloc_0)
 				{
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(SteadyEnvironmentEffects), "map");
+					yield return CodeInstruction.LoadField(typeof(SteadyEnvironmentEffects), nameof(SteadyEnvironmentEffects.map));
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(SteadyEnvironmentEffects), "cycleIndex");
+					yield return CodeInstruction.LoadField(typeof(SteadyEnvironmentEffects), nameof(SteadyEnvironmentEffects.cycleIndex));
 					yield return CodeInstruction.LoadLocal(0);
 					yield return CodeInstruction.Call(
 						typeof(RimWorld_SteadyEnvironmentEffects_SteadyEnvironmentEffectsTick),

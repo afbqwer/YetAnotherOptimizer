@@ -18,7 +18,7 @@ namespace YaOpt.Patches
 		{
 			yield return AccessTools.Method(typeof(Pawn_FilthTracker),
 				nameof(Pawn_FilthTracker.Notify_EnteredNewCell));
-			yield return AccessTools.Method(typeof(Alert_AnimalFilth), "CalculateTargets");
+			yield return AccessTools.Method(typeof(Alert_AnimalFilth), nameof(Alert_AnimalFilth.CalculateTargets));
 		}
 
 		static bool Prepare()

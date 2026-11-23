@@ -16,7 +16,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 		{
 			yield return AccessTools.Method(typeof(AttackTargetFinder), nameof(AttackTargetFinder.BestAttackTarget));
 			yield return AccessTools.Method(typeof(AttackTargetFinder), nameof(AttackTargetFinder.CanSee));
-			yield return AccessTools.Method(typeof(AttackTargetFinder), "GetAvailableShootingTargetsByScore");
+			yield return AccessTools.Method(typeof(AttackTargetFinder), nameof(AttackTargetFinder.GetAvailableShootingTargetsByScore));
 		}
 
 		static bool Prepare()
@@ -43,7 +43,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalAttackTargetFinder),
 						nameof(ThreadLocalAttackTargetFinder.TmpTargets)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<IAttackTarget>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<IAttackTarget>>), nameof(ThreadLocal<List<IAttackTarget>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTmpTargets.LocalIndex);
 			}
 
@@ -57,7 +57,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalAttackTargetFinder),
 						nameof(ThreadLocalAttackTargetFinder.TempDestList)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<IntVec3>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<IntVec3>>), nameof(ThreadLocal<List<IntVec3>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTempDestList.LocalIndex);
 
 				yield return new CodeInstruction(OpCodes.Ldsfld,
@@ -65,7 +65,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalAttackTargetFinder),
 						nameof(ThreadLocalAttackTargetFinder.TempSourceList)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<IntVec3>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<IntVec3>>), nameof(ThreadLocal<List<IntVec3>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTempSourceList.LocalIndex);
 			}
 
@@ -80,7 +80,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalAttackTargetFinder),
 						nameof(ThreadLocalAttackTargetFinder.AvailableShootingTargets)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<Pair<IAttackTarget, float>>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<Pair<IAttackTarget, float>>>), nameof(ThreadLocal<List<Pair<IAttackTarget, float>>>.Value)));
 				yield return CodeInstruction.StoreLocal(localAvailableShootingTargets.LocalIndex);
 
 				yield return new CodeInstruction(OpCodes.Ldsfld,
@@ -88,7 +88,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalAttackTargetFinder),
 						nameof(ThreadLocalAttackTargetFinder.TmpTargetScores)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<float>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<float>>), nameof(ThreadLocal<List<float>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTmpTargetScores.LocalIndex);
 
 				yield return new CodeInstruction(OpCodes.Ldsfld,
@@ -96,7 +96,7 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 						typeof(ThreadLocalAttackTargetFinder),
 						nameof(ThreadLocalAttackTargetFinder.TmpCanShootAtTarget)));
 				yield return new CodeInstruction(OpCodes.Call,
-					AccessTools.PropertyGetter(typeof(ThreadLocal<List<bool>>), "Value"));
+					AccessTools.PropertyGetter(typeof(ThreadLocal<List<bool>>), nameof(ThreadLocal<List<bool>>.Value)));
 				yield return CodeInstruction.StoreLocal(localTmpCanShootAtTarget.LocalIndex);
 			}
 

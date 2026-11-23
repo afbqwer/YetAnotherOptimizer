@@ -16,8 +16,8 @@ namespace YaOpt.Patches.Early
 	{
 		static IEnumerable<MethodBase> TargetMethods()
 		{
-			yield return AccessTools.Method(typeof(PatchOperationConditional), "ApplyWorker");
-			yield return AccessTools.Method(typeof(PatchOperationTest), "ApplyWorker");
+			yield return AccessTools.Method(typeof(PatchOperationConditional), nameof(PatchOperationConditional.ApplyWorker));
+			yield return AccessTools.Method(typeof(PatchOperationTest), nameof(PatchOperationTest.ApplyWorker));
 		}
 
 		static bool Prepare()

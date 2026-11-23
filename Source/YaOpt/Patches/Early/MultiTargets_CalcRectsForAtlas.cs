@@ -18,8 +18,8 @@ namespace YaOpt.Patches.Early
 	{
 		static IEnumerable<MethodBase> TargetMethods()
 		{
-			yield return AccessTools.Method(typeof(StaticTextureAtlas), "CalcRectsForAtlas");
-			yield return AccessTools.Method(typeof(StaticTextureAtlas), "CalcRectsForAtlasNew");
+			yield return AccessTools.Method(typeof(StaticTextureAtlas), nameof(StaticTextureAtlas.CalcRectsForAtlas));
+			yield return AccessTools.Method(typeof(StaticTextureAtlas), nameof(StaticTextureAtlas.CalcRectsForAtlasNew));
 		}
 
 		static bool Prepare()

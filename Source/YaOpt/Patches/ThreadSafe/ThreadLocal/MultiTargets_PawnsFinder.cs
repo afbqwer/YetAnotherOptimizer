@@ -75,168 +75,168 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 			switch (methodBase.Name)
 			{
 				case "get_AllMapsWorldAndTemporary_AliveOrDead":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsWorldAndTemporary_AliveOrDead_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsWorldAndTemporary_AliveOrDead_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsWorldAndTemporary_AliveOrDead_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsWorldAndTemporary_AliveOrDead_Result));
 					break;
 				case "get_AllMapsWorldAndTemporary_Alive":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsWorldAndTemporary_Alive_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsWorldAndTemporary_Alive_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsWorldAndTemporary_Alive_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsWorldAndTemporary_Alive_Result));
 					break;
 				case "get_AllMapsAndWorld_Alive":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsAndWorld_Alive_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsAndWorld_Alive_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsAndWorld_Alive_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsAndWorld_Alive_Result));
 					break;
 				case "get_AllMaps":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_Result));
 					break;
 				case "get_AllMaps_Spawned":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_Spawned_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_Spawned_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_Spawned_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_Spawned_Result));
 					break;
 				case "get_All_AliveOrDead":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "all_AliveOrDead_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "All_AliveOrDead_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.all_AliveOrDead_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.All_AliveOrDead_Result));
 					break;
 				case "get_Temporary":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "temporary_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "Temporary_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.temporary_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.Temporary_Result));
 					break;
 				case "get_Temporary_Alive":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "temporary_Alive_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "Temporary_Alive_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.temporary_Alive_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.Temporary_Alive_Result));
 					break;
 				case "get_Temporary_Dead":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "temporary_Dead_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "Temporary_Dead_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.temporary_Dead_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.Temporary_Dead_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_AliveSpawned":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_AliveSpawned_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_AliveSpawned_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_AliveSpawned_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_Result));
 					break;
 				case "get_AllCaravansAndTravellingTransporters_Alive":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allCaravansAndTravellingTransporters_Alive_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllCaravansAndTravellingTransporters_Alive_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allCaravansAndTravellingTransporters_Alive_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllCaravansAndTravellingTransporters_Alive_Result));
 					break;
 				case "get_AllCaravansAndTravellingTransporters_AliveOrDead":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allCaravansAndTravellingTransporters_AliveOrDead_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllCaravansAndTravellingTransporters_AliveOrDead_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allCaravansAndTravellingTransporters_AliveOrDead_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllCaravansAndTravellingTransporters_AliveOrDead_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_Colonists":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_Colonists_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_Colonists_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_Colonists_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_Colonists_NoSlaves":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_Colonists_NoSlaves_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_Colonists_NoSlaves_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_Colonists_NoSlaves_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists_NoSlaves_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoLodgers":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoLodgers_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoLodgers_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoLodgers_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoLodgers_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoCryptosleep":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoCryptosleep_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoCryptosleep_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoCryptosleep_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoCryptosleep_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_NoCryptosleep":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_NoCryptosleep_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_NoCryptosleep_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_NoCryptosleep_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction_NoCryptosleep_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_PrisonersOfColony":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_PrisonersOfColony_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_PrisonersOfColony_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_PrisonersOfColony_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_PrisonersOfColony_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_AliveSpawned_PrisonersOfColony":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_AliveSpawned_PrisonersOfColony_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_AliveSpawned_PrisonersOfColony_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_AliveSpawned_PrisonersOfColony_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_PrisonersOfColony_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_SlavesOfColony":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_SlavesOfColony_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_SlavesOfColony_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_SlavesOfColony_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_SlavesOfColony_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_NoCryptosleep":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_NoCryptosleep_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_NoCryptosleep_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_NoCryptosleep_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners_NoCryptosleep_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_NoCryptosleep":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_NoCryptosleep_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_NoCryptosleep_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_NoCryptosleep_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonistsAndPrisoners_NoCryptosleep_Result));
 					break;
 				case "get_AllMaps_PrisonersOfColonySpawned":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_PrisonersOfColonySpawned_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_PrisonersOfColonySpawned_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_PrisonersOfColonySpawned_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_PrisonersOfColonySpawned_Result));
 					break;
 				case "get_AllMaps_PrisonersOfColony":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_PrisonersOfColony_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_PrisonersOfColony_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_PrisonersOfColony_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_PrisonersOfColony_Result));
 					break;
 				case "get_AllMaps_FreeColonists":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_FreeColonists_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_FreeColonists_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_FreeColonists_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_FreeColonists_Result));
 					break;
 				case "get_AllMaps_FreeColonistsSpawned":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_FreeColonistsSpawned_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_FreeColonistsSpawned_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_FreeColonistsSpawned_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_FreeColonistsSpawned_Result));
 					break;
 				case "get_AllMaps_FreeColonistsAndPrisonersSpawned":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_FreeColonistsAndPrisonersSpawned_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_FreeColonistsAndPrisonersSpawned_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_FreeColonistsAndPrisonersSpawned_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_FreeColonistsAndPrisonersSpawned_Result));
 					break;
 				case "get_AllMaps_FreeColonistsAndPrisoners":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_FreeColonistsAndPrisoners_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_FreeColonistsAndPrisoners_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_FreeColonistsAndPrisoners_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_FreeColonistsAndPrisoners_Result));
 					break;
 				case "get_AllMaps_ColonySubhumansSpawnedPlayerControlled":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_ColonySubhumansSpawned_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_ColonySubhumansSpawned_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_ColonySubhumansSpawned_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_ColonySubhumansSpawned_Result));
 					break;
 				case "get_AllMapsCaravansAndTravellingTransporters_Alive_ColonySubhumans_NoSuspended":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_ColonySubhumans_NoSuspended_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_ColonySubhumans_NoSuspended_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_ColonySubhumans_NoSuspended_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_ColonySubhumans_NoSuspended_Result));
 					break;
 				case "AllMapsCaravansAndTravellingTransporters_Alive_Colonists_OfXenotype":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMapsCaravansAndTravellingTransporters_Alive_Colonists_OfXenotype_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMapsCaravansAndTravellingTransporters_Alive_Colonists_OfXenotype_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMapsCaravansAndTravellingTransporters_Alive_Colonists_OfXenotype_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists_OfXenotype_Result));
 					break;
 				case "AllMaps_SpawnedPawnsInFaction":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "allMaps_SpawnedPawnsInFaction_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "AllMaps_SpawnedPawnsInFaction_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.allMaps_SpawnedPawnsInFaction_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.AllMaps_SpawnedPawnsInFaction_Result));
 					break;
 				case "get_HomeMaps_FreeColonistsSpawned":
-					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), "homeMaps_FreeColonistsSpawned_Result");
-					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), "HomeMaps_FreeColonistsSpawned_Result");
+					fieldPawnFinder = AccessTools.Field(typeof(PawnsFinder), nameof(PawnsFinder.homeMaps_FreeColonistsSpawned_Result));
+					fieldThreadLocal = AccessTools.Field(typeof(ThreadLocalPawnsFinder), nameof(ThreadLocalPawnsFinder.HomeMaps_FreeColonistsSpawned_Result));
 					break;
 				default:
 					throw new Exception($"Unexpected method {methodBase.Name}");

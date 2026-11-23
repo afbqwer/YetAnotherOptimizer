@@ -24,7 +24,7 @@ namespace YaOpt.Patches.ThreadSafe
 				if (instruction.opcode == OpCodes.Call)
 				{
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(UniqueIDsManager), "wasLoaded");
+					yield return CodeInstruction.LoadField(typeof(UniqueIDsManager), nameof(UniqueIDsManager.wasLoaded));
 					yield return CodeInstruction.Call(
 						typeof(ConcurrentUniqueIDHelper), nameof(ConcurrentUniqueIDHelper.GetNextIdThreadSafely));
 					continue;

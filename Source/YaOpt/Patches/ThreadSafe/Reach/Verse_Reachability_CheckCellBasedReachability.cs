@@ -50,17 +50,17 @@ namespace YaOpt.Patches.ThreadSafe.Reach
 
 			//     var startingRegions = this.startingRegions;
 			yield return CodeInstruction.LoadArgument(0);
-			yield return CodeInstruction.LoadField(typeof(Reachability), "startingRegions");
+			yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.startingRegions));
 			yield return CodeInstruction.StoreLocal(localStartingRegions.LocalIndex);
 
 			//     var destRegions = this.destRegions;
 			yield return CodeInstruction.LoadArgument(0);
-			yield return CodeInstruction.LoadField(typeof(Reachability), "destRegions");
+			yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.destRegions));
 			yield return CodeInstruction.StoreLocal(localDestRegions.LocalIndex);
 
 			//     var regionGrid = this.regionGrid;
 			yield return CodeInstruction.LoadArgument(0);
-			yield return CodeInstruction.LoadField(typeof(Reachability), "regionGrid");
+			yield return CodeInstruction.LoadField(typeof(Reachability), nameof(Reachability.regionGrid));
 			yield return CodeInstruction.StoreLocal(localRegionGrid.LocalIndex);
 
 			// }

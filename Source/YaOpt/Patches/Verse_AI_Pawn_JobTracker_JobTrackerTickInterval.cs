@@ -33,7 +33,7 @@ namespace YaOpt.Patches
 					found = true;
 					var label = instruction.operand;
 					yield return CodeInstruction.LoadArgument(0);
-					yield return CodeInstruction.LoadField(typeof(Pawn_JobTracker), "pawn");
+					yield return CodeInstruction.LoadField(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.pawn));
 					yield return CodeInstruction.Call(
 						typeof(JobPredictor),
 						nameof(JobPredictor.ShouldCheckConstantJob));
