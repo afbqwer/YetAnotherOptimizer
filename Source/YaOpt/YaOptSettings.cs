@@ -8,7 +8,6 @@ using UnityEngine;
 using Verse;
 using YaOpt.Helpers;
 using YaOpt.Patches;
-using YaOpt.Patches.Prepatch;
 using YaOpt.Settings;
 
 namespace YaOpt
@@ -750,6 +749,57 @@ namespace YaOpt
 			Category = OptimizationCategory.Misc
 		};
 
+		/// <summary>
+		/// Optimizations that are unavailable in RimWorld 1.7.
+		/// </summary>
+		/// <remarks>
+		/// Multithreading and mod-compatibility optimizations are retired. The remaining entries
+		/// duplicate behavior now built into 1.7, depend on the removed Burst runtime, depend on
+		/// the engine texture pipeline that 1.7 replaced, or rely on pre-1.7 IL.
+		/// </remarks>
+		private static readonly HashSet<string> LockedOffOptimizations = new HashSet<string>(StringComparer.Ordinal)
+		{
+			// Multithreading
+			nameof(OptParallelPawnTick),
+			nameof(OptParallelWorkGiver),
+			nameof(OptParallelThoughtUpdate),
+			nameof(OptParallelPostMapTick),
+			nameof(OptEarlyRenderPrepare),
+			nameof(OptPrepareBatchCount),
+			nameof(OptParallelMaterialUpdate),
+
+			// Unity Burst is a non-functional stub in 1.7.
+			nameof(OptComputeMatrixBurst),
+
+			// Superseded by vanilla 1.7 or incompatible with the 1.7 engine.
+			nameof(OptThingGetComp),
+			nameof(OptMaterialGetColor),
+			nameof(OptAppendThingHolders),
+			nameof(OptFixTextureAtlas),
+			nameof(OptRuntimeInfoCache),
+			nameof(OptLazyTextureLoad),
+
+			// Other-mod compatibility submodules
+			"OptCELineOfSightBurst",
+			"OptFAParallelUpdate",
+			"OptFADeLinq",
+			"OptFADeLinqBurst",
+			"OptFAAnimCache",
+			"OptFAPawnSpawn",
+			"OptFATextureCache",
+			"OptHARDeLinq",
+			"OptHARTextureCache",
+			"OptVEFMemoryLeakFix"
+		};
+
+		private static void ApplyPlatformLock(OptimizationOption option)
+		{
+			if (!LockedOffOptimizations.Contains(option.SettingId))
+				return;
+			option.Flags |= OptimizationFlags.LockedOff;
+			option.Default = false;
+		}
+
 		[Unsaved]
 		private readonly List<OptimizationOption> _allOptimizations;
 
@@ -780,6 +830,7 @@ namespace YaOpt
 					_allOptimizations.Add(option);
 					if (string.IsNullOrWhiteSpace(option.SettingId))
 						option.SettingId = propertyInfo.Name;
+					ApplyPlatformLock(option);
 				}
 			}
 
@@ -787,7 +838,12 @@ namespace YaOpt
 			{
 				try
 				{
-					_allOptimizations.AddRange(subMod.OnCreateSettings());
+					var subModOptions = subMod.OnCreateSettings();
+					foreach (var option in subModOptions)
+					{
+						_allOptimizations.Add(option);
+						ApplyPlatformLock(option);
+					}
 				}
 				catch (Exception ex)
 				{

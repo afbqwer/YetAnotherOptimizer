@@ -57,7 +57,9 @@ namespace YaOpt
 			Instance = this;
 			Log("Now loading...");
 			YaOptGlobal.IsMultiplayer = YaOptGlobal.HasMod("rwmt.Multiplayer");
-			YaOptGlobal.IsPrepatcherAvailable = YaOptGlobal.HasMod("zetrith.prepatcher");
+			// Prepatcher is built into RimWorld 1.7 (RimWorldWaylith.PrepatcherCompat),
+			// so the standalone "zetrith.prepatcher" mod id no longer exists.
+			YaOptGlobal.IsPrepatcherAvailable = true;
 
 			// Initialize compatibility submods.
 			InitSubMods();
@@ -75,9 +77,6 @@ namespace YaOpt
 			// Apply settings and early Harmony patches.
 			ApplySettings();
 			ApplyEarlyPatches();
-
-			// Init Prepatch
-			Patches.Prepatch.Prepatcher.Init();
 		}
 
 		private void InitSubMods()

@@ -28,18 +28,9 @@ namespace YaOpt.Patches
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var ppmt = YaOptGlobal.Settings.OptParallelPostMapTick.Enabled;
-			var tr = YaOptGlobal.Settings.OptFastListerRemove.Enabled;
 
 			foreach (var instruction in instructions)
 			{
-				// Call DrawableRemovalHelper.StartRemovalJob before WorldTick
-				if (tr && instruction.Calls("WorldTick"))
-				{
-					tr = false;
-					yield return CodeInstruction.Call(
-						typeof(DrawableRemovalHelper), nameof(DrawableRemovalHelper.StartRemovalJob));
-				}
-
 				// Call ParallelMapTickManager.FinishPostMapTick after MapPostTick 
 				if (ppmt && instruction.Calls("get_History"))
 				{

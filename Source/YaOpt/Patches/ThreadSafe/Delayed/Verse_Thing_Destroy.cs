@@ -21,7 +21,7 @@ namespace YaOpt.Patches.ThreadSafe.Delayed
 
 		static bool Prefix(Thing __instance, DestroyMode mode)
 		{
-			if (!ParallelMapTickManager.ShouldCheckThread || !JobsUtility.IsExecutingJob)
+			if (!ParallelMapTickManager.ShouldCheckThread || !YaOptGlobal.IsExecutingJob)
 				return true;
 			_delayedThingDestroy.Enqueue((__instance, mode, Thing.allowDestroyNonDestroyable));
 			return false;

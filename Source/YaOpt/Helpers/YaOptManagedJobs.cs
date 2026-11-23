@@ -27,7 +27,14 @@ namespace YaOpt.Helpers
 			{
 				lock (_handles)
 				{
-					var i = _used.Find(0, CAPACITY, 1);
+					var i = -1;
+					for (var j = 0; j < CAPACITY; j++)
+					{
+						if (_used.IsSet(j))
+							continue;
+						i = j;
+						break;
+					}
 					if (i >= 0)
 					{
 						_used.Set(i, true);

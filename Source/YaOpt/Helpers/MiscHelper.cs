@@ -37,66 +37,6 @@ namespace YaOpt.Helpers
 			return $"{field.DeclaringTypeName()}:{field.Name}";
 		}
 
-		public static Hash128 GetMethodBodyHash(MethodBase method)
-		{
-			var instructions = PatchProcessor.GetOriginalInstructions(method);
-			if (instructions == null)
-				throw new MethodAccessException($"Cannot get the parsed IL instructions of method {method.FullName()}");
-
-			using (var hasher = SHA1.Create())
-			using (var ms = new System.IO.MemoryStream())
-			{
-				foreach (var inst in instructions)
-				{
-					var opValue = inst.opcode.Value;
-					ms.WriteByte((byte)(opValue & 0xFF));
-					if (inst.opcode.Size == 2)
-					{
-						ms.WriteByte((byte)((opValue >> 8) & 0xFF));
-					}
-				}
-
-				ms.Position = 0;
-				var hash = Hash128.Compute(hasher.ComputeHash(ms));
-				YaOptMod.Debug($"MethodBody Hash: {method.FullName()} - {hash}");
-				return hash;
-			}
-		}
-
-		public static bool CheckHash(MethodBase method, Hash128 hash, bool throwException = false, bool warn = true)
-		{
-			try
-			{
-				var methodHash = GetMethodBodyHash(method);
-				if (methodHash == hash)
-					return true;
-
-				if (warn)
-				{
-					YaOptMod.Warning($"Method {method.FullName()} code does not match the expected code.\n" +
-									 $"Actual code hash: {methodHash}\n" +
-									 $"Expected code hash: {hash}\n" +
-									 "This may cause the patch to fail. " +
-									 "This issue is caused by YaOpt. Please report it to the YaOpt developers.");
-				}
-
-				if (throwException)
-					throw new Exception($"Method {method.FullName()} code does not match the expected code.\n" +
-										$"Actual code hash: {methodHash}\n" +
-										$"Expected code hash: {hash}\n" +
-										"This issue is caused by YaOpt. Please report it to the YaOpt developers.");
-
-			}
-			catch (MethodAccessException)
-			{
-				if (warn)
-					YaOptMod.Warning($"Cannot get the IL code of method {method.FullName()}");
-				if (throwException)
-					throw;
-			}
-			return false;
-		}
-
 		#endregion
 
 		#region TypeResolver

@@ -269,7 +269,8 @@ namespace YaOpt.Settings
 				label = sb.ToString();
 			}
 			var enabled = option._enabled;
-			var disabledByDef = CompatibilityDefines.CachedBannedOptimizations.Contains(option.SettingId);
+			var disabledByDef = option.IsLockedOff ||
+								CompatibilityDefines.CachedBannedOptimizations.Contains(option.SettingId);
 			DrawCheckboxLabeled(listing, label, enabled, disabledByDef, out var mouseOver, out var result);
 			if (mouseOver && _lastMouseOverOption != option)
 			{
@@ -381,7 +382,8 @@ namespace YaOpt.Settings
 			var filter = enable ? OptimizationFlags.IgnoreEnableAll : OptimizationFlags.IgnoreDisableAll;
 			foreach (var optimization in _settings.AllOptimizations)
 			{
-				if ((optimization.Category & category) > 0 && (optimization.Flags & filter) == 0)
+				if ((optimization.Category & category) > 0 && (optimization.Flags & filter) == 0 &&
+					!optimization.IsLockedOff)
 				{
 					optimization.Enabled = enable;
 				}

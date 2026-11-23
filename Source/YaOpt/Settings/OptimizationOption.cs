@@ -10,10 +10,14 @@ namespace YaOpt.Settings
 
 		private bool _default = true;
 
+		public bool IsLockedOff => (Flags & OptimizationFlags.LockedOff) != 0;
+
 		public bool Enabled
 		{
 			get
 			{
+				if (IsLockedOff)
+					return false;
 				if (!MultiplayerCompatibility && YaOptGlobal.IsMultiplayer)
 					return false;
 				if (!string.IsNullOrWhiteSpace(RequiredMod) && !YaOptGlobal.HasMod(RequiredMod))
@@ -24,7 +28,12 @@ namespace YaOpt.Settings
 					return false;
 				return _enabled;
 			}
-			set => _enabled = value;
+			set
+			{
+				if (IsLockedOff)
+					return;
+				_enabled = value;
+			}
 		}
 
 		public bool Default
@@ -33,7 +42,7 @@ namespace YaOpt.Settings
 			set
 			{
 				_default = value;
-				_enabled = value;
+				_enabled = value && !IsLockedOff;
 			}
 		}
 
@@ -71,8 +80,14 @@ namespace YaOpt.Settings
 
 		public bool Validate(bool dryRun, bool printError, bool translateMessage, out string message)
 		{
-			// Validator doesn't validate multiplay and mod requirements. They are validated in the getter of Enabled
 			message = string.Empty;
+			if (IsLockedOff)
+			{
+				if (!dryRun)
+					_enabled = false;
+				return true;
+			}
+			// Validator doesn't validate multiplay and mod requirements. They are validated in the getter of Enabled
 			var error = false;
 			if (_enabled && (Flags & OptimizationFlags.RequirePrepatcher) > 0 && !YaOptGlobal.IsPrepatcherAvailable)
 			{
@@ -104,6 +119,8 @@ namespace YaOpt.Settings
 
 		public bool ShouldShow(YaOptSettings settings)
 		{
+			if (IsLockedOff)
+				return false;
 			if (!MultiplayerCompatibility && YaOptGlobal.IsMultiplayer)
 				return false;
 			if (!string.IsNullOrWhiteSpace(RequiredMod) && !YaOptGlobal.HasMod(RequiredMod))

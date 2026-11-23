@@ -75,6 +75,15 @@ namespace YaOpt
 		public static bool IsInMainThread => _isInMainThread;
 
 		/// <summary>
+		/// Gets a value indicating whether the current thread is a worker thread.
+		/// </summary>
+		/// <remarks>
+		/// Unity's <c>JobsUtility.IsExecutingJob</c> does not exist in 1.7. Multithreading is locked
+		/// off, so this simple main-thread inverse is only used by dormant compatibility code.
+		/// </remarks>
+		public static bool IsExecutingJob => !IsInMainThread;
+
+		/// <summary>
 		/// Gets a value indicating whether thread-safe code paths are required.
 		/// </summary>
 		/// <seealso cref="YaOptSettings.OptParallelPawnTick"/>

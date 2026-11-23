@@ -13,6 +13,13 @@ namespace YaOpt
 
 		public static void LoadLibraries(ModContentPack content)
 		{
+#if RIMWORLD_1_7
+			// Unity Burst is a managed stub in RimWorld 1.7: IsEnabled is always false and
+			// LoadAdditionalLibrary is a no-op. Do not load the 1.6 native libraries.
+			YaOptGlobal.IsBurstAvailable = false;
+			YaOptMod.Debug("Burst features are unavailable on RimWorld 1.7.");
+			return;
+#else
 			string burstDllName = null;
 
 			if (Environment.Is64BitProcess && Environment.Is64BitOperatingSystem)
@@ -77,6 +84,7 @@ namespace YaOpt
 				YaOptMod.Error($"Error when load Burst library. " +
 							   $"Any features that require Burst will not work.\n {e}");
 			}
+#endif
 		}
 	}
 }

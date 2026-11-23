@@ -10,16 +10,19 @@ using static YaOpt.Helpers.ListerThingsIndexer;
 namespace YaOpt.Patches
 {
 	/// <summary>
+	/// Uses the per-thing index to remove entries from the global <see cref="ListerThings"/> lists in O(1).
 	/// </summary>
+	/// <remarks>
+	/// RimWorld 1.7 routes all list removals through <c>ListerThings.RemoveSwap</c>, which still
+	/// performs a linear <c>IndexOf</c>. This patch replaces both call sites with the indexed
+	/// helper, preserving swap-remove semantics.
+	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptFastListerRemove"/>
 	[HarmonyPatch]
 	internal static class Verse_ListerThings_Remove
 	{
 		static MethodBase TargetMethod()
 		{
-			// Kingfisher pastes its own body into this method via PurePatcher's [ReplaceMethod]
-			// instead of patching it, so its own "Remove" helper is never called at runtime.
-			// Patch the original method so that both the vanilla and the rewritten body are handled.
 			return AccessTools.Method(typeof(ListerThings), nameof(ListerThings.Remove));
 		}
 
@@ -83,10 +86,10 @@ namespace YaOpt.Patches
 						typeof(ListerThingsIndexer),
 						nameof(ListerThingsIndexer.Remove));
 				}
-				else if (IsRemove<Thing>(instruction))
+				else if (IsRemoveSwap(instruction))
 				{
 					// Replace
-					// list.Remove(thing);
+					// RemoveSwap(list, thing);
 					// to
 					// RemoveFromThingList(list, thing, indexer, record, use, indexType);
 					yield return CodeInstruction.LoadLocal(localIndexer.LocalIndex);
@@ -94,7 +97,7 @@ namespace YaOpt.Patches
 					yield return CodeInstruction.LoadLocal(localUse.LocalIndex);
 					if (i == groupRemoveIndex)
 					{
-						// indexType = thingRequestGroup
+						// indexType = loop index (equal to the ThingRequestGroup enum value)
 						yield return CodeInstruction.LoadLocal(localThingRequestGroup);
 					}
 					else
@@ -104,17 +107,16 @@ namespace YaOpt.Patches
 					}
 					yield return CodeInstruction.Call(
 						typeof(ListerThingsHelper), nameof(ListerThingsHelper.RemoveFromThingList));
-					if (IsVoidRemove(instruction))
-						yield return new CodeInstruction(OpCodes.Pop);
-
+					// RemoveFromThingList returns bool, RemoveSwap returns void.
+					yield return new CodeInstruction(OpCodes.Pop);
 					continue;
 				}
-				else if (IsRemove<IHaulSource>(instruction))
+				else if (IsRemoveHaulSource(instruction))
 				{
 					// Replace
-					// list.Remove(haulSources);
+					// haulSources.Remove(haulSource);
 					// to
-					// RemoveFromHaulList(list, haulSources, indexer, record, use);
+					// RemoveFromHaulList(haulSources, haulSource, indexer, record, use);
 					yield return CodeInstruction.LoadLocal(localIndexer.LocalIndex);
 					yield return CodeInstruction.LoadLocal(localRecord.LocalIndex);
 					yield return CodeInstruction.LoadLocal(localUse.LocalIndex);
@@ -130,8 +132,7 @@ namespace YaOpt.Patches
 		}
 
 		/// <summary>
-		/// Locates the removal that operates on one of the <c>listsByGroup</c> lists and the local
-		/// variable used as its index.
+		/// Locates the group-list removal and the local variable used as its array index.
 		/// </summary>
 		private static bool TryFindGroupRemove(List<CodeInstruction> instructions, out int removeIndex, out int localIndex)
 		{
@@ -140,7 +141,7 @@ namespace YaOpt.Patches
 
 			for (var i = 0; i < instructions.Count; i++)
 			{
-				if (!IsRemove<Thing>(instructions[i]))
+				if (!IsRemoveSwap(instructions[i]))
 					continue;
 				localIndex = FindListIndexLocal(instructions, i);
 				if (localIndex < 0)
@@ -155,11 +156,6 @@ namespace YaOpt.Patches
 		/// Resolves the local variable used as the index of the array element on which the removal
 		/// at <paramref name="removeIndex"/> is performed.
 		/// </summary>
-		/// <remarks>
-		/// The local index is resolved from the IL pattern instead of being hard-coded, because the
-		/// method body can be rewritten by other mods (e.g. Kingfisher), which shifts local indices.
-		/// The "listsByDef" removal is not indexed by an array element and is therefore rejected.
-		/// </remarks>
 		private static int FindListIndexLocal(List<CodeInstruction> instructions, int removeIndex)
 		{
 			for (var i = removeIndex - 1; i >= 0 && i >= removeIndex - 8; i--)
@@ -177,33 +173,27 @@ namespace YaOpt.Patches
 			return -1;
 		}
 
+		private static bool IsRemoveSwap(CodeInstruction instruction)
+		{
+			return instruction.opcode == OpCodes.Call &&
+				   instruction.operand is MethodInfo methodInfo &&
+				   methodInfo.Name == "RemoveSwap" &&
+				   methodInfo.DeclaringType == typeof(ListerThings);
+		}
+
 		/// <summary>
 		/// Checks whether the removal call returns void.
 		/// </summary>
-		/// <remarks>
-		/// <c>List&lt;T&gt;.Remove</c> returns a boolean that the original IL pops itself, while
-		/// Kingfisher's <c>RemoveFromTail</c> returns void and needs an extra pop.
-		/// </remarks>
 		private static bool IsVoidRemove(CodeInstruction instruction)
 		{
 			return instruction.operand is MethodInfo methodInfo && methodInfo.ReturnType == typeof(void);
 		}
 
-		private static bool IsRemove<T>(CodeInstruction instruction)
+		private static bool IsRemoveHaulSource(CodeInstruction instruction)
 		{
-			if (instruction.operand is MethodInfo methodInfo)
-			{
-				if (methodInfo.Name == "Remove")
-				{
-					return methodInfo.DeclaringType == typeof(List<T>);
-				}
-				// Compatible with Kingfisher
-				if (methodInfo.Name == "RemoveFromTail")
-				{
-					return methodInfo.IsGenericMethod && methodInfo.GetGenericArguments()[0] == typeof(T);
-				}
-			}
-			return false;
+			return instruction.operand is MethodInfo methodInfo &&
+				   methodInfo.Name == "Remove" &&
+				   methodInfo.DeclaringType == typeof(List<IHaulSource>);
 		}
 	}
 }

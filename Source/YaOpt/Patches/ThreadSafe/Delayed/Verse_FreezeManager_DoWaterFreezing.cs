@@ -23,7 +23,7 @@ namespace YaOpt.Patches.ThreadSafe.Delayed
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void Delay(TerrainGrid terrainGrid, IntVec3 vec3, TerrainDef newTerr)
 		{
-			if (ParallelMapTickManager.ShouldCheckThread && JobsUtility.IsExecutingJob)
+			if (ParallelMapTickManager.ShouldCheckThread && YaOptGlobal.IsExecutingJob)
 			{
 				_delayedSetTempTerrain.Enqueue((terrainGrid, vec3, newTerr));
 			}

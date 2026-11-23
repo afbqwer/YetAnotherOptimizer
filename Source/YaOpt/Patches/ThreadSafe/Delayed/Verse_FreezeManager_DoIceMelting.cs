@@ -23,7 +23,7 @@ namespace YaOpt.Patches.ThreadSafe.Delayed
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		static void Delay(TerrainGrid terrainGrid, IntVec3 vec3, bool doLeavings, bool preventDestroyEffects)
 		{
-			if (ParallelMapTickManager.ShouldCheckThread && JobsUtility.IsExecutingJob)
+			if (ParallelMapTickManager.ShouldCheckThread && YaOptGlobal.IsExecutingJob)
 			{
 				_delayedRemoveTempTerrain.Enqueue((terrainGrid, vec3));
 			}

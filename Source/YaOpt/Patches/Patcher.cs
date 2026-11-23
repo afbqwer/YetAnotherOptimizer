@@ -3,7 +3,6 @@ using System;
 using System.Reflection;
 using Verse;
 using YaOpt.Helpers;
-using YaOpt.Patches.Compatibility;
 
 namespace YaOpt.Patches
 {
@@ -80,9 +79,6 @@ namespace YaOpt.Patches
 				noError &= harmony.TryPatchAll(assembly);
 				// Apply submod patches.
 				noError &= YaOptSubMod.PatchAll(YaOptGlobal.SubMods, harmony);
-				// Execute unpatcher to resolve conflicts.
-				Unpatcher.Unpatch();
-				Unpatcher.PatchAgain();
 				_hasPatched = true;
 				YaOptMod.Debug("Patcher complated");
 			}

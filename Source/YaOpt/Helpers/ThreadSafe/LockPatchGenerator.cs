@@ -85,7 +85,7 @@ namespace YaOpt.Helpers.ThreadSafe
 		static LockPatchGenerator()
 		{
 			var assemblyName = new AssemblyName("YaOpt.DynamicLocks");
-			var assemblyBuilder = AppDomain.CurrentDomain.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+			var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
 			_moduleBuilder = assemblyBuilder.DefineDynamicModule("DynamicLocksModule");
 			_methodGreedySpinLockEnter = AccessTools.Method(
 				typeof(GreedySpinLock),

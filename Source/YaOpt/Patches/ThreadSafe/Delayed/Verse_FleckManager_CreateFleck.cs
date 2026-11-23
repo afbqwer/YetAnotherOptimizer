@@ -21,7 +21,7 @@ namespace YaOpt.Patches.ThreadSafe.Delayed
 
 		static bool Prefix(FleckManager __instance, in FleckCreationData __0)
 		{
-			if (!ParallelMapTickManager.ShouldCheckThread || !JobsUtility.IsExecutingJob)
+			if (!ParallelMapTickManager.ShouldCheckThread || !YaOptGlobal.IsExecutingJob)
 				return true;
 			_delayedFleckCreation.Enqueue((__instance, __0));
 			return false;

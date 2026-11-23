@@ -37,6 +37,9 @@ namespace YaOpt.Defines
 		public static void Load()
 		{
 			var workGivers = DefDatabase<WorkGiverDef>.AllDefsListForReading;
+			// Multithreading is retired in 1.7. Skip the thread-local/lock definitions entirely so
+			// renamed vanilla members cannot spam errors, but keep BannedOptimizations active.
+			var needThreadSafe = YaOptGlobal.NeedThreadSafe;
 
 			foreach (var def in DefDatabase<CompatibilityDef>.AllDefs)
 			{
@@ -53,7 +56,7 @@ namespace YaOpt.Defines
 					continue;
 				}
 
-				if (def.WorkGiverCompatibilities != null)
+				if (needThreadSafe && def.WorkGiverCompatibilities != null)
 				{
 					foreach (var compatibility in def.WorkGiverCompatibilities)
 					{
@@ -73,7 +76,7 @@ namespace YaOpt.Defines
 					}
 				}
 
-				if (def.ThreadLocalPatches != null)
+				if (needThreadSafe && def.ThreadLocalPatches != null)
 				{
 					foreach (var threadLocalPatch in def.ThreadLocalPatches)
 					{
@@ -95,7 +98,7 @@ namespace YaOpt.Defines
 					}
 				}
 
-				if (def.LockPatches != null)
+				if (needThreadSafe && def.LockPatches != null)
 				{
 					foreach (var lockPatch in def.LockPatches)
 					{

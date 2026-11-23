@@ -162,7 +162,7 @@ namespace YaOpt.Helpers
 				{
 					pawn.jobs.DebugLogEvent(
 						$"{parallelTaskCount} of {jobList?.Count} WorkGivers are being processed by " +
-						$"{JobsUtility.JobWorkerMaximumCount} worker threads.");
+						$"{JobsUtility.JobWorkerCount} worker threads.");
 					if (mainThreadHasJobToDone)
 					{
 						pawn.jobs.DebugLogEvent(

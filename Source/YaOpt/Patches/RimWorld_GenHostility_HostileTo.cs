@@ -20,7 +20,10 @@ namespace YaOpt.Patches
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static bool IsShamblerFast(Pawn pawn)
 		{
-			return ModsConfig.AnomalyActive && pawn.IsMutant && pawn.mutant.Def == MutantDefOf.Shambler;
+			// 1.7 also treats corpses with the ShamblerCorpse hediff as shamblers.
+			return ModsConfig.AnomalyActive &&
+				   ((pawn.IsMutant && pawn.mutant.Def == MutantDefOf.Shambler) ||
+					pawn.health.hediffSet.HasHediff(HediffDefOf.ShamblerCorpse));
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

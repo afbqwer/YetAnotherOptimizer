@@ -48,9 +48,16 @@ namespace YaOpt.Helpers
 
 		public static void CreateCache(XmlDocument xml)
 		{
+			_xmlDefs = xml?["Defs"];
+			_available = false;
+			_xmlCache = null;
+			_tmpQueue = null;
+			_singletonEnumerator = null;
+			if (_xmlDefs == null)
+				return;
+
 			var nameSet = new HashSet<(string, string)>();
 			_xmlCache = new Dictionary<string, Dictionary<string, XmlElement>>();
-			_xmlDefs = xml["Defs"];
 			_tmpQueue = new Queue<(XmlElement, int)>();
 			_singletonEnumerator = new NodeEnumerator();
 			foreach (object obj in _xmlDefs.ChildNodes)

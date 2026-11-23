@@ -22,7 +22,7 @@ namespace YaOpt.Patches.ThreadSafe.Delayed
 
 		static bool Prefix(IntVec3 c, Map map, float fireSize, Thing instigator, SimpleCurve flammabilityChanceCurve)
 		{
-			if (!ParallelMapTickManager.ShouldCheckThread || !JobsUtility.IsExecutingJob)
+			if (!ParallelMapTickManager.ShouldCheckThread || !YaOptGlobal.IsExecutingJob)
 				return true;
 			_delayedStartFire.Enqueue((c, map, fireSize, instigator, flammabilityChanceCurve));
 			return false;

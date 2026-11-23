@@ -4,18 +4,6 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaOpt", "YaOpt\YaOpt.csproj", "{3374B7AB-53BA-42B5-9E5F-D7CCB6B4C759}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaOpt.OtherMod.FacialAnimation", "YaOpt.OtherMod.FacialAnimation\YaOpt.OtherMod.FacialAnimation.csproj", "{7E51FEB7-46F8-4362-A6E5-26246B3FDFFF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaOpt.OtherMod.HumanoidAlienRaces", "YaOpt.OtherMod.HumanoidAlienRaces\YaOpt.OtherMod.HumanoidAlienRaces.csproj", "{DA156E42-3BBC-48E8-A840-15080D128FD7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaOpt.OtherMod.ImageOpt", "YaOpt.OtherMod.ImageOpt\YaOpt.OtherMod.ImageOpt.csproj", "{3A7FEE32-560F-4BD5-8724-734CCBFC9BDA}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaOpt.OtherMod.CombatExtended", "YaOpt.OtherMod.CombatExtended\YaOpt.OtherMod.CombatExtended.csproj", "{E3CF29A4-AB3B-4912-9AAE-2F9200D85B25}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaOpt.OtherMod.VanillaExpandedFramework", "YaOpt.OtherMod.VanillaExpandedFramework\YaOpt.OtherMod.VanillaExpandedFramework.csproj", "{C4780F16-3E16-4150-8594-5197B76563FE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YaOpt.OtherMod.PerformanceOptimizer", "YaOpt.OtherMod.PerformanceOptimizer\YaOpt.OtherMod.PerformanceOptimizer.csproj", "{C9BDFB75-1765-4464-B8D1-5583E83F1AF8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,30 +14,6 @@ Global
 		{3374B7AB-53BA-42B5-9E5F-D7CCB6B4C759}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3374B7AB-53BA-42B5-9E5F-D7CCB6B4C759}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3374B7AB-53BA-42B5-9E5F-D7CCB6B4C759}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7E51FEB7-46F8-4362-A6E5-26246B3FDFFF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7E51FEB7-46F8-4362-A6E5-26246B3FDFFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7E51FEB7-46F8-4362-A6E5-26246B3FDFFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7E51FEB7-46F8-4362-A6E5-26246B3FDFFF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DA156E42-3BBC-48E8-A840-15080D128FD7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA156E42-3BBC-48E8-A840-15080D128FD7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA156E42-3BBC-48E8-A840-15080D128FD7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA156E42-3BBC-48E8-A840-15080D128FD7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3A7FEE32-560F-4BD5-8724-734CCBFC9BDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3A7FEE32-560F-4BD5-8724-734CCBFC9BDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3A7FEE32-560F-4BD5-8724-734CCBFC9BDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3A7FEE32-560F-4BD5-8724-734CCBFC9BDA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E3CF29A4-AB3B-4912-9AAE-2F9200D85B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E3CF29A4-AB3B-4912-9AAE-2F9200D85B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E3CF29A4-AB3B-4912-9AAE-2F9200D85B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E3CF29A4-AB3B-4912-9AAE-2F9200D85B25}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C4780F16-3E16-4150-8594-5197B76563FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C4780F16-3E16-4150-8594-5197B76563FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C4780F16-3E16-4150-8594-5197B76563FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C4780F16-3E16-4150-8594-5197B76563FE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C9BDFB75-1765-4464-B8D1-5583E83F1AF8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C9BDFB75-1765-4464-B8D1-5583E83F1AF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C9BDFB75-1765-4464-B8D1-5583E83F1AF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C9BDFB75-1765-4464-B8D1-5583E83F1AF8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
