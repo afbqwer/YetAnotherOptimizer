@@ -367,11 +367,3 @@ FodyWeavers.xsd
 **.dll
 **.so
 **.bundle
-
-# Keep the 1.6 release artifacts tracked so an accidental overwrite is recoverable.
-# The 1.7 build output stays ignored; rebuild it from Source.
-!1.6/Assemblies/*.dll
-!1.6/Burst/*.dll
-!1.6/Burst/*.so
-!1.6/Burst/*.bundle
-!1.6/Mods/**/Assemblies/*.dll

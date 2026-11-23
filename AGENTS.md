@@ -1,10 +1,10 @@
 # YetAnotherOptimizer Development Guide
 
-This project is a high-performance optimization mod for **RimWorld**, designed to significantly increase game frame rates (TPS/FPS) through Harmony patches, multi-threading parallelization, cache optimization, and Unity Burst compilation.
+This project is a high-performance optimization mod for **RimWorld 1.7**, designed to increase game frame rates (TPS/FPS) through Harmony patches, cache optimization and throttling. The `master` branch is 1.7-only and single-threaded; multithreading, Burst and other-mod compatibility optimizations are disabled. The 1.6 line, including `Source/YaOpt.Unity`, `Source/YaOpt.OtherMod.*` and the 1.6 binaries, is preserved on the `1.6` branch.
 
 ## 1. Project Architecture
 
-The project consists of three modules:
+The `master` branch contains the core module; the other two modules exist only on the `1.6` branch:
 
 ### 1.1 `Source/YaOpt` (Core Module)
 - **Purpose**: Contains the main logic of the mod, Harmony patches, and general helper tools.
@@ -27,7 +27,7 @@ The project consists of three modules:
   - `PostIniter.cs`: Startup initializer that triggers patching after game loads.
   - `NativeLoader.cs`: Loads platform-specific Burst native libraries.
 
-### 1.2 `Source/YaOpt.Unity` (Burst Module)
+### 1.2 `Source/YaOpt.Unity` (Burst Module, 1.6 branch only)
 - **Purpose**: Utilizes Unity's **Burst Compiler** for high-performance mathematical operations and data processing.
 - **Features**:
   - For reference only. It is not a complete C# project. It needs to be imported into a Unity project for compilation.
@@ -35,7 +35,7 @@ The project consists of three modules:
   - Uses `[BurstCompile]` to mark critical paths.
   - Strictly prohibits referencing any managed objects (reference types); only uses `NativeArray` and unmanaged structures (`struct`).
 
-### 1.3 `Source/YaOpt.OtherMod.*` (Compatibility Submods)
+### 1.3 `Source/YaOpt.OtherMod.*` (Compatibility Submods, 1.6 branch only)
 - **Purpose**: Compatibility patches for specific popular mods (e.g., `CombatExtended`, `FacialAnimation`, `HumanoidAlienRaces`, `ImageOpt`, `VanillaExpandedFramework`).
 - **Architecture**: Each project extends `YaOptSubMod` and receives lifecycle calls during initialization and patching.
 - **Principles**: Must reference target mod APIs via reflection or soft dependencies to avoid hard crashes if the target mod is missing.
@@ -44,10 +44,8 @@ The project consists of three modules:
 
 ```
 Root
-├── 1.6/                        # Release directory
-│   ├── Assemblies/             # Main managed DLL (YaOpt.dll)
-│   ├── Burst/                  # Burst native libraries (.dll/.so/.bundle)
-│   └── Mods/                   # OtherMod standalone DLL output
+├── 1.7/                        # Release directory
+│   └── Assemblies/             # Main managed DLL (YaOpt.dll)
 ├── Common/
 │   ├── Defs/
 │   │   └── Compatibilities/    # CompatibilityDef XML files
@@ -57,9 +55,7 @@ Root
 │   │   ├── Defines/            # Compile-time compatibility definitions
 │   │   ├── Helpers/            # Utility classes and trampolines
 │   │   └── Patches/            # Harmony patches (Early, Prepatch, ThreadSafe, Compatibility, Debugging)
-│   ├── YaOpt.Unity/            # Unity Burst project (reference only)
-│   ├── YaOpt.OtherMod.*/       # Compatibility sub-module projects
-│   ├── Settings.props          # Shared build properties (GameVersion, HarmonyVersion)
+│   ├── Settings.props          # Shared build properties
 │   └── YaOpt.sln               # Visual Studio solution
 ├── About/                      # Mod metadata (About.xml, icon)
 ├── LoadFolders.xml             # Loading logic
@@ -139,9 +135,7 @@ Since this is an optimization mod, performance is the highest priority:
 - **Build Config**: Version parameters are in `Source/Settings.props` (shared) and `Source/UserSettings.props` (local, gitignored; copy from `Source/UserSettings.props.template`).
 - **Build**: Run `dotnet build Source\YaOpt.sln` or open `Source/YaOpt.sln` with Visual Studio 2022+.
 - **Output**:
-  - Main DLL: `1.6/Assemblies/YaOpt.dll`
-  - OtherMod DLLs: `1.6/Mods/<ModName>/Assemblies/`
-  - Burst native libraries: `1.6/Burst/yaopt_burst_*.dll`
+  - Main DLL: `1.7/Assemblies/YaOpt.dll`
 - **Conditional Compilation**: `DEBUG` symbol enables performance diagnostics and profiling output.
 - **Test**: Launch RimWorld with the mod loaded. Verify via in-game TPS display and log messages.
 

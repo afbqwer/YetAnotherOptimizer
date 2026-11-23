@@ -1,23 +1,24 @@
 # Yet another Optimizer
 
-![RimWorld 1.6](https://img.shields.io/badge/RimWorld-1.6-blue)
+![RimWorld 1.7](https://img.shields.io/badge/RimWorld-1.7-blue)
 ![License MIT](https://img.shields.io/badge/license-MIT-blue)
 
-*Yet another Optimizer* (YaOpt) is a performance optimization mod for *RimWorld*. It improves TPS and FPS through Harmony patching, multithreading, Burst-compiled math, and targeted caching.
+*Yet another Optimizer* (YaOpt) is a performance optimization mod for *RimWorld*. It improves TPS and FPS through Harmony patching and targeted caching.
 
 ## Features
 
 Optimizations are grouped into three categories, all configurable in the in-game mod settings:
 
-- **TPS** — Multi-threaded pawn tick, work giver scanning, thought updates, and map post-tick. Smart throttling for meditation, beds, idle checks, and wind updates. Caching for stats, component lookups, ideology checks, and lister operations.
-- **FPS** — Early parallel render preparation, burst-compiled matrix computation, material property caching, texture caching, and mesh update throttling.
-- **Misc** — Lazy texture loading, accelerated XML and translation operations, runtime type info caching, and mipmap atlas fixes.
+- **TPS** — Work-giver and pawn-list caching, ideology checks, stat caching, meditation/bed/idle throttling, lister and spawned-thing removal indexing.
+- **FPS** — Pawn render node caching, silhouette cache optimization, texture lookup caching, mesh update throttling, and text parsing improvements.
+- **Misc** — Accelerated XML/translation processing and startup-time caches.
+
+Multithreading, Burst, Prepatcher-specific and other-mod compatibility optimizations are intentionally disabled in the 1.7 line.
 
 ## Requirements
 
-- [RimWorld 1.6](https://store.steampowered.com/app/294100)
+- [RimWorld 1.7](https://store.steampowered.com/app/294100)
 - [Harmony](https://github.com/pardeike/Harmony)
-- *(Optional)* [Prepatcher](https://github.com/Zetrith/Prepatcher) — required for certain optimizations
 
 ## Installation
 
@@ -27,9 +28,13 @@ Optimizations are grouped into three categories, all configurable in the in-game
 
 ## Building from Source
 
-Open `Source/YaOpt.sln` in Visual Studio 2022+ and build. Copy `Source/UserSettings.props.template` to `Source/UserSettings.props` first if you need to adjust paths.
+```
+dotnet build Source/YaOpt.sln -c Release
+```
 
-The Burst module (`Source/YaOpt.Unity`) requires the Unity Editor 2022.3.35f1 with the Burst package. After compilation, copy the output to `1.6/Burst/`.
+The build references `Assembly-CSharp.dll`, `UnityStubs.dll` and `Waylith.dll` from the RimWorld install directory. The output is written to `1.7/Assemblies/YaOpt.dll`.
+
+The last 1.6 release, including its source and binaries, is preserved on the `1.6` branch.
 
 ## License
 
