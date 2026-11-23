@@ -12,8 +12,9 @@ namespace YaOpt.Patches.Debugging
 		{
 #if DEBUG
 			return true;
-#endif
+#else
 			return false;
+#endif
 		}
 
 		static void Prefix(CompExplosive __instance)

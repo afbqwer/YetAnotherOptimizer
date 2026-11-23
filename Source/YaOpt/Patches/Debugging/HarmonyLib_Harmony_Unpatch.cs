@@ -14,8 +14,9 @@ namespace YaOpt.Patches.Debugging
 		{
 #if DEBUG
 			return true;
-#endif
+#else
 			return false;
+#endif
 		}
 
 		static void Prefix(MethodBase original)

@@ -54,7 +54,7 @@ namespace YaOpt.Helpers
 						YaOptMod.Error("An error was thrown while caching the types from " +
 									   $"assembly {assembly.FullName}. " +
 									   "Any call to AccessTools.TypeByName may fail to " +
-									   "retrieve the types in this assembly.");
+									   $"retrieve the types in this assembly. Error: {ex}");
 					}
 				}
 			}

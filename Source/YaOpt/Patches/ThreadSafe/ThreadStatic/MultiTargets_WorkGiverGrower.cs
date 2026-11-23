@@ -12,8 +12,9 @@ namespace YaOpt.Patches.ThreadSafe.ThreadStatic
 	[HarmonyPatch]
 	internal static class MultiTargets_WorkGiverGrower
 	{
+		// Assigned by the transpiler below; explicit null keeps the compiler from reporting CS0649.
 		[ThreadStatic]
-		public static ThingDef WantedPlantDef;
+		public static ThingDef WantedPlantDef = null;
 
 		static IEnumerable<MethodBase> TargetMethods()
 		{

@@ -11,8 +11,9 @@ namespace YaOpt.Patches.ThreadSafe.ThreadStatic
 	[HarmonyPatch(nameof(GenAdj.AdjacentCells8WayRandomized))]
 	internal static class Verse_GenAdj_AdjacentCells8WayRandomized
 	{
+		// Assigned by the transpiler below; explicit null keeps the compiler from reporting CS0649.
 		[ThreadStatic]
-		public static List<IntVec3> AdjRandomOrderList;
+		public static List<IntVec3> AdjRandomOrderList = null;
 
 		static bool Prepare()
 		{

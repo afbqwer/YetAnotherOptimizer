@@ -35,8 +35,6 @@ namespace YaOpt.Helpers.ThreadSafe
 
 		private static readonly MethodInfo _methodLockWrapperExit;
 
-		private static readonly MethodInfo _methodGetLockWrapper;
-
 		private static int _typeCounter = 0;
 
 		public sealed class PatchInfo

@@ -65,19 +65,21 @@ namespace YaOpt.Helpers
 		/// <summary>
 		/// Handle for the parallel camera culling job.
 		/// </summary>
-		public static JobHandle CullJobHandle;
+		// Assigned by Harmony transpilers (see Patches/Verse_DynamicDrawManager_*.cs);
+		// explicit defaults keep the compiler from reporting CS0649.
+		public static JobHandle CullJobHandle = default;
 
 		/// <summary>
 		/// Handle for the parallel pre-draw job.
 		/// </summary>
-		public static JobHandle PreDrawJobHandle;
+		public static JobHandle PreDrawJobHandle = default;
 
 		/// <summary>
 		/// Intermediate data is stored here (<c>NativeArray&lt;DynamicDrawManager.ThingCullDetails&gt;</c>).
 		/// Since the type of this data is an inner class and cannot be directly referenced,
 		/// it is boxed as an object type here.
 		/// </summary>
-		public static object Data;
+		public static object Data = null;
 
 		/// <summary>
 		/// Static constructor that registers type searcher for compatibility detection.

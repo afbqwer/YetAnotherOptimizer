@@ -692,8 +692,7 @@ namespace YaOpt.Helpers
 				{
 					data = _tmpTextureDataBytes;
 				}
-				// ReSharper disable once MustUseReturnValue
-				fs.Read(data, 0, dataSize);
+				fs.ReadExactly(data, 0, dataSize);
 
 				if (ddsHeader.PixelFormat.IsBgr888 && !ddsHeader.PixelFormat.IsCompressed)
 				{
