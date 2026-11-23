@@ -12,14 +12,14 @@ The `master` branch contains the core module; the other two modules exist only o
   - `Patches/`: Harmony patches organized by target namespace. Subdirectories:
     - `Early/` — Patches applied before other mods load via the `EarlyHarmony` instance (ID `"YetAnotherOptimizer.Early"`).
     - `Prepatch/` — Patches for the Prepatcher mod.
-    - `ThreadSafe/` — Thread-safety patches. Subcategories: `ThreadLocal/` (per-thread instance fields), `ThreadStatic/` (simple `[ThreadStatic]` replacements), `Locked/` (critical section lock injection), `Delayed/` (deferred execution).
+    - `ThreadSafe/` — Thread-safety patches. Subcategories: `ThreadLocal/` (per-thread instance fields), `ThreadStatic/` (simple `[ThreadStatic]` replacements), `Locked/` (critical section lock injection), `Delayed/` (deferred execution). **1.6 legacy — never applied on this branch, see section 6.**
     - `Compatibility/` — Runtime compatibility patches for other mods, plus `Unpatcher.cs` for conflict resolution.
     - `Debugging/` — Debugging and diagnostic patches.
   - `Helpers/`: Utility classes including:
-    - `ParallelPawnTickManager`, `ParallelMapTickManager`, `ParallelWorkGiver` — Multi-threaded tick computations via Unity Job System.
+    - `ParallelPawnTickManager`, `ParallelMapTickManager`, `ParallelWorkGiver` — Multi-threaded tick computations via Unity Job System. **1.6 legacy — locked off on this branch, see section 6.**
     - `UpdateCallbackHelper.cs` — Central event system for game lifecycle hooks (pre-tick, post-tick, pre-render, post-render, cache-clear).
-    - `ThreadLocal/` — Per-thread helper classes for common APIs.
-    - `ThreadSafe/` — Lock primitives (`GreedySpinLock`, `GreedyMonitor`) and `LockPatchManager`.
+    - `ThreadLocal/` — Per-thread helper classes for common APIs. **1.6 legacy.**
+    - `ThreadSafe/` — Lock primitives (`GreedySpinLock`, `GreedyMonitor`) and `LockPatchManager`. **1.6 legacy.**
   - `YaOptMod.cs`: Handles initialization, settings loading, early patching, and logging.
   - `YaOptGlobal.cs`: Central hub for mod state, settings, platform capabilities, thread-safety flags.
   - `YaOptSubMod.cs`: Base class for sub-modules with lifecycle hooks (`OnPreInit`, `OnInit`, `OnPostInit`, `OnPatch`, `OnUnpatch`).
@@ -107,7 +107,21 @@ Since this is an optimization mod, performance is the highest priority:
 - **Patch File Naming**: Place patch files under `Patches/`. Name them `Namespace_Type_Method.cs` (e.g., `RimWorld_Pawn_Tick.cs`). For patches targeting multiple types or methods, use the `MultiTargets_` prefix (e.g., `MultiTargets_ClosestThingGlobal.cs`). Compatibility patch files use the target mod name as prefix (e.g., `CombatExtended_CompInventory_TrySwitchToWeapon.cs`).
 - **Patch Class Modifiers**: All patch classes must be `internal static`.
 
-### 3.4 Documentation Style
+### 3.4 Accessing Vanilla Members
+The project compiles against a **publicized** copy of `Assembly-CSharp` (`Krafs.Publicizer` + `<Publicize Include="Assembly-CSharp" />` in `Source/YaOpt/YaOpt.csproj`), so non-public vanilla members are visible to the compiler. Runtime access checks are waived by WaylithClr (`"WaylithClr.SkipAccessChecks": true`), which is why `PublicizerRuntimeStrategies` is `Unsafe` only and no `IgnoresAccessChecksTo` shim exists.
+
+- **Direct access first**: call `private` / `protected` / `internal` vanilla members directly instead of caching a `MethodDelegate` / `FieldRefAccess` or going through `GetValue` / `Invoke`. Direct access is checked at compile time and removes the reflection indirection from hot paths.
+- **`nameof` for every member name that must stay a string**: `AccessTools.Method(typeof(X), nameof(X.M))`, `AccessTools.Field(typeof(X), nameof(X.f))`, `CodeInstruction.LoadField(typeof(X), nameof(X.f))`. A vanilla rename then breaks the build instead of failing at runtime. C# has no `infoof`, so keeping `AccessTools` to *identify* a member for a Harmony target or an IL operand is fine — only the string literal is replaced.
+- **Prefer `typeof` over `TypeByName`**: nested vanilla types are publicized too, so `typeof(DynamicDrawManager.ThingCullDetails)` replaces `AccessTools.TypeByName("Verse.DynamicDrawManager/ThingCullDetails")`.
+- **Keep reflection for**:
+  - **Other mods** — only `Assembly-CSharp` is publicized, and a hard reference crashes when the mod is absent (see `CompatibilityChecker`, `ContentManager`, `CacheWarmer`).
+  - **Members of assemblies outside `Assembly-CSharp`** — e.g. `List<T>._version` in the BCL (`Verse_ThingDef_HasAssignableCompFrom`).
+  - **Generic dispatch that needs a runtime `Type`** — e.g. `ThreadLocalHelper.TryAllocate`, `ThingOwnerUtility.GetAllThingsRecursively`.
+- **`MethodDelegate` arity pitfall**: `AccessTools.MethodDelegate<T>(method, null, virtualCall)` binds an *instance* method to a delegate whose parameter list matches the method's parameters and emits `this = null`. It only "works" while a prefix short-circuits the body. Put the declaring type in the delegate's first parameter, or call the member directly.
+- **Visibility, not dispatch**: publicizing does not devirtualize. A `protected virtual` getter called directly is still a `callvirt`, exactly as `MethodDelegate` with the default `virtualCall: true` was. Only `virtualCall: false` skipped overrides. If this project ever overrides a publicized virtual member, declare it `public override` (or add a `<DoNotPublicize>` entry) — narrowing it back to `protected` is CS0507.
+- **Cache invalidation**: Publicizer caches the rewritten assembly under `obj/Release/PublicizedAssemblies/`. If a change to the csproj or the game DLL seems to have no effect, delete that folder or rebuild with `-t:Rebuild`.
+
+### 3.5 Documentation Style
 - **Be Concise**: XML documentation should be brief and to the point.
 - **Summary Only for Simple Members**: For straightforward methods/properties, a single `<summary>` line is sufficient.
 - **Remarks for Complexity**: Use `<remarks>` only when explaining non-obvious behavior, thread safety, or performance implications.
@@ -150,3 +164,4 @@ Since this is an optimization mod, performance is the highest priority:
 
 - **Game tick is single-threaded**: All Thing Tick calls are executed serially on a single thread — there are never two Things ticking concurrently. Parallel work giver assignment and parallel thought updates do execute within the logical tick cycle, but they block the main thread while running, so no other Thing is being ticked simultaneously.
 - **No race conditions in ClearCache**: All `ClearCache` calls are invoked exclusively from the main thread. There are never concurrent cache clears, so caches do not require locks for write operations during invalidation.
+- **Parallel code is 1.6 legacy**: `Helpers/ThreadLocal`, `Helpers/ThreadSafe`, `Patches/ThreadSafe`, the `Parallel*` managers and every `OptParallel*` toggle come from the 1.6 line and are archived with it. On this branch all of those toggles are listed in `YaOptSettings.LockedOffOptimizations`, so `YaOptGlobal.NeedThreadSafe` never becomes true and every patch gated on it is skipped — the code compiles but never runs. Do not extend it, and do not read its presence as evidence that multithreading is supported here. (One known trap lives there: `ThreadLocalReachability.QueueNewOpenRegion` is bound with `AccessTools.MethodDelegate`, which emits `this = null`; it is only safe while the matching prefix replaces the method body.)
