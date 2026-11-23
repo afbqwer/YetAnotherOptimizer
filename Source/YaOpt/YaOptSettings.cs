@@ -62,6 +62,20 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches pawn name labels and their measured widths for a short period.
+		/// Vanilla rebuilds the label string and measures it at least twice per rendered pawn per frame.
+		/// </summary>
+		/// <seealso cref="Patches.GenMapUI_GetPawnLabel"/>
+		/// <seealso cref="Patches.GenMapUI_GetPawnLabelNameWidth"/>
+		public OptimizationOption OptPawnLabelCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnLabelCache",
+			Desc = "YaOpt.Setting.Option.PawnLabelCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnLabelCache.Compatibility",
+			Category = OptimizationCategory.Fps
+		};
+
+		/// <summary>
 		/// Starts the render preparation for dynamic objects earlier.
 		/// <br/>
 		/// Details:
@@ -557,6 +571,17 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Throttles weather overlay texture panning to once every few ticks.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_WeatherOverlayDualPanner_TickOverlay"/>
+		public OptimizationOption OptWeatherOverlayThrottle { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.WeatherOverlayThrottle",
+			Desc = "YaOpt.Setting.Option.WeatherOverlayThrottle.Desc",
+			Category = OptimizationCategory.Fps,
+		};
+
+		/// <summary>
 		/// Optimizes the performance of removing things from the game.
 		/// Vanilla maintains various lists (ListerThings) for object classification.
 		/// Removing an object requires a linear search (O(N)) in each list.
@@ -577,6 +602,30 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FastListerRemove",
 			Desc = "YaOpt.Setting.Option.FastListerRemove.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Indexes <see cref="Map.spawnedThings"/> so removals during despawn are O(1).
+		/// </summary>
+		/// <seealso cref="Patches.Verse_ThingOwner_Remove"/>
+		/// <seealso cref="Patches.Verse_ThingOwner_TryAdd"/>
+		/// <seealso cref="Helpers.SpawnedThingsIndexer"/>
+		public OptimizationOption OptFastSpawnedThingsRemove { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FastSpawnedThingsRemove",
+			Desc = "YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Removes the global lock from <see cref="GenTypes.IsSealedWithCache"/>.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_GenTypes_IsSealedWithCache"/>
+		public OptimizationOption OptGenTypesLockFree { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.GenTypesLockFree",
+			Desc = "YaOpt.Setting.Option.GenTypesLockFree.Desc",
 			Category = OptimizationCategory.Tps,
 		};
 
@@ -610,6 +659,18 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.AttackTargetFinder",
 			Desc = "YaOpt.Setting.Option.AttackTargetFinder.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Short-circuits turret target searches when no candidate can possibly be in range.
+		/// </summary>
+		/// <seealso cref="Patches.RimWorld_Building_TurretGun_TryFindNewTarget"/>
+		public OptimizationOption OptTurretTargetPrune { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.TurretTargetPrune",
+			Desc = "YaOpt.Setting.Option.TurretTargetPrune.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.TurretTargetPrune.Compatibility",
 			Category = OptimizationCategory.Tps,
 		};
 

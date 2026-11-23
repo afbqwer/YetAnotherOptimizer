@@ -11,6 +11,9 @@
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DefineConstants>$(DefineConstants);RIMWORLD_1_7</DefineConstants>
+		<!-- RimWorld 1.7 runs WaylithClr with SkipAccessChecks; compile against a publicized copy
+		     of Assembly-CSharp so private members can be used directly instead of reflection. -->
+		<PublicizerRuntimeStrategies>Unsafe</PublicizerRuntimeStrategies>
 
 		<RimWorldDir Condition="'$(RimWorldDir)' == ''">$(RIMWORLD_DIR)</RimWorldDir>
 		<RimWorldDir Condition="'$(RimWorldDir)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', '..', '..', '..'))</RimWorldDir>
@@ -53,12 +56,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Krafs.Publicizer" Version="2.3.0" />
+		<PackageReference Include="Krafs.Publicizer" Version="2.3.0" PrivateAssets="all" />
 		<PackageReference Include="Lib.Harmony" Version="3.0.0-rc.2" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Publicize Include="0Harmony" />
+		<Publicize Include="Assembly-CSharp" />
 	</ItemGroup>
 
 	</Project>

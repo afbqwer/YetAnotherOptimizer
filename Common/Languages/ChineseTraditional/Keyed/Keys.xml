@@ -154,6 +154,18 @@
 	<YaOpt.Setting.Option.WindUpdate.Desc>遊戲會在每一個邏輯幀中為所有植物材質更新風力強度參數，這是沒必要的。最佳化後將僅在渲染幀中更新風力強度。</YaOpt.Setting.Option.WindUpdate.Desc>
 	<YaOpt.Setting.Option.FastListerRemove>物體移除最佳化</YaOpt.Setting.Option.FastListerRemove>
 	<YaOpt.Setting.Option.FastListerRemove.Desc>最佳化從遊戲中移除物體時的效率。原版遊戲在移除物體時，需要在多個檢索列表中進行線性搜索以找到並刪除物體。此最佳化為每個物體添加了索引記錄，移除時可直接定位並使用“交換移除”策略（將末尾物體移至空位）。</YaOpt.Setting.Option.FastListerRemove.Desc>
+	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物體快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
+	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>為地圖的已生成物體容器建立索引，使 DeSpawn 時的移除從「線性查找 + 列表搬移」變為 O(1) 的字典查找與交換移除。索引按需構建，若檢測到索引與列表不一致會自動回退原版邏輯。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
+	<YaOpt.Setting.Option.GenTypesLockFree>無鎖密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>
+	<YaOpt.Setting.Option.GenTypesLockFree.Desc>將 GenTypes.IsSealedWithCache 中的全域鎖替換為並行字典。ThingWithComps.GetComp 在查找不存在的組件時會走到這個方法；Type.IsSealed 在執行期不會改變，因此快取無需失效。</YaOpt.Setting.Option.GenTypesLockFree.Desc>
+	<YaOpt.Setting.Option.PawnLabelCache>角色標籤快取</YaOpt.Setting.Option.PawnLabelCache>
+	<YaOpt.Setting.Option.PawnLabelCache.Desc>短時間快取角色的名字標籤及其測量寬度。原版對每個正在渲染的角色每幀至少構造兩次標籤字串並重新量寬；快取每 60 幀刷新一次，改名最多只會有很小的延遲。</YaOpt.Setting.Option.PawnLabelCache.Desc>
+	<YaOpt.Setting.Option.PawnLabelCache.Compatibility>如果有其他Mod透過Transpiler修改了GenMapUI的標籤方法，快取可能會繞過它們的改動。若發現標籤文字或寬度異常，請關閉此選項。</YaOpt.Setting.Option.PawnLabelCache.Compatibility>
+	<YaOpt.Setting.Option.TurretTargetPrune>砲塔索敵剪枝</YaOpt.Setting.Option.TurretTargetPrune>
+	<YaOpt.Setting.Option.TurretTargetPrune.Desc>當沒有敵對、狂暴或無派系候選目標，或所有候選目標都超出砲塔有效射程時，跳過完整的砲塔索敵流程。有人操作的砲塔以及候選目標較多的情況仍交還原版處理。</YaOpt.Setting.Option.TurretTargetPrune.Desc>
+	<YaOpt.Setting.Option.TurretTargetPrune.Compatibility>替換了砲塔索敵邏輯的Mod可能與本最佳化衝突。若發現砲塔不再尋找目標，請關閉此選項。</YaOpt.Setting.Option.TurretTargetPrune.Compatibility>
+	<YaOpt.Setting.Option.WeatherOverlayThrottle>天氣疊加層節流</YaOpt.Setting.Option.WeatherOverlayThrottle>
+	<YaOpt.Setting.Option.WeatherOverlayThrottle.Desc>將天氣疊加層的紋理偏移更新從每 tick 一次改為每 4 tick 一次。被跳過的位移會合併到下一次更新中，平均平移速度不變；這能避免純視覺效果反覆爭用材質鎖。</YaOpt.Setting.Option.WeatherOverlayThrottle.Desc>
 	<YaOpt.Setting.Option.CameraUpdateRate>更新速率計算最佳化</YaOpt.Setting.Option.CameraUpdateRate>
 	<YaOpt.Setting.Option.CameraUpdateRate.Desc>遊戲會在每一幀計算物體在螢幕上的可見性，並調低螢幕外物體的更新速率，然而這個計算過於精細了，以至於它本身就有一定的開銷。此最佳化微調了可見性判斷，稍微放寬了判定標準，減少了更新速率計算的開銷，代價是在一些特定條件下可能有少量接近螢幕邊緣但不可見的物體也被誤判為可見，讓系統增加它們的更新速率導致執行開銷。但在大部分情況下，這個最佳化是值得的。</YaOpt.Setting.Option.CameraUpdateRate.Desc>
 	<YaOpt.Setting.Option.GetMapPawns>地圖角色檢索最佳化</YaOpt.Setting.Option.GetMapPawns>
