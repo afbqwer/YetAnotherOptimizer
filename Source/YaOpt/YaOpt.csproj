@@ -6,7 +6,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
-		<DebugType>none</DebugType>
+		<DebugType>embedded</DebugType>
 		<LangVersion>latest</LangVersion>
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,7 +14,7 @@
 		<!-- Assembly-CSharp is publicized so non-public vanilla members are reachable at compile
 		     time. Publicizing only rewrites the copy the compiler sees; at runtime the original
 		     assembly is loaded, so access checks still apply. IgnoresAccessChecksTo is the
-		     mechanism CoreCLR honours; the Unsafe strategy alone only works on older Mono. -->
+		     mechanism CoreCLR honours. -->
 		<PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>
 
 		<RimWorldDir Condition="'$(RimWorldDir)' == ''">$(RIMWORLD_DIR)</RimWorldDir>
