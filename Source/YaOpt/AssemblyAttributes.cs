@@ -1,9 +1,9 @@
 using System.Runtime.CompilerServices;
 
 // Publicizer only rewrites the copy of the assembly the compiler sees. At runtime the game
-// loads the original Assembly-CSharp / 0Harmony, so access checks still run. The Unsafe
-// strategy relies on SkipVerification, which only ever worked on older Mono; CoreCLR honours
-// IgnoresAccessChecksTo instead.
+// loads the original Assembly-CSharp / 0Harmony, so access checks still apply. The Unsafe
+// strategy relies on SkipVerification, which CoreCLR does not honour — IgnoresAccessChecksTo
+// is the supported mechanism.
 //
 // Publicizer would emit these two lines itself through the AssemblyAttribute mechanism, but
 // this project sets GenerateAssemblyInfo to false, which disables that mechanism entirely.

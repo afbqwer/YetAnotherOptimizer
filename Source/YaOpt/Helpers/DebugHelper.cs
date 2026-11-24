@@ -1,7 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 
 namespace YaOpt.Helpers
@@ -15,12 +14,6 @@ namespace YaOpt.Helpers
 		{
 			try
 			{
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-					YaOptGlobal.Settings.VectoredExceptionHandler.Enabled)
-				{
-					WindowsVectoredExceptionHandler.InitHandler();
-				}
-
 				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 			}
 			catch (Exception e)
@@ -74,49 +67,6 @@ namespace YaOpt.Helpers
 				.Append(method.DeclaringTypeName())
 				.Append('.')
 				.AppendLine(method.Name);
-		}
-
-		private static class WindowsVectoredExceptionHandler
-		{
-			private const uint STACK_OVERFLOW_EXCEPTION = 0xC00000FD;
-
-			[DllImport("kernel32.dll")]
-			private static extern IntPtr AddVectoredExceptionHandler(uint first, VectoredHandler handler);
-
-			private delegate int VectoredHandler(IntPtr exceptionPointers);
-
-			public static void InitHandler()
-			{
-				AddVectoredExceptionHandler(1, CatchAnyException);
-			}
-
-			private static int CatchAnyException(IntPtr exceptionPointers)
-			{
-				var exceptionRecord = Marshal.ReadIntPtr(exceptionPointers);
-				var exceptionCode = (uint)Marshal.ReadInt32(exceptionRecord);
-				if (exceptionCode == STACK_OVERFLOW_EXCEPTION)
-				{
-					OnStackOverflowException();
-				}
-				return 0;
-			}
-
-			private static void OnStackOverflowException()
-			{
-				var stackTrace = new StackTrace();
-				var sb = new StringBuilder()
-					.AppendLine("=== Stack Overflow Exception ===")
-					.AppendLine("YaOpt caught a Stack Overflow Exception, " +
-									 "which is usually caused by infinite recursion. " +
-									 "Mono cannot handle this exception, " +
-									 "causing the game to crash immediately.")
-					.AppendLine("System.StackOverflowException");
-				PrintCallStack(stackTrace, sb);
-				sb.AppendLine("================================");
-				YaOptMod.Error(sb.ToString());
-			}
-
-
 		}
 	}
 }

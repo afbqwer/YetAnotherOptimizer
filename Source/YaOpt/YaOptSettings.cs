@@ -879,7 +879,18 @@ namespace YaOpt
 			"OptFATextureCache",
 			"OptHARDeLinq",
 			"OptHARTextureCache",
-			"OptVEFMemoryLeakFix"
+			"OptVEFMemoryLeakFix",
+
+			// Retired. The old implementation handed a managed delegate to
+			// AddVectoredExceptionHandler. On CoreCLR (1.7 / WaylithClr) that delegate is entered
+			// through a reverse-pinvoke thunk which fail-fasts the process with
+			// "attempted to call a UnmanagedCallersOnly method from managed code" the moment any
+			// first-chance exception (including ones raised by native components) hits while the
+			// thread is in cooperative mode — VEH is process-wide and first-chance, so the
+			// registration turned every such exception into a fatal 0x80131506 crash. The
+			// implementation was removed from this branch (it lives on the 1.6 branch); a working
+			// 1.7 version needs a redesign around [UnmanagedCallersOnly].
+			nameof(VectoredExceptionHandler)
 		};
 
 		private static void ApplyPlatformLock(OptimizationOption option)

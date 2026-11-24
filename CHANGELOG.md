@@ -1,3 +1,7 @@
+## Unreleased (1.7 master)
+
+* Fix: Startup crash (ExecutionEngineException 0x80131506, "attempted to call a UnmanagedCallersOnly method from managed code") caused by the VectoredExceptionHandler debug option. A managed delegate passed to AddVectoredExceptionHandler fail-fasts CoreCLR on the first first-chance exception raised in cooperative mode. The option is locked off on 1.7 and the Mono-era implementation was removed from this branch (preserved on the 1.6 branch); enabling it on 1.7 requires an [UnmanagedCallersOnly] redesign.
+
 ## 1.1.4 (2026-06-22)
 
 * Compatibility: Hyperdrive
