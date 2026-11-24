@@ -30,6 +30,7 @@ namespace YaOpt.Patches
 		/// </summary>
 		private static void PatchOnStartup()
 		{
+			WorldMapOptimizationHelper.CheckConflicts();
 			TryPatch(true, false);
 			CompatibilityChecker.Check(false);
 		}
@@ -40,6 +41,7 @@ namespace YaOpt.Patches
 		/// </summary>
 		public static void CheckAndRePatchOnLoadGame()
 		{
+			WorldMapOptimizationHelper.CheckConflicts();
 			TryPatch(false, true);
 			CompatibilityChecker.Check(true);
 		}

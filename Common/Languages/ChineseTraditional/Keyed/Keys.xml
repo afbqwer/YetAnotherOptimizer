@@ -89,6 +89,22 @@
 	<YaOpt.Setting.Option.PRNRWorker.Compatibility>不兼容會動態修改PawnRenderNodeProperties.workerClass的Mod。</YaOpt.Setting.Option.PRNRWorker.Compatibility>
 	<YaOpt.Setting.Option.GraphicTextureCache>紋理索引快取</YaOpt.Setting.Option.GraphicTextureCache>
 	<YaOpt.Setting.Option.GraphicTextureCache.Desc>快取Graphic_Multi初始化所需的紋理。原版遊戲每次初始化時都需要透過字串拼接構建東西南北四個朝向的紋理路徑並進行資源查找。此最佳化快取了這些紋理，消除了重複的字串拼接和資源查找開銷。本最佳化最初為外星人框架開發，現已整合入本體，供任何頻繁重建Graphic_Multi的物體受益。註：這個最佳化可能會導致開發者選項中的紋理熱重載失效。</YaOpt.Setting.Option.GraphicTextureCache.Desc>
+	<YaOpt.Setting.SubCategory.WorldMap>世界地圖</YaOpt.Setting.SubCategory.WorldMap>
+	<YaOpt.Setting.Option.WorldMapTextureCache>世界地圖紋理查找快取</YaOpt.Setting.Option.WorldMapTextureCache>
+	<YaOpt.Setting.Option.WorldMapTextureCache.Desc>快取世界地圖圖層對紋理路徑的重複解析。原版每次查找都可能遍歷全部已載入Mod，此最佳化將重複查詢變為字典命中，並在Mod內容重載時清空快取。</YaOpt.Setting.Option.WorldMapTextureCache.Desc>
+	<YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>如果其他Mod也修改ContentFinder&lt;Texture2D&gt;.Get，本項會自動停用；啟動後才出現的衝突也會回退原版，避免快取覆蓋對方的結果。</YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>
+	<YaOpt.Setting.Option.WorldMapSubMeshCache>世界地圖子網格查找快取</YaOpt.Setting.Option.WorldMapSubMeshCache>
+	<YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>世界繪製層每處理一個地塊都會線性掃描子網格列表以查找材質。此最佳化按圖層快取「材質→下標」，並在子網格填滿、重設或銷毀時正確失效，保持原版的分網格順序。</YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>
+	<YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>與WOWGAG's Performance Patch的同類功能重複；偵測到該Mod或其他子網格修補程式時，本項會自動停用。</YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>
+	<YaOpt.Setting.Option.WorldMapInsectLayer>昆蟲領地層短路</YaOpt.Setting.Option.WorldMapInsectLayer>
+	<YaOpt.Setting.Option.WorldMapInsectLayer.Desc>VFE Insectoids的昆蟲圖層會為每個世界地塊遍歷全部定居點。此最佳化將昆蟲領地展開為集合，讓非領地地塊直接跳過，顯著減少大型Mod列表下的世界地圖重建耗時。</YaOpt.Setting.Option.WorldMapInsectLayer.Desc>
+	<YaOpt.Setting.Option.WorldMapRegrowth>ReGrowth美化層路徑烘焙</YaOpt.Setting.Option.WorldMapRegrowth>
+	<YaOpt.Setting.Option.WorldMapRegrowth.Desc>ReGrowth美化層會為每個世界地塊重新拼接紋理路徑並解析材質，而結果只取決於生物群系、山丘度與溫濕度檔位。此最佳化按生物群系預解析這些組合，保持繪製與隨機數呼叫順序，並快取每地塊重複讀取的Mod設定。</YaOpt.Setting.Option.WorldMapRegrowth.Desc>
+	<YaOpt.Setting.Option.WorldMapRegrowth.Stability>實驗性選項。它會替換ReGrowth美化層的重建方法；如果世界地圖紋理異常，請手動關閉本項。版本不相容、所需欄位或方法不符時會自動停用。</YaOpt.Setting.Option.WorldMapRegrowth.Stability>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel>Geological Landforms並行快取填充</YaOpt.Setting.Option.WorldMapLandformsParallel>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel.Desc>讀檔後首次重建世界地圖時，用最多16個工作執行緒並行填充Geological Landforms的世界地塊快取，再按原版順序繪製。每個地塊獨立計算並寫入自己的快取槽，不改變生成邏輯或繪製結果。</YaOpt.Setting.Option.WorldMapLandformsParallel.Desc>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>如果Geological Landforms已經內建WarmCache並行填充，或偵測到其他地質地形修補程式，本項會自動停用，避免重複執行。僅對缺少該實作的版本生效。</YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel.Multithread>使用最多16個工作執行緒；偵測到衝突時自動停用，啟用連線Mod時也會自動停用。</YaOpt.Setting.Option.WorldMapLandformsParallel.Multithread>
 	<YaOpt.Setting.Option.Silhouette>剪影快取最佳化</YaOpt.Setting.Option.Silhouette>
 	<YaOpt.Setting.Option.Silhouette.Desc>最佳化剪影（螢幕拉遠後的小圖示）快取的查找效能。</YaOpt.Setting.Option.Silhouette.Desc>
 	<YaOpt.Setting.Option.ToggleTabCheck>標籤頁檢查去重</YaOpt.Setting.Option.ToggleTabCheck>

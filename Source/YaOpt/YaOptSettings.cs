@@ -225,6 +225,79 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches texture resolution for world-map layers that repeatedly query the same paths.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_ContentFinder_TextureGet"/>
+		public OptimizationOption OptWorldMapTextureCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.WorldMapTextureCache",
+			Desc = "YaOpt.Setting.Option.WorldMapTextureCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.WorldMapTextureCache.Compatibility",
+			SubCategory = "WorldMap",
+			Category = OptimizationCategory.Misc,
+		};
+
+		/// <summary>
+		/// Indexes world-layer submeshes by material to avoid a linear scan for every world tile.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_WorldDrawLayerBase_GetSubMesh"/>
+		public OptimizationOption OptWorldMapSubMeshCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.WorldMapSubMeshCache",
+			Desc = "YaOpt.Setting.Option.WorldMapSubMeshCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility",
+			SubCategory = "WorldMap",
+			Category = OptimizationCategory.Misc,
+		};
+
+		/// <summary>
+		/// Short-circuits VFE Insectoids' world-layer territory lookup outside insect settlements.
+		/// </summary>
+		/// <seealso cref="Patches.VFEInsectoids_WorldDrawLayer_Insects_TryAddMeshForTile"/>
+		public OptimizationOption OptWorldMapInsectLayer { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.WorldMapInsectLayer",
+			Desc = "YaOpt.Setting.Option.WorldMapInsectLayer.Desc",
+			SubCategory = "WorldMap",
+			Category = OptimizationCategory.Misc,
+			RequiredMod = "oskarpotocki.vfe.insectoid2",
+		};
+
+		/// <summary>
+		/// Bakes ReGrowth's world beautification paths and materials once per biome.
+		/// </summary>
+		/// <seealso cref="Patches.ReGrowthCore_WorldDrawLayer_Beautification_Regenerate"/>
+		public OptimizationOption OptWorldMapRegrowth { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.WorldMapRegrowth",
+			Desc = "YaOpt.Setting.Option.WorldMapRegrowth.Desc",
+			NoteStability = "YaOpt.Setting.Option.WorldMapRegrowth.Stability",
+			SubCategory = "WorldMap",
+			Category = OptimizationCategory.Misc,
+			RequiredMod = "regrowth.botr.core",
+		};
+
+		/// <summary>
+		/// Prefills Geological Landforms' world-tile cache in parallel before the layer draws.
+		/// </summary>
+		/// <remarks>
+		/// This is a loading-only exception to the branch's single-threaded tick model. Versions that
+		/// already provide <c>WorldTileInfo.WarmCache</c> are left untouched.
+		/// </remarks>
+		/// <seealso cref="Patches.GeologicalLandforms_WorldLayer_Landforms_Regenerate"/>
+		public OptimizationOption OptWorldMapLandformsParallel { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.WorldMapLandformsParallel",
+			Desc = "YaOpt.Setting.Option.WorldMapLandformsParallel.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility",
+			NoteMultithread = "YaOpt.Setting.Option.WorldMapLandformsParallel.Multithread",
+			SubCategory = "WorldMap",
+			Category = OptimizationCategory.Misc,
+			Flags = OptimizationFlags.MultiplayerIncompatible,
+			RequiredMod = "m00nl1ght.GeologicalLandforms",
+		};
+
+		/// <summary>
 		/// Optimizes <see cref="SilhouetteUtility.GetCachedSilhouetteData"/>.
 		/// Vanilla uses a struct as a dictionary key for silhouette caching but fails to implement <see cref="IEquatable{T}"/>.
 		/// This forces the runtime to use <see cref="ValueType.Equals(object)"/>, causing boxing and reflection overhead for every lookup.

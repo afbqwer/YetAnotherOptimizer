@@ -89,6 +89,22 @@
 	<YaOpt.Setting.Option.PRNRWorker.Compatibility>不兼容会动态修改PawnRenderNodeProperties.workerClass的Mod。</YaOpt.Setting.Option.PRNRWorker.Compatibility>
 	<YaOpt.Setting.Option.GraphicTextureCache>纹理索引缓存</YaOpt.Setting.Option.GraphicTextureCache>
 	<YaOpt.Setting.Option.GraphicTextureCache.Desc>缓存Graphic_Multi初始化所需的纹理。原版游戏每次初始化时都需要通过字符串拼接构建东西南北四个朝向的纹理路径并进行资源查找。此优化缓存了这些纹理，消除了重复的字符串拼接和资源查找开销。本优化最初为外星人框架开发，现已整合入本体，供任何频繁重建Graphic_Multi的物体受益。注：这个优化可能会导致开发者选项中的纹理热重载失效。</YaOpt.Setting.Option.GraphicTextureCache.Desc>
+	<YaOpt.Setting.SubCategory.WorldMap>世界地图</YaOpt.Setting.SubCategory.WorldMap>
+	<YaOpt.Setting.Option.WorldMapTextureCache>世界地图纹理查找缓存</YaOpt.Setting.Option.WorldMapTextureCache>
+	<YaOpt.Setting.Option.WorldMapTextureCache.Desc>缓存世界地图图层对纹理路径的重复解析。原版每次查找都可能遍历全部已加载Mod，此优化将重复查询变为字典命中，并在Mod内容重载时清空缓存。</YaOpt.Setting.Option.WorldMapTextureCache.Desc>
+	<YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>如果其他Mod也修改ContentFinder&lt;Texture2D&gt;.Get，本项会自动禁用；启动后才出现的冲突也会回退原版，避免缓存覆盖对方的结果。</YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>
+	<YaOpt.Setting.Option.WorldMapSubMeshCache>世界地图子网格查找缓存</YaOpt.Setting.Option.WorldMapSubMeshCache>
+	<YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>世界绘制层每处理一个地块都会线性扫描子网格列表以查找材质。此优化按图层缓存“材质→下标”，并在子网格填满、重置或销毁时正确失效，保持原版的分网格顺序。</YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>
+	<YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>与WOWGAG's Performance Patch的同类功能重复；检测到该Mod或其他子网格补丁时，本项会自动禁用。</YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>
+	<YaOpt.Setting.Option.WorldMapInsectLayer>昆虫领地层短路</YaOpt.Setting.Option.WorldMapInsectLayer>
+	<YaOpt.Setting.Option.WorldMapInsectLayer.Desc>VFE Insectoids的昆虫图层会为每个世界地块遍历全部定居点。此优化将昆虫领地展开为集合，让非领地地块直接跳过，显著减少大型Mod列表下的世界地图重建耗时。</YaOpt.Setting.Option.WorldMapInsectLayer.Desc>
+	<YaOpt.Setting.Option.WorldMapRegrowth>ReGrowth美化层路径烘焙</YaOpt.Setting.Option.WorldMapRegrowth>
+	<YaOpt.Setting.Option.WorldMapRegrowth.Desc>ReGrowth美化层会为每个世界地块重新拼接纹理路径并解析材质，而结果只取决于生物群系、山丘度与温湿度档位。此优化按生物群系预解析这些组合，保持绘制与随机数调用顺序，并缓存每地块重复读取的Mod设置。</YaOpt.Setting.Option.WorldMapRegrowth.Desc>
+	<YaOpt.Setting.Option.WorldMapRegrowth.Stability>实验性选项。它会替换ReGrowth美化层的重建方法；如果世界地图纹理异常，请手动关闭本项。版本不相容、所需字段或方法不符时会自动禁用。</YaOpt.Setting.Option.WorldMapRegrowth.Stability>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel>Geological Landforms并行缓存填充</YaOpt.Setting.Option.WorldMapLandformsParallel>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel.Desc>读档后首次重建世界地图时，用最多16个工作线程并行填充Geological Landforms的世界地块缓存，再按原版顺序绘制。每个地块独立计算并写入自己的缓存槽，不改变生成逻辑或绘制结果。</YaOpt.Setting.Option.WorldMapLandformsParallel.Desc>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>如果Geological Landforms已经内置WarmCache并行填充，或检测到其他地质地形补丁，本项会自动禁用，避免重复执行。仅对缺少该实现的版本生效。</YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel.Multithread>使用最多16个工作线程；检测到冲突时自动禁用，启用联机Mod时也会自动禁用。</YaOpt.Setting.Option.WorldMapLandformsParallel.Multithread>
 	<YaOpt.Setting.Option.Silhouette>剪影缓存优化</YaOpt.Setting.Option.Silhouette>
 	<YaOpt.Setting.Option.Silhouette.Desc>优化剪影（屏幕拉远后的小图标）缓存的查找性能。</YaOpt.Setting.Option.Silhouette.Desc>
 	<YaOpt.Setting.Option.ToggleTabCheck>标签页检查去重</YaOpt.Setting.Option.ToggleTabCheck>
