@@ -18,9 +18,15 @@ namespace YaOpt.Helpers
 
 		private static int _idleColonists;
 
-		private static int _getUpInterval;
+		// Both fields are written by PreTick only, and PreTick is registered by this type's
+		// static constructor, which itself only runs on the first call into this type. The
+		// first such call is the one the LayDown transpiler injects while pawns are already
+		// sleeping, so a zero default reaches Gen.IsHashIntervalTick and divides by zero for
+		// every pawn of that tick. Starting from the vanilla intervals keeps the very first
+		// tick identical to unpatched behaviour.
+		private static int _getUpInterval = DEFAULT_LAYDOWN_INTERVAL;
 
-		private static int _stopWanderInterval;
+		private static int _stopWanderInterval = DEFAULT_WANDER_INTERVAL;
 
 		static IdleHelper()
 		{
@@ -98,14 +104,22 @@ namespace YaOpt.Helpers
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int GetUpInterval()
 		{
-			return _getUpInterval;
+			// Never hand out a non-positive interval: it would reach Gen.IsHashIntervalTick
+			// and throw. This also covers the window between an option change and the next
+			// PreTick, and the case where PreTick is not running at all.
+			var interval = _getUpInterval;
+			return interval > 0 ? interval : DEFAULT_LAYDOWN_INTERVAL;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static int StopWanderInterval(int oldValue)
 		{
-			var fluctuation = oldValue - DEFAULT_WANDER_INTERVAL;
-			return _stopWanderInterval + fluctuation;
+			var interval = _stopWanderInterval;
+			if (interval <= 0)
+			{
+				interval = DEFAULT_WANDER_INTERVAL;
+			}
+			return interval + oldValue - DEFAULT_WANDER_INTERVAL;
 		}
 
 		public static bool CanUseBedNowLight(Pawn actor, Thing bedThing)
