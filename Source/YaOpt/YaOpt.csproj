@@ -43,6 +43,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<!-- The HAR need-condition fix applies to 1.7 as well: it reaches HAR only through
+		     reflection and does not depend on any retired compatibility type. -->
+		<Compile Include="Patches\Compatibility\HumanoidAlienRaces\**\*.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Reference Include="Assembly-CSharp">
 			<HintPath>$(RimWorldDir)Assembly-CSharp.dll</HintPath>
 			<Private>false</Private>

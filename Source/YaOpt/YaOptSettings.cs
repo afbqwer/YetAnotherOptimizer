@@ -700,6 +700,20 @@ namespace YaOpt
 			Category = OptimizationCategory.Tps,
 		};
 
+		/// <summary>
+		/// Reuses a static <see cref="HashSet{T}"/> in Humanoid Alien Races' need update postfix.
+		/// HAR builds a two-element <c>HashSet&lt;Type&gt;</c> every time <see cref="Need.CurLevel"/>
+		/// is written and only ever reads it, so the same set can be passed on every call.
+		/// </summary>
+		/// <seealso cref="Patches.Compatibility.HumanoidAlienRaces.AlienRace_HarmonyPatches_NeedLevelPostfix"/>
+		public OptimizationOption OptHARNeedCondition { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.HARNeedCondition",
+			Desc = "YaOpt.Setting.Option.HARNeedCondition.Desc",
+			RequiredMod = "erdelf.HumanoidAlienRaces",
+			Category = OptimizationCategory.Tps,
+		};
+
 		/// <seealso cref="Patches.Verse_GenTicks_GetCameraUpdateRate"/>
 		public OptimizationOption OptCameraUpdateRate { get; } = new OptimizationOption
 		{

@@ -189,6 +189,8 @@
 	<YaOpt.Setting.Option.ConstructDeliverResources.Desc>Optimizes the check order of resource delivery during construction. The vanilla game checks passability twice when assigning construction jobs; this optimization removes the redundant check. Also adds a cache for internal passability calculations, improving performance when laying lots of floor and walls.</YaOpt.Setting.Option.ConstructDeliverResources.Desc>
 	<YaOpt.Setting.Option.ConnectivityUpdate>Connectivity Update Optimization</YaOpt.Setting.Option.ConnectivityUpdate>
 	<YaOpt.Setting.Option.ConnectivityUpdate.Desc>Optimizes performance for map connectivity updates (e.g., building or removing walls). The vanilla code uses a large deduplication pool and repeatedly clears it within a loop, causing significant overhead. This optimization replaces it with a smaller deduplication pool and moves the clearing operation outside the loop, improving performance.</YaOpt.Setting.Option.ConnectivityUpdate.Desc>
+	<YaOpt.Setting.Option.HARNeedCondition>Alien Race Need Update Fix</YaOpt.Setting.Option.HARNeedCondition>
+	<YaOpt.Setting.Option.HARNeedCondition.Desc>Humanoid Alien Races allocates a two-element HashSet&lt;Type&gt; every time a pawn's need level is written, adding up to tens of KB of garbage per frame. HAR only reads that argument, so this optimization passes one shared static set instead. Behavior is unchanged.</YaOpt.Setting.Option.HARNeedCondition.Desc>
 	<YaOpt.Setting.Tab.Main>All</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

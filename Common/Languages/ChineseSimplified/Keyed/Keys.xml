@@ -189,6 +189,8 @@
 	<YaOpt.Setting.Option.ConstructDeliverResources.Desc>优化建造时资源搬运工作的检查顺序，原版在分配建造工作时会重复检测两次可通行性，此优化会剔除掉多余的一次。同时为可通行性的内部运算增加了缓存，提高了大量铺设地板和墙体时的性能。</YaOpt.Setting.Option.ConstructDeliverResources.Desc>
 	<YaOpt.Setting.Option.ConnectivityUpdate>连通性更新优化</YaOpt.Setting.Option.ConnectivityUpdate>
 	<YaOpt.Setting.Option.ConnectivityUpdate.Desc>优化当地图连通性更新（如建墙、拆墙）时的性能。原版代码使用了一个巨大的去重池并在循环内反复清空，造成了显著的性能开销。此优化将其替换为更小的去重池并将清空操作正确外置，从而提升了性能。</YaOpt.Setting.Option.ConnectivityUpdate.Desc>
+	<YaOpt.Setting.Option.HARNeedCondition>外星种族需求更新优化</YaOpt.Setting.Option.HARNeedCondition>
+	<YaOpt.Setting.Option.HARNeedCondition.Desc>Humanoid Alien Races（外星种族框架）在每次写入小人需求值的时候都会新建一个包含两个元素的 HashSet&lt;Type&gt;，每帧累计可达数十 KB 的垃圾分配。HAR 只是读取该参数，因此此优化改为复用同一个静态集合。行为完全一致。</YaOpt.Setting.Option.HARNeedCondition.Desc>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>
