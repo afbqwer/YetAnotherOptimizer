@@ -24,15 +24,18 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// The stack overflow reporter, backed by the native shim YaOpt.NativeVEH.dll.
+		/// The native crash reporter, backed by YaOpt.NativeVEH.dll.
 		/// </summary>
 		/// <remarks>
 		/// The VEH callback must be pure native code: on CoreCLR a managed callback (a marshaled
 		/// delegate or an [UnmanagedCallersOnly] method) fail-fasts the process with
 		/// ExecutionEngineException 0x80131506 when entered from a cooperative-mode thread, and a
-		/// stack overflow is always exactly that. The shim records module+offset frame candidates
-		/// of the overflowing thread to YaOpt_StackOverflow_&lt;pid&gt;.log in the save data
-		/// folder, then lets the CLR fail-fast proceed. Source: Source/NativeVEH/YaOptVeh.c.
+		/// stack overflow is always exactly that. The shim records the fault site for native
+		/// faults the CLR never surfaces to managed code - access violation, illegal instruction,
+		/// stack overflow, in-page error, privileged instruction - to
+		/// YaOpt_Crash_&lt;pid&gt;.log in the save data folder, then lets the CLR fail-fast
+		/// proceed. CLR fail-fast (0xC0000409) is unreachable from user mode and still requires a
+		/// dump. Source: Source/NativeVEH/YaOptVeh.c.
 		/// </remarks>
 		public OptimizationOption VectoredExceptionHandler { get; } = new OptimizationOption
 		{

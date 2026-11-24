@@ -14,6 +14,9 @@ namespace YaOpt.Helpers
 		private const int MAX_STACK_BOTTOM_PRINT_COUNT = 36;
 		private const string NativeShimDllName = "YaOpt.NativeVEH.dll";
 
+		private static bool _crashReporterInstalled;
+		private static string _crashLogPath;
+
 		public static void Init()
 		{
 			try
@@ -23,7 +26,7 @@ namespace YaOpt.Helpers
 				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
 					YaOptGlobal.Settings.VectoredExceptionHandler.Enabled)
 				{
-					InstallStackOverflowLogger();
+					InstallCrashReporter();
 				}
 			}
 			catch (Exception e)
@@ -35,17 +38,20 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
-		/// Loads the native VEH shim and installs the stack overflow logger.
+		/// Loads the native VEH shim and installs the crash reporter.
 		/// </summary>
 		/// <remarks>
 		/// The callback must be pure native code: every managed callback (a marshaled delegate or
 		/// an [UnmanagedCallersOnly] method) fails the JIT_ReversePInvokeEnter cooperative-mode
 		/// check when entered from a thread inside managed code, and a stack overflow is always
-		/// exactly that. The shim writes module+offset frame candidates for the overflowing
-		/// thread to a log file in the save data folder, then lets the CLR fail-fast proceed.
+		/// exactly that. Everything the shim reports is beyond the reach of managed code: the CLR
+		/// never surfaces access violations, illegal instructions or stack overflows to
+		/// AppDomain.UnhandledException. It writes the fault site to a log file in the save data
+		/// folder, then lets the CLR fail-fast proceed. CLR fail-fast itself (0xC0000409) is not
+		/// reachable from user mode and still needs a dump.
 		/// Source: Source/NativeVEH/YaOptVeh.c.
 		/// </remarks>
-		private static void InstallStackOverflowLogger()
+		private static void InstallCrashReporter()
 		{
 			// The shim lives in 1.7/Native, NOT in Assemblies: the game loads every dll in
 			// Assemblies as a managed mod assembly, and a native dll would error each startup.
@@ -54,7 +60,7 @@ namespace YaOpt.Helpers
 			if (!File.Exists(dllPath))
 			{
 				YaOptMod.Warning($"{NativeShimDllName} not found next to YaOpt.dll; " +
-								 "stack overflow logging is unavailable.");
+								 "crash reporting is unavailable.");
 				return;
 			}
 
@@ -62,35 +68,122 @@ namespace YaOpt.Helpers
 			NativeLibrary.Load(dllPath);
 
 			var logPath = Path.Combine(GenFilePaths.SaveDataFolderPath,
-									   $"YaOpt_StackOverflow_{Environment.ProcessId}.log");
+									   $"YaOpt_Crash_{Environment.ProcessId}.log");
 			var rc = YaOptVehInstall(logPath);
 			switch (rc)
 			{
 				case 0:
-					YaOptMod.Log("Stack overflow logging installed. If the game ever dies from a " +
-								 "stack overflow, native frame candidates are written to " + logPath);
+					_crashReporterInstalled = true;
+					_crashLogPath = logPath;
+					AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+					YaOptMod.Log("Crash reporting installed. Native faults (access violation, illegal " +
+								 "instruction, stack overflow, in-page error, privileged instruction) " +
+								 "are recorded to " + logPath);
 					break;
 				case 1:
-					YaOptMod.Warning("Stack overflow logging was already installed.");
+					_crashReporterInstalled = true;
+					_crashLogPath = logPath;
+					AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
+					YaOptMod.Warning("Crash reporting was already installed.");
 					break;
 				default:
-					YaOptMod.Warning($"Stack overflow logging failed to install (error code {rc}).");
+					YaOptMod.Warning($"Crash reporting failed to install (error code {rc}).");
 					break;
 			}
 
 			if (Environment.GetEnvironmentVariable("YAOPT_SO_TEST") == "1")
 			{
 				YaOptMod.Error("YAOPT_SO_TEST=1: deliberately overflowing a native thread now. " +
-							   "The game is expected to die immediately; check the stack overflow log afterwards.");
+							   "The game is expected to die immediately; check the crash log afterwards.");
 				YaOptVehSelfTest();
+			}
+			if (Environment.GetEnvironmentVariable("YAOPT_AV_TEST") == "1")
+			{
+				YaOptMod.Error("YAOPT_AV_TEST=1: deliberately dereferencing a bad pointer now. " +
+							   "The game is expected to die immediately; check the crash log afterwards.");
+				YaOptVehSelfTestAv();
+			}
+		}
+
+		private static void OnProcessExit(object sender, EventArgs e)
+		{
+			if (!_crashReporterInstalled)
+			{
+				return;
+			}
+			try
+			{
+				// Per-code totals. Only 0xC000 status faults are counted here; hosted exceptions are
+				// far more frequent but are not this reporter's business. Printed only when
+				// something actually happened, so a clean session stays silent.
+				var sb = new StringBuilder();
+				var faults = 0;
+				for (uint i = 0; ; i++)
+				{
+					if (YaOptVehGetSlot(i, out var code, out var total, out var written) == 0)
+					{
+						break;
+					}
+					if (total == 0)
+					{
+						continue;
+					}
+					faults += total;
+					sb.Append("  ").Append(code.ToString("X8")).Append(": ")
+						.Append(total).Append(" seen, ").Append(written).AppendLine(" recorded");
+				}
+				if (faults > 0)
+				{
+					YaOptMod.Log("Native fault counters at exit:\n" + sb);
+				}
+			}
+			catch (Exception)
+			{
+				// Process is going away; nothing useful to report here.
+			}
+
+			TryDeleteEmptyLog();
+		}
+
+		/// <summary>
+		/// Removes the crash log when nothing was ever written to it.
+		/// </summary>
+		/// <remarks>
+		/// The native side opens the file at install time so that a stack overflow can still write
+		/// to an existing handle. Without this cleanup every session would leave an empty file in
+		/// the save data folder.
+		/// </remarks>
+		private static void TryDeleteEmptyLog()
+		{
+			if (string.IsNullOrEmpty(_crashLogPath))
+			{
+				return;
+			}
+			try
+			{
+				var info = new FileInfo(_crashLogPath);
+				if (info.Exists && info.Length == 0)
+				{
+					info.Delete();
+				}
+			}
+			catch (Exception)
+			{
+				// Locked or already gone: not worth reporting while the process is exiting.
 			}
 		}
 
 		[DllImport("YaOpt.NativeVEH", EntryPoint = "YaOptVehInstall", CharSet = CharSet.Unicode)]
 		private static extern int YaOptVehInstall(string logPath);
 
+		[DllImport("YaOpt.NativeVEH", EntryPoint = "YaOptVehGetSlot")]
+		private static extern int YaOptVehGetSlot(uint index, out uint code, out int total, out int written);
+
 		[DllImport("YaOpt.NativeVEH", EntryPoint = "YaOptVehSelfTest")]
 		private static extern int YaOptVehSelfTest();
+
+		[DllImport("YaOpt.NativeVEH", EntryPoint = "YaOptVehSelfTestAv")]
+		private static extern int YaOptVehSelfTestAv();
 
 		private static void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
 		{

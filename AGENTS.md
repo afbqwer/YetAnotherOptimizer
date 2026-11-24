@@ -149,12 +149,13 @@ The project compiles against a **publicized** copy of `Assembly-CSharp` (`Krafs.
 ## 4. Build & Test
 - **Build Config**: Version parameters are in `Source/Settings.props` (shared) and `Source/UserSettings.props` (local, gitignored; copy from `Source/UserSettings.props.template`).
 - **Build**: Run `dotnet build Source\YaOpt.sln -c Release` or open `Source/YaOpt.sln` with Visual Studio 2022+. Ship Release builds only — the default Debug configuration compiles in the `DEBUG` performance-diagnostics code.
-- **Native VEH shim**: Run `Source/NativeVEH/build.bat` to build `1.7/Native/YaOpt.NativeVEH.dll` (requires the MSVC toolchain paths at the top of the script). The shim backs the stack overflow reporter (`DebugHelper.InstallStackOverflowLogger`); its callback must stay pure native — managed callbacks of any kind fail the reverse-pinvoke cooperative-mode check on CoreCLR. The shim must NOT live in `Assemblies/`: the game loads every dll there as a managed mod assembly and a native dll would error on each startup.
+- **Native VEH shim**: Run `Source/NativeVEH/build.bat` to build `1.7/Native/YaOpt.NativeVEH.dll` (requires the MSVC toolchain paths at the top of the script). The shim backs the crash reporter (`DebugHelper.InstallCrashReporter`); its callback must stay pure native — managed callbacks of any kind fail the reverse-pinvoke cooperative-mode check on CoreCLR. It reports the 0xC000 status faults the CLR never surfaces to managed code (access violation, illegal instruction, stack overflow, in-page error, privileged instruction). It cannot report CLR fail-fast (0xC0000409): the kernel terminates without returning to user mode, so those still need a dump. The log file is opened at install time (a stack overflow leaves no stack for `CreateFileW`) and the managed side deletes it on exit when it stayed empty. The shim must NOT live in `Assemblies/`: the game loads every dll there as a managed mod assembly and a native dll would error on each startup.
 - **Output**:
   - Main DLL: `1.7/Assemblies/YaOpt.dll`
   - Native shim: `1.7/Native/YaOpt.NativeVEH.dll`
+  - Crash log: `YaOpt_Crash_<pid>.log` in the save data folder; opened at install, written on the first record, removed on exit if it stayed empty
 - **Conditional Compilation**: `DEBUG` symbol enables performance diagnostics and profiling output.
-- **Test**: Launch RimWorld with the mod loaded. Verify via in-game TPS display and log messages. `YAOPT_SO_TEST=1` self-tests the stack overflow logging chain (the game is expected to die from a deliberate overflow; check `YaOpt_StackOverflow_<pid>.log` in the save data folder).
+- **Test**: Launch RimWorld with the mod loaded. Verify via in-game TPS display and log messages. `YAOPT_SO_TEST=1` self-tests the stack overflow path and `YAOPT_AV_TEST=1` the access violation path (the game is expected to die; check `YaOpt_Crash_<pid>.log` in the save data folder).
 
 ## 5. Adding a New Optimization
 

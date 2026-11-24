@@ -45,8 +45,8 @@
 	<YaOpt.Setting.Note.Multithread>【多執行緒】</YaOpt.Setting.Note.Multithread>
 	<YaOpt.Setting.Option.DebugOutput>偵錯輸出</YaOpt.Setting.Option.DebugOutput>
 	<YaOpt.Setting.Option.DebugOutput.Desc>在主控台中輸出偵錯資訊，啟用這個選項可能會略微降低遊戲速度，因為遊戲會在每次輸出主控台資訊時記錄整個呼叫堆疊，這是一個開銷很大的操作。</YaOpt.Setting.Option.DebugOutput.Desc>
-	<YaOpt.Setting.Option.VectoredExceptionHandler>擷取堆疊溢位導致的閃退</YaOpt.Setting.Option.VectoredExceptionHandler>
-	<YaOpt.Setting.Option.VectoredExceptionHandler.Desc>堆疊溢位（通常由無窮遞迴導致）會讓遊戲瞬間閃退且沒有任何日誌輸出。啟用此選項後，Mod 會安裝一個原生的 Windows 例外處理回呼，在處理程序結束前把溢出執行緒的「模組+偏移」框架記錄到存檔目錄下的 YaOpt_StackOverflow_&lt;pid&gt;.log。此選項無法阻止閃退；要拿到完整受控堆疊請配合當機 dump 環境變數（DOTNET_DbgEnableMiniDump=1、DOTNET_DbgMiniDumpType=4）並分析 dump 檔案。僅限 Windows。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.VectoredExceptionHandler.Desc>
+	<YaOpt.Setting.Option.VectoredExceptionHandler>擷取原生當機現場</YaOpt.Setting.Option.VectoredExceptionHandler>
+	<YaOpt.Setting.Option.VectoredExceptionHandler.Desc>存取違規、非法指令、堆疊溢位、分頁讀取失敗這類原生故障會讓遊戲瞬間閃退，而受控程式碼完全看不到它們——CLR 不會把它們交給 UnhandledException。啟用此選項後，Mod 會安裝一個原生的 Windows 例外回呼，在處理程序結束前把故障點（RIP + 模組位移、讀寫類型與被存取位址）寫進存檔目錄下的 YaOpt_Crash_&lt;pid&gt;.log，堆疊溢位還會附上溢出執行緒的堆疊上候選框架。每個故障碼最多記錄 4 次，之後只做計數，不會拖慢遊戲。此選項無法阻止閃退；CLR 的 fast-fail（0xC0000409）在使用者模式無法攔截，要拿到完整受控堆疊請配合當機 dump 環境變數（DOTNET_DbgEnableMiniDump=1、DOTNET_DbgMiniDumpType=4）並分析 dump 檔案。僅限 Windows。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.VectoredExceptionHandler.Desc>
 	<YaOpt.Setting.Option.MaterialGetColor>材質顏色快取</YaOpt.Setting.Option.MaterialGetColor>
 	<YaOpt.Setting.Option.MaterialGetColor.Desc>快取材質顏色以減少頻繁呼叫底層引擎函式帶來的開銷。當顏色發生變化時會自動更新快取。</YaOpt.Setting.Option.MaterialGetColor.Desc>
 	<YaOpt.Setting.Option.ColoredText>富文本最佳化</YaOpt.Setting.Option.ColoredText>
