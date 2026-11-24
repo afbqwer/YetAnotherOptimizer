@@ -11,9 +11,11 @@
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DefineConstants>$(DefineConstants);RIMWORLD_1_7</DefineConstants>
-		<!-- RimWorld 1.7 runs WaylithClr with SkipAccessChecks; compile against a publicized copy
-		     of Assembly-CSharp so private members can be used directly instead of reflection. -->
-		<PublicizerRuntimeStrategies>Unsafe</PublicizerRuntimeStrategies>
+		<!-- Assembly-CSharp is publicized so non-public vanilla members are reachable at compile
+		     time. Publicizing only rewrites the copy the compiler sees; at runtime the original
+		     assembly is loaded, so access checks still apply. IgnoresAccessChecksTo is the
+		     mechanism CoreCLR honours; the Unsafe strategy alone only works on older Mono. -->
+		<PublicizerRuntimeStrategies>Unsafe;IgnoresAccessChecksTo</PublicizerRuntimeStrategies>
 
 		<RimWorldDir Condition="'$(RimWorldDir)' == ''">$(RIMWORLD_DIR)</RimWorldDir>
 		<RimWorldDir Condition="'$(RimWorldDir)' == ''">$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)', '..', '..', '..', '..'))</RimWorldDir>
