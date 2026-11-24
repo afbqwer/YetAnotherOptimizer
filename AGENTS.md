@@ -149,10 +149,10 @@ The project compiles against a **publicized** copy of `Assembly-CSharp` (`Krafs.
 ## 4. Build & Test
 - **Build Config**: Version parameters are in `Source/Settings.props` (shared) and `Source/UserSettings.props` (local, gitignored; copy from `Source/UserSettings.props.template`).
 - **Build**: Run `dotnet build Source\YaOpt.sln -c Release` or open `Source/YaOpt.sln` with Visual Studio 2022+. Ship Release builds only — the default Debug configuration compiles in the `DEBUG` performance-diagnostics code.
-- **Native VEH shim**: Run `Source/NativeVEH/build.bat` to build `1.7/Assemblies/YaOpt.NativeVEH.dll` (requires the MSVC toolchain paths at the top of the script). The shim backs the stack overflow reporter (`DebugHelper.InstallStackOverflowLogger`); its callback must stay pure native — managed callbacks of any kind fail the reverse-pinvoke cooperative-mode check on CoreCLR.
+- **Native VEH shim**: Run `Source/NativeVEH/build.bat` to build `1.7/Native/YaOpt.NativeVEH.dll` (requires the MSVC toolchain paths at the top of the script). The shim backs the stack overflow reporter (`DebugHelper.InstallStackOverflowLogger`); its callback must stay pure native — managed callbacks of any kind fail the reverse-pinvoke cooperative-mode check on CoreCLR. The shim must NOT live in `Assemblies/`: the game loads every dll there as a managed mod assembly and a native dll would error on each startup.
 - **Output**:
   - Main DLL: `1.7/Assemblies/YaOpt.dll`
-  - Native shim: `1.7/Assemblies/YaOpt.NativeVEH.dll`
+  - Native shim: `1.7/Native/YaOpt.NativeVEH.dll`
 - **Conditional Compilation**: `DEBUG` symbol enables performance diagnostics and profiling output.
 - **Test**: Launch RimWorld with the mod loaded. Verify via in-game TPS display and log messages. `YAOPT_SO_TEST=1` self-tests the stack overflow logging chain (the game is expected to die from a deliberate overflow; check `YaOpt_StackOverflow_<pid>.log` in the save data folder).
 

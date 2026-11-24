@@ -47,8 +47,10 @@ namespace YaOpt.Helpers
 		/// </remarks>
 		private static void InstallStackOverflowLogger()
 		{
-			var dllPath = Path.Combine(Path.GetDirectoryName(typeof(DebugHelper).Assembly.Location),
-									   NativeShimDllName);
+			// The shim lives in 1.7/Native, NOT in Assemblies: the game loads every dll in
+			// Assemblies as a managed mod assembly, and a native dll would error each startup.
+			var dllPath = Path.GetFullPath(Path.Combine(
+				Path.GetDirectoryName(typeof(DebugHelper).Assembly.Location), "..", "Native", NativeShimDllName));
 			if (!File.Exists(dllPath))
 			{
 				YaOptMod.Warning($"{NativeShimDllName} not found next to YaOpt.dll; " +

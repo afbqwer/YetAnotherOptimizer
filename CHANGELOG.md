@@ -1,7 +1,7 @@
 ## Unreleased (1.7 master)
 
 * Fix: Startup crash (ExecutionEngineException 0x80131506, "attempted to call a UnmanagedCallersOnly method from managed code") caused by the old VectoredExceptionHandler implementation: a managed delegate passed to AddVectoredExceptionHandler fail-fasts CoreCLR on the first first-chance exception raised in cooperative mode, so registering it during startup was a deferred crash.
-* Feature: Reimplement the stack overflow reporter natively. Source/NativeVEH/YaOptVeh.c builds YaOpt.NativeVEH.dll - a pure native VEH callback, because managed callbacks of any kind fail the reverse-pinvoke cooperative-mode check on CoreCLR. It records module+offset frame candidates of the overflowing thread to YaOpt_StackOverflow_<pid>.log in the save data folder before the process dies. Set YAOPT_SO_TEST=1 to self-test the chain. Build script: Source/NativeVEH/build.bat.
+* Feature: Reimplement the stack overflow reporter natively. Source/NativeVEH/YaOptVeh.c builds YaOpt.NativeVEH.dll - a pure native VEH callback, because managed callbacks of any kind fail the reverse-pinvoke cooperative-mode check on CoreCLR. It records module+offset frame candidates of the overflowing thread to YaOpt_StackOverflow_<pid>.log in the save data folder before the process dies. Set YAOPT_SO_TEST=1 to self-test the chain. Build script: Source/NativeVEH/build.bat. The shim ships in 1.7/Native, not Assemblies (the game loads every dll in Assemblies as a managed assembly).
 * Build: Embed portable PDB symbols into YaOpt.dll (DebugType embedded) for diagnosability.
 
 ## 1.1.4 (2026-06-22)
