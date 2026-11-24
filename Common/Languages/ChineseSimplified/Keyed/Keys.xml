@@ -182,6 +182,8 @@
 	<YaOpt.Setting.Option.MeditationTick.Compatibility>兼容原版灵能扩展（Vanilla Psycasts Expanded）,但可能会与其他大幅修改冥想机制的Mod产生冲突。与Performance Esmolas的功能重复，如果同时安装了Performance Esmolas，会优先使用它的优化实现。</YaOpt.Setting.Option.MeditationTick.Compatibility>
 	<YaOpt.Setting.Option.StatCache>更多属性缓存</YaOpt.Setting.Option.StatCache>
 	<YaOpt.Setting.Option.StatCache.Desc>将角色的舒适温度和污垢率加入原版的属性缓存系统。舒适温度改为每20帧更新一次（装备变动时强制刷新），污垢率每60帧更新一次。这能减少频繁访问这些高开销属性时的性能损耗。</YaOpt.Setting.Option.StatCache.Desc>
+	<YaOpt.Setting.Option.MoveSpeedStatCache>移动速度属性缓存</YaOpt.Setting.Option.MoveSpeedStatCache>
+	<YaOpt.Setting.Option.MoveSpeedStatCache.Desc>在移动调用点为移动速度属性缓存20帧。原版每走一格都会重新求值一次移动速度，而它极少变化。启用后同一数值最多沿用20帧（约三分之一秒）。亡灵被排除，因为其速度随可见时间曲线变化。刚发生的装备、健康或光照变化最多需20帧才会反映到移动速度上。</YaOpt.Setting.Option.MoveSpeedStatCache.Desc>
 	<YaOpt.Setting.Option.ConstructDeliverResources>建造资源搬运检查优化</YaOpt.Setting.Option.ConstructDeliverResources>
 	<YaOpt.Setting.Option.ConstructDeliverResources.Desc>优化建造时资源搬运工作的检查顺序，原版在分配建造工作时会重复检测两次可通行性，此优化会剔除掉多余的一次。同时为可通行性的内部运算增加了缓存，提高了大量铺设地板和墙体时的性能。</YaOpt.Setting.Option.ConstructDeliverResources.Desc>
 	<YaOpt.Setting.Option.ConnectivityUpdate>连通性更新优化</YaOpt.Setting.Option.ConnectivityUpdate>

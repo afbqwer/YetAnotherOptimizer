@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	<!--
+		MoveSpeed is not cacheable in vanilla, so StatWorker never creates its temporary cache
+		dictionary and a cacheStaleAfterTicks value is silently ignored. Turn cacheability on so the
+		interval set by RimWorld_StatWorker_GetValue_MoveSpeedCache takes effect. The xpath predicate
+		keeps this idempotent if another mod already added the element.
+	-->
+	<Operation Class="YaOpt.Patches.Xml.PatchOperationSettingGate">
+		<setting>OptMoveSpeedStatCache</setting>
+		<match Class="PatchOperationAdd">
+			<xpath>/Defs/StatDef[defName="MoveSpeed" and not(cacheable)]</xpath>
+			<value>
+				<cacheable>true</cacheable>
+			</value>
+		</match>
+	</Operation>
+</Patch>

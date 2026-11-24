@@ -467,6 +467,28 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches <see cref="StatDefOf.MoveSpeed"/> for 20 ticks at the <see cref="Pawn.TicksPerMove"/>
+		/// call site. Vanilla evaluates MoveSpeed once per cell walked and never reads the temporary
+		/// stat cache for it (<c>cacheStaleAfterTicks</c> defaults to -1); MoveSpeed is also not
+		/// <c>cacheable</c>, so the dictionary is never created. An XML patch turns cacheability on and
+		/// this option switches the call site to a 20-tick interval.
+		/// </summary>
+		/// <remarks>
+		/// Kept separate from <see cref="OptStatCache"/> on purpose: this one changes movement timing
+		/// (up to 20 ticks of staleness), whereas OptStatCache only touches temperature and filth.
+		/// Revenants are excluded because StatPart_RevenantSpeed reads the current tick.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_StatWorker_GetValue_MoveSpeedCache"/>
+		/// <seealso cref="Patches.Xml.PatchOperationSettingGate"/>
+		public OptimizationOption OptMoveSpeedStatCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.MoveSpeedStatCache",
+			Desc = "YaOpt.Setting.Option.MoveSpeedStatCache.Desc",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Introduces a restricted multi-threaded handling for pawn updates.
 		/// It implements a multi-threaded job interruption predictor that checks if the current job
 		/// might fail or be interrupted by emergency jobs (e.g. fleeing enemies) in the current frame.
