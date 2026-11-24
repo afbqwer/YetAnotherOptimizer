@@ -1,8 +1,13 @@
+using HarmonyLib;
 using RimWorld;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
 using Verse;
+using YaOpt.Patches;
 using static YaOpt.Helpers.ListerThingsIndexer;
 
 namespace YaOpt.Helpers
@@ -23,6 +28,103 @@ namespace YaOpt.Helpers
 		/// Like <c>_bannedThingRequestGroup</c>, but used for <c>IHaulSource</c>.
 		/// </summary>
 		private static bool _banHaulSourceIndex = false;
+
+		/// <summary>
+		/// Whether the fast removal path could actually be installed on
+		/// <see cref="ListerThings.Remove"/>.
+		/// </summary>
+		/// <remarks>
+		/// The thing index only works as a pair: <see cref="Verse_ListerThings_Add"/> records
+		/// where a thing landed, and <see cref="Verse_ListerThings_Remove"/> consumes that
+		/// record. If another mod transpiles <c>ListerThings.Remove</c> in a way that hides the
+		/// group-removal call, the consumer disappears while the producer stays alive, which
+		/// leaks one record per despawned thing and reports a duplicate on every respawn.
+		/// When the removal call cannot be located, this is false and every patch that depends
+		/// on the index is left unapplied, falling back to vanilla behaviour as a whole.
+		/// </remarks>
+		public static bool FastRemoveAvailable { get; private set; }
+
+		/// <summary>
+		/// The method that took over the removal site, or an empty string when the site could not
+		/// be found at all. <c>null</c> when the fast removal is available or not applicable,
+		/// so the settings panel can tell the two apart.
+		/// </summary>
+		public static string FastRemoveConflict { get; private set; }
+
+		/// <summary>
+		/// Decides whether the fast removal can be installed, once per patch pass.
+		/// </summary>
+		/// <remarks>
+		/// Must run before the patches are applied, because <c>Prepare</c> of every patch that
+		/// depends on the index reads the result, and those results are evaluated in an
+		/// unspecified order relative to the transpiler that would report the failure.
+		/// </remarks>
+		internal static void EvaluateFastRemoveAvailability()
+		{
+			FastRemoveAvailable = false;
+			FastRemoveConflict = null;
+			if (!YaOptGlobal.Settings.OptFastListerRemove.Enabled)
+				return;
+
+			var method = AccessTools.Method(typeof(ListerThings), nameof(ListerThings.Remove), new[] { typeof(Thing) });
+			if (method == null)
+			{
+				YaOptMod.Warning("Cannot find ListerThings.Remove, the fast removal has been skipped.");
+				return;
+			}
+
+			List<CodeInstruction> codes;
+			try
+			{
+				// Other mods' transpilers are already in place at this point, so this sees the
+				// same instructions our transpiler would receive.
+				codes = PatchProcessor.GetCurrentInstructions(method);
+			}
+			catch (Exception ex)
+			{
+				YaOptMod.Warning("Cannot read the IL of ListerThings.Remove, the fast removal has been skipped: " + ex);
+				return;
+			}
+
+			if (Verse_ListerThings_Remove.TryLocateGroupRemove(codes))
+			{
+				FastRemoveAvailable = true;
+				return;
+			}
+
+			var conflict = FindForeignSwap(codes);
+			FastRemoveConflict = conflict ?? string.Empty;
+			YaOptMod.Warning("Cannot locate the group removal of ListerThings.Remove" +
+							 (conflict != null ? $", the call has been replaced by {conflict}" : string.Empty) +
+							 ". The fast removal, the thing index and every patch built on it " +
+							 "have been skipped; ListerThings falls back to vanilla behaviour.");
+		}
+
+		/// <summary>
+		/// Finds a method that took the place of <c>ListerThings.RemoveSwap</c>, for diagnostics.
+		/// </summary>
+		private static string FindForeignSwap(List<CodeInstruction> codes)
+		{
+			foreach (var code in codes)
+			{
+				if (code.opcode != OpCodes.Call && code.opcode != OpCodes.Callvirt)
+					continue;
+				if (!(code.operand is MethodInfo method))
+					continue;
+				if (method.DeclaringType == typeof(ListerThings))
+					continue;
+				if (method.ReturnType != typeof(void))
+					continue;
+				var parameters = method.GetParameters();
+				if (parameters.Length != 2)
+					continue;
+				if (parameters[0].ParameterType != typeof(List<Thing>) ||
+					parameters[1].ParameterType != typeof(Thing))
+					continue;
+				return $"{method.DeclaringType?.FullName}.{method.Name}";
+			}
+			return null;
+		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		internal static void AddToThingList(List<Thing> list, Thing thing,

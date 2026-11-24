@@ -12,7 +12,10 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptFastListerRemove.Enabled;
+			// Only meaningful while the index is maintained; otherwise this is a wasted scan
+			// over every corpse on the map.
+			return YaOptGlobal.Settings.OptFastListerRemove.Enabled &&
+				   ListerThingsHelper.FastRemoveAvailable;
 		}
 
 		static void Postfix(Pawn pawn)

@@ -74,6 +74,11 @@ namespace YaOpt.Patches
 					_hasPatched = false;
 				}
 
+				// Decide whether the thing index can be maintained at all before any patch that
+				// depends on it is applied; Prepare() of those patches reads the result and their
+				// evaluation order is not something we control.
+				ListerThingsHelper.EvaluateFastRemoveAvailability();
+
 				// Apply Harmony patches from the current assembly.
 				YaOptMod.Debug("Patching...");
 				noError &= harmony.TryPatchAll(assembly);

@@ -333,6 +333,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.IdleThrottle",
 			Desc = "YaOpt.Setting.Option.IdleThrottle.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.IdleThrottle.Compatibility",
 			Category = OptimizationCategory.Tps,
 			FuncPostDraw = SettingsPanel.IdleThrottlePostDraw,
 			FuncExposeData = (settings) =>
@@ -645,6 +646,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FastListerRemove",
 			Desc = "YaOpt.Setting.Option.FastListerRemove.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.FastListerRemove.Compatibility",
 			Category = OptimizationCategory.Tps,
 		};
 

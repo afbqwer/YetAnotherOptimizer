@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using Verse;
 using YaOpt.Defines;
+using YaOpt.Helpers;
 
 namespace YaOpt.Settings
 {
@@ -255,7 +256,11 @@ namespace YaOpt.Settings
 			var hasNoteC = !string.IsNullOrWhiteSpace(option.NoteCompatibility);
 			var hasNoteP = !string.IsNullOrWhiteSpace(option.NotePrepatch);
 			var hasNoteMT = !string.IsNullOrWhiteSpace(option.NoteMultithread);
-			if (hasNoteS || hasNoteC || hasNoteP || hasNoteMT)
+			// Mark the options that are enabled but could not be installed this session, so the
+			// player sees it without having to hover.
+			var isSkipped = option == _settings.OptFastListerRemove &&
+							ListerThingsHelper.FastRemoveConflict != null;
+			if (hasNoteS || hasNoteC || hasNoteP || hasNoteMT || isSkipped)
 			{
 				var sb = new StringBuilder(label);
 				if (hasNoteS)
@@ -266,6 +271,8 @@ namespace YaOpt.Settings
 					sb.Append(" <color=#88F0F0>[P]</color>");
 				if (hasNoteMT)
 					sb.Append(" <color=#0044FF>[MT]</color>");
+				if (isSkipped)
+					sb.Append(" <color=#FF9020>[!]</color>");
 				label = sb.ToString();
 			}
 			var enabled = option._enabled;
@@ -331,6 +338,19 @@ namespace YaOpt.Settings
 					.Append("YaOpt.Setting.Note.Banned".Translate(
 						CompatibilityDefines.CachedBannedBy[option.SettingId]))
 					.AppendLine("</color>");
+			}
+
+			// Turns the option off in the player's eyes only when it really was skipped, not when
+			// it is simply unchecked or not evaluated yet (FastRemoveConflict stays null then).
+			if (option == _settings.OptFastListerRemove && ListerThingsHelper.FastRemoveConflict != null)
+			{
+				sb.Append("<color=#FF9020>");
+				if (ListerThingsHelper.FastRemoveConflict.Length > 0)
+					sb.Append("YaOpt.Setting.Note.FastListerRemove.Skipped"
+						.Translate(ListerThingsHelper.FastRemoveConflict));
+				else
+					sb.Append("YaOpt.Setting.Note.FastListerRemove.SkippedUnknown".Translate());
+				sb.AppendLine("</color>");
 			}
 
 			sb.AppendLine(option.Desc.Translate());

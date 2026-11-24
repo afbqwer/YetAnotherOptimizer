@@ -43,6 +43,8 @@
 	<YaOpt.Setting.Note.Compatibility>【Mod相容性說明】</YaOpt.Setting.Note.Compatibility>
 	<YaOpt.Setting.Note.Prepatch>【預修補程式】</YaOpt.Setting.Note.Prepatch>
 	<YaOpt.Setting.Note.Multithread>【多執行緒】</YaOpt.Setting.Note.Multithread>
+	<YaOpt.Setting.Note.FastListerRemove.Skipped>【已跳過】{0} 已經改寫了同一處程式碼，本最佳化在本次遊戲中不會生效，以對方的實作為準。</YaOpt.Setting.Note.FastListerRemove.Skipped>
+	<YaOpt.Setting.Note.FastListerRemove.SkippedUnknown>【已跳過】無法在原版方法中定位到移除呼叫，可能是其他 Mod 改寫所致，本最佳化在本次遊戲中不會生效。</YaOpt.Setting.Note.FastListerRemove.SkippedUnknown>
 	<YaOpt.Setting.Option.DebugOutput>偵錯輸出</YaOpt.Setting.Option.DebugOutput>
 	<YaOpt.Setting.Option.DebugOutput.Desc>在主控台中輸出偵錯資訊，啟用這個選項可能會略微降低遊戲速度，因為遊戲會在每次輸出主控台資訊時記錄整個呼叫堆疊，這是一個開銷很大的操作。</YaOpt.Setting.Option.DebugOutput.Desc>
 	<YaOpt.Setting.Option.VectoredExceptionHandler>擷取原生當機現場</YaOpt.Setting.Option.VectoredExceptionHandler>
@@ -121,9 +123,10 @@
 	<YaOpt.Setting.Option.IdeoCheck.Desc>遊戲在檢查文化是否允許做某事時，會遍歷其下所有的戒律。此最佳化會在戒律每次更新時，為它建立快取，記錄那些涉及到禁令的戒律，然後在檢查文化是否允許做某事時，只遍歷那些有禁令的戒律。</YaOpt.Setting.Option.IdeoCheck.Desc>
 	<YaOpt.Setting.Option.BedThrottle>床鋪檢查最佳化</YaOpt.Setting.Option.BedThrottle>
 	<YaOpt.Setting.Option.BedThrottle.Desc>最佳化臥床角色的床鋪可用性檢測，原版臥床角色每幀都會檢測當前床鋪是否可用，雖然很有必要，但卻包含了一些運算量較大的計算，比如判斷因病臥床的角色是否痊癒等。節流後每15幀（0.25秒）才會進行一次完整檢測，其他14幀只會進行簡單的快速檢測，如判斷床鋪是否被毀。</YaOpt.Setting.Option.BedThrottle.Desc>
-	<YaOpt.Setting.Option.BedThrottle.Compatibility>與Performance Fish的同類最佳化（FailOnBedNoLongerUsable）功能重複，Performance Fish的起床檢測最佳化為每64幀檢測一次，其他時間不檢測。簡單來說，YaOpt更安全，Performance Fish更快。建議使用Performance Fish的實現，因為床鋪意外不可用的情況太罕見，用非常小的起床延遲換取相當的效能提升是值得的。</YaOpt.Setting.Option.BedThrottle.Compatibility>
+	<YaOpt.Setting.Option.BedThrottle.Compatibility>與Performance Fish的同類最佳化（FailOnBedNoLongerUsable）功能重複，Performance Fish的起床檢測最佳化為每64幀檢測一次，其他時間不檢測。簡單來說，YaOpt更安全，Performance Fish更快。建議使用Performance Fish的實現，因為床鋪意外不可用的情況太罕見，用非常小的起床延遲換取相當的效能提升是值得的。\n與[WG] WOWGAG's Performance Patch的同類最佳化也針對同一處程式碼，兩者只會有一個生效，對方在每次讀檔時會嘗試接管這一處。</YaOpt.Setting.Option.BedThrottle.Compatibility>
 	<YaOpt.Setting.Option.IdleThrottle>閒置檢查最佳化</YaOpt.Setting.Option.IdleThrottle>
 	<YaOpt.Setting.Option.IdleThrottle.Desc>對遊戲中閒置角色（睡覺和閒逛）的中斷閒置檢測做節流。具體最佳化包括：\n1.最佳化臥床角色起床工作的檢測間隔，原版遊戲的臥床角色每211幀會進行一次工作判定，最佳化可以延長這個間隔，還可以讓間隔變為動態間隔，根據臥床的殖民者數量來控制間隔，確保小型殖民地的角色依然能快速響應突發情況。\n2.最佳化閒逛角色的工作檢測間隔，原版處於閒置狀態的殖民者每125~200幀會進行一次工作判定，最佳化可以延長這個間隔，並且也能實現動態間隔，根據處於無事可做狀態的殖民者數量來控制間隔。</YaOpt.Setting.Option.IdleThrottle.Desc>
+	<YaOpt.Setting.Option.IdleThrottle.Compatibility>與[WG] WOWGAG's Performance Patch的「起床工作檢測間隔」針對同一處程式碼（臥床角色每211幀的工作判定）。兩者只會有一個生效：對方在每次讀檔時會嘗試接管這一處，若對方生效，本項的間隔設定將不起作用；若本項生效，對方的同類選項也會自動跳過。\n本Mod按躺下的殖民者人數動態計算間隔，對方使用固定間隔（預設422幀，可調範圍211~1266幀）。</YaOpt.Setting.Option.IdleThrottle.Compatibility>
 	<YaOpt.Setting.Option.IdleThrottle.GetUp.Title>起床工作檢測</YaOpt.Setting.Option.IdleThrottle.GetUp.Title>
 	<YaOpt.Setting.Option.IdleThrottle.GetUp>檢測間隔: {0}</YaOpt.Setting.Option.IdleThrottle.GetUp>
 	<YaOpt.Setting.Option.IdleThrottle.GetUp.Desc>調整讓臥床角色起床工作的檢測間隔，單位為邏輯幀（Tick），原版為211幀。</YaOpt.Setting.Option.IdleThrottle.GetUp.Desc>
@@ -154,6 +157,7 @@
 	<YaOpt.Setting.Option.WindUpdate.Desc>遊戲會在每一個邏輯幀中為所有植物材質更新風力強度參數，這是沒必要的。最佳化後將僅在渲染幀中更新風力強度。</YaOpt.Setting.Option.WindUpdate.Desc>
 	<YaOpt.Setting.Option.FastListerRemove>物體移除最佳化</YaOpt.Setting.Option.FastListerRemove>
 	<YaOpt.Setting.Option.FastListerRemove.Desc>最佳化從遊戲中移除物體時的效率。原版遊戲在移除物體時，需要在多個檢索列表中進行線性搜索以找到並刪除物體。此最佳化為每個物體添加了索引記錄，移除時可直接定位並使用“交換移除”策略（將末尾物體移至空位）。</YaOpt.Setting.Option.FastListerRemove.Desc>
+	<YaOpt.Setting.Option.FastListerRemove.Compatibility>本最佳化依賴對原版移除邏輯的改寫。部分效能類Mod（如[WG] WOWGAG's Performance Patch）會改寫同一處，讓移除方法中不再出現原本的呼叫。這種情況下本項會在啟動時整體停用，保留對方的實作，本Mod不再插手；此時開關不起作用，滑鼠懸停本項會顯示被哪個方法接管。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物體快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>為地圖的已生成物體容器建立索引，使 DeSpawn 時的移除從「線性查找 + 列表搬移」變為 O(1) 的字典查找與交換移除。索引按需構建，若檢測到索引與列表不一致會自動回退原版邏輯。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
 	<YaOpt.Setting.Option.GenTypesLockFree>無鎖密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>

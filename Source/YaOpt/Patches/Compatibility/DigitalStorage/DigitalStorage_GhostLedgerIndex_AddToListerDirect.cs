@@ -21,6 +21,7 @@ namespace YaOpt.Patches.Compatibility.DigitalStorage
 		static bool Prepare()
 		{
 			var shouldDo = YaOptGlobal.Settings.OptFastListerRemove.Enabled &&
+						   ListerThingsHelper.FastRemoveAvailable &&
 						   YaOptGlobal.HasMod("cagier.digitalstorage");
 			if (shouldDo && _listsByDefRef == null)
 			{

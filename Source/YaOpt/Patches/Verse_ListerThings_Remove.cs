@@ -28,13 +28,14 @@ namespace YaOpt.Patches
 
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptFastListerRemove.Enabled;
+			return YaOptGlobal.Settings.OptFastListerRemove.Enabled &&
+				   ListerThingsHelper.FastRemoveAvailable;
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
 		{
 			var codes = new List<CodeInstruction>(instructions);
-			if (!TryFindGroupRemove(codes, out var groupRemoveIndex, out var localThingRequestGroup))
+			if (!TryLocateGroupRemove(codes, out var groupRemoveIndex, out var localThingRequestGroup))
 			{
 				// Falling back to vanilla is preferable to emitting invalid IL.
 				YaOptMod.Warning("Cannot resolve the ThingRequestGroup index of ListerThings.Remove, " +
@@ -134,7 +135,12 @@ namespace YaOpt.Patches
 		/// <summary>
 		/// Locates the group-list removal and the local variable used as its array index.
 		/// </summary>
-		private static bool TryFindGroupRemove(List<CodeInstruction> instructions, out int removeIndex, out int localIndex)
+		/// <remarks>
+		/// Also used by <see cref="ListerThingsHelper.EvaluateFastRemoveAvailability"/> as the
+		/// pre-flight check, so that every patch depending on the thing index is decided before
+		/// any of them is applied.
+		/// </remarks>
+		internal static bool TryLocateGroupRemove(List<CodeInstruction> instructions, out int removeIndex, out int localIndex)
 		{
 			removeIndex = -1;
 			localIndex = -1;
@@ -150,6 +156,14 @@ namespace YaOpt.Patches
 				return true;
 			}
 			return false;
+		}
+
+		/// <summary>
+		/// Checks whether the group removal site exists, without resolving its details.
+		/// </summary>
+		internal static bool TryLocateGroupRemove(List<CodeInstruction> instructions)
+		{
+			return TryLocateGroupRemove(instructions, out _, out _);
 		}
 
 		/// <summary>

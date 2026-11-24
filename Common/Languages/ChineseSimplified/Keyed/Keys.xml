@@ -43,6 +43,8 @@
 	<YaOpt.Setting.Note.Compatibility>【Mod兼容性说明】</YaOpt.Setting.Note.Compatibility>
 	<YaOpt.Setting.Note.Prepatch>【预补丁】</YaOpt.Setting.Note.Prepatch>
 	<YaOpt.Setting.Note.Multithread>【多线程】</YaOpt.Setting.Note.Multithread>
+	<YaOpt.Setting.Note.FastListerRemove.Skipped>【已跳过】{0} 已经改写了同一处代码，本优化在本次游戏中不会生效，以对方的实现为准。</YaOpt.Setting.Note.FastListerRemove.Skipped>
+	<YaOpt.Setting.Note.FastListerRemove.SkippedUnknown>【已跳过】无法在原版方法中定位到移除调用，可能是其他 Mod 改写所致，本优化在本次游戏中不会生效。</YaOpt.Setting.Note.FastListerRemove.SkippedUnknown>
 	<YaOpt.Setting.Option.DebugOutput>调试输出</YaOpt.Setting.Option.DebugOutput>
 	<YaOpt.Setting.Option.DebugOutput.Desc>在控制台中输出调试信息，启用这个选项可能会略微降低游戏速度，因为游戏会在每次输出控制台信息时记录整个调用栈，这是一个开销很大的操作。</YaOpt.Setting.Option.DebugOutput.Desc>
 	<YaOpt.Setting.Option.VectoredExceptionHandler>捕获原生崩溃现场</YaOpt.Setting.Option.VectoredExceptionHandler>
@@ -121,9 +123,10 @@
 	<YaOpt.Setting.Option.IdeoCheck.Desc>游戏在检查文化是否允许做某事时，会遍历其下所有的戒律。此优化会在戒律每次更新时，为它创建缓存，记录那些涉及到禁令的戒律，然后在检查文化是否允许做某事时，只遍历那些有禁令的戒律。</YaOpt.Setting.Option.IdeoCheck.Desc>
 	<YaOpt.Setting.Option.BedThrottle>床铺检查优化</YaOpt.Setting.Option.BedThrottle>
 	<YaOpt.Setting.Option.BedThrottle.Desc>优化卧床角色的床铺可用性检测，原版卧床角色每帧都会检测当前床铺是否可用，虽然很有必要，但却包含了一些运算量较大的计算，比如判断因病卧床的角色是否痊愈等。节流后每15帧（0.25秒）才会进行一次完整检测，其他14帧只会进行简单的快速检测，如判断床铺是否被毁。</YaOpt.Setting.Option.BedThrottle.Desc>
-	<YaOpt.Setting.Option.BedThrottle.Compatibility>与Performance Fish的同类优化（FailOnBedNoLongerUsable）功能重复，Performance Fish的起床检测优化为每64帧检测一次，其他时间不检测。简单来说，YaOpt更安全，Performance Fish更快。建议使用Performance Fish的实现，因为床铺意外不可用的情况太罕见，用非常小的起床延迟换取相当的性能提升是值得的。</YaOpt.Setting.Option.BedThrottle.Compatibility>
+	<YaOpt.Setting.Option.BedThrottle.Compatibility>与Performance Fish的同类优化（FailOnBedNoLongerUsable）功能重复，Performance Fish的起床检测优化为每64帧检测一次，其他时间不检测。简单来说，YaOpt更安全，Performance Fish更快。建议使用Performance Fish的实现，因为床铺意外不可用的情况太罕见，用非常小的起床延迟换取相当的性能提升是值得的。\n与[WG] WOWGAG's Performance Patch的同类优化也针对同一处代码，两者只会有一个生效，对方在每次读档时会尝试接管这一处。</YaOpt.Setting.Option.BedThrottle.Compatibility>
 	<YaOpt.Setting.Option.IdleThrottle>闲时检查优化</YaOpt.Setting.Option.IdleThrottle>
 	<YaOpt.Setting.Option.IdleThrottle.Desc>对游戏中闲置角色（睡觉和闲逛）的中断闲置检测做节流。具体优化包括：\n1.优化卧床角色起床工作的检测间隔，原版游戏的卧床角色每211帧会进行一次工作判定，优化可以延长这个间隔，还可以让间隔变为动态间隔，根据卧床的殖民者数量来控制间隔，确保小型殖民地的角色依然能快速响应突发情况。\n2.优化闲逛角色的工作检测间隔，原版处于闲置状态的殖民者每125~200帧会进行一次工作判定，优化可以延长这个间隔，并且也能实现动态间隔，根据处于无事可做状态的殖民者数量来控制间隔。</YaOpt.Setting.Option.IdleThrottle.Desc>
+	<YaOpt.Setting.Option.IdleThrottle.Compatibility>与[WG] WOWGAG's Performance Patch的「起床工作检测间隔」针对同一处代码（卧床角色每211帧的工作判定）。两者只会有一个生效：对方在每次读档时会尝试接管这一处，若对方生效，本项的间隔设置将不起作用；若本项生效，对方的同类选项也会自动跳过。\n本Mod按躺下的殖民者人数动态计算间隔，对方使用固定间隔（默认422帧，可调范围211~1266帧）。</YaOpt.Setting.Option.IdleThrottle.Compatibility>
 	<YaOpt.Setting.Option.IdleThrottle.GetUp.Title>起床工作检测</YaOpt.Setting.Option.IdleThrottle.GetUp.Title>
 	<YaOpt.Setting.Option.IdleThrottle.GetUp>检测间隔: {0}</YaOpt.Setting.Option.IdleThrottle.GetUp>
 	<YaOpt.Setting.Option.IdleThrottle.GetUp.Desc>调整让卧床角色起床工作的检测间隔，单位为逻辑帧（Tick），原版为211帧。</YaOpt.Setting.Option.IdleThrottle.GetUp.Desc>
@@ -154,6 +157,7 @@
 	<YaOpt.Setting.Option.WindUpdate.Desc>游戏会在每一个逻辑帧中为所有植物材质更新风力强度参数，这是没必要的。优化后将仅在渲染帧中更新风力强度。</YaOpt.Setting.Option.WindUpdate.Desc>
 	<YaOpt.Setting.Option.FastListerRemove>物体移除优化</YaOpt.Setting.Option.FastListerRemove>
 	<YaOpt.Setting.Option.FastListerRemove.Desc>优化从游戏中移除物体时的效率。原版游戏在移除物体时，需要在多个检索列表中进行线性搜索以找到并删除物体。此优化为每个物体添加了索引记录，移除时可直接定位并使用“交换移除”策略（将末尾物体移至空位）。</YaOpt.Setting.Option.FastListerRemove.Desc>
+	<YaOpt.Setting.Option.FastListerRemove.Compatibility>本优化依赖对原版移除逻辑的改写。部分性能类Mod（如[WG] WOWGAG's Performance Patch）会改写同一处，让移除方法中不再出现原本的调用。这种情况下本项会在启动时整体停用，保留对方的实现，本Mod不再插手；此时开关不起作用，鼠标悬停本项会显示被哪个方法接管。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物体快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>为地图的已生成物体容器建立索引，使 DeSpawn 时的移除从“线性查找 + 列表搬移”变为 O(1) 的字典查找与交换移除。索引按需构建，若检测到索引与列表不一致会自动回退原版逻辑。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
 	<YaOpt.Setting.Option.GenTypesLockFree>无锁密封类型检查</YaOpt.Setting.Option.GenTypesLockFree>

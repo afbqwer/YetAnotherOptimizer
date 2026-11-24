@@ -17,7 +17,10 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptFastListerRemove.Enabled;
+			// The index is only useful when the matching removal patch is in place; on its own
+			// it just grows a record per thing and produces duplicate-record reports.
+			return YaOptGlobal.Settings.OptFastListerRemove.Enabled &&
+				   ListerThingsHelper.FastRemoveAvailable;
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
