@@ -46,6 +46,7 @@
 #include <windows.h>
 
 #define YAO_MAX_RECORDS_PER_CODE 4
+#define YAO_MAX_LOW_ADDRESS_RECORDS 2
 #define YAO_LOG_BUF_SIZE 32768u
 #define YAO_STACK_SCAN_BYTES 16384u
 
@@ -61,16 +62,17 @@ typedef struct
 	const char *title;
 	LONG total;
 	LONG written;
+	LONG writtenLowAddress;
 } YaoCodeSlot;
 
 // Order matters only for probe count; access violations come first because they are by far
 // the most common real crash in a RimWorld mod list.
 static YaoCodeSlot g_slots[] = {
-	{ YAO_ACCESS_VIOLATION, "access violation", 0, 0 },
-	{ YAO_ILLEGAL_INSTRUCTION, "illegal instruction", 0, 0 },
-	{ YAO_STACK_OVERFLOW, "stack overflow", 0, 0 },
-	{ YAO_IN_PAGE_ERROR, "in-page error", 0, 0 },
-	{ YAO_PRIVILEGED_INSTRUCTION, "privileged instruction", 0, 0 },
+	{ YAO_ACCESS_VIOLATION, "access violation", 0, 0, 0 },
+	{ YAO_ILLEGAL_INSTRUCTION, "illegal instruction", 0, 0, 0 },
+	{ YAO_STACK_OVERFLOW, "stack overflow", 0, 0, 0 },
+	{ YAO_IN_PAGE_ERROR, "in-page error", 0, 0, 0 },
+	{ YAO_PRIVILEGED_INSTRUCTION, "privileged instruction", 0, 0, 0 },
 };
 
 #define YAO_SLOT_COUNT (sizeof(g_slots) / sizeof(g_slots[0]))
@@ -163,7 +165,12 @@ static char *AppendModuleRef(char *dst, const char *end, void *addr)
 	if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
 								GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
 							(LPCWSTR)addr, &mod))
-		return dst;
+	{
+		// JIT-compiled managed code lives in a private code heap, not in any mapped module, so
+		// this is the normal answer for a managed fault - and the clearest sign that the fault
+		// site was JIT code rather than a native dll.
+		return AppendStr(dst, end, " <no owning module - JIT or dynamic code>");
+	}
 
 	n = GetModuleFileNameW(mod, path, MAX_PATH);
 	name = path;
@@ -305,9 +312,12 @@ static LONG CALLBACK VehCallback(PEXCEPTION_POINTERS info)
 {
 	EXCEPTION_RECORD *rec;
 	YaoCodeSlot *slot = NULL;
+	LONG *quota;
+	LONG quotaLimit;
 	DWORD code;
 	unsigned i;
 	int isStackOverflow;
+	int isLowAddress = 0;
 
 	if (!info)
 		return EXCEPTION_CONTINUE_SEARCH;
@@ -336,13 +346,26 @@ static LONG CALLBACK VehCallback(PEXCEPTION_POINTERS info)
 
 	InterlockedIncrement(&slot->total);
 
+	// A read/write on a low address is what the CLR turns into a catchable
+	// NullReferenceException, so it is noise rather than a crash - but it is also the single
+	// most frequent thing an AV reporter sees, and a burst of them would otherwise consume the
+	// budget reserved for real wild-pointer faults. It gets its own smaller quota.
+	if (code == YAO_ACCESS_VIOLATION || code == YAO_IN_PAGE_ERROR)
+	{
+		ULONG_PTR op = rec->NumberParameters > 0 ? rec->ExceptionInformation[0] : 0;
+		ULONG_PTR addr = rec->NumberParameters > 1 ? rec->ExceptionInformation[1] : 0;
+		isLowAddress = (op != 8 && addr < 0x10000);
+	}
+	quota = isLowAddress ? &slot->writtenLowAddress : &slot->written;
+	quotaLimit = isLowAddress ? YAO_MAX_LOW_ADDRESS_RECORDS : YAO_MAX_RECORDS_PER_CODE;
+
 	// Quota gate first: once a code has been recorded enough times, the callback must cost
 	// nothing beyond the increment above. A time-windowed quota would turn a sustained flood
 	// into a permanent cost, so this is a lifetime cap.
-	if (slot->written >= YAO_MAX_RECORDS_PER_CODE)
+	if (*quota >= quotaLimit)
 		return EXCEPTION_CONTINUE_SEARCH;
 
-	// Single-flight guard covers every code, not just stack overflow: g_buf and slot->written
+	// Single-flight guard covers every code, not just stack overflow: g_buf and the counters
 	// are shared, and several threads can fault at the same time.
 	if (InterlockedExchange(&g_busy, 1) != 0)
 		return EXCEPTION_CONTINUE_SEARCH;
@@ -362,7 +385,7 @@ static LONG CALLBACK VehCallback(PEXCEPTION_POINTERS info)
 		if (!EnsureLogFile())
 			__leave;
 
-		InterlockedIncrement(&slot->written);
+		InterlockedIncrement(quota);
 		dst = g_buf;
 		end = g_buf + YAO_LOG_BUF_SIZE - 2;
 		ctx = info->ContextRecord;
@@ -371,9 +394,9 @@ static LONG CALLBACK VehCallback(PEXCEPTION_POINTERS info)
 		dst = AppendStr(dst, end, "[");
 		dst = AppendTimeStamp(dst, end);
 		dst = AppendStr(dst, end, "] #");
-		dst = AppendDec(dst, end, (unsigned long)slot->written);
+		dst = AppendDec(dst, end, (unsigned long)*quota);
 		dst = AppendStr(dst, end, "/");
-		dst = AppendDec(dst, end, YAO_MAX_RECORDS_PER_CODE);
+		dst = AppendDec(dst, end, (unsigned long)quotaLimit);
 		dst = AppendStr(dst, end, " 0x");
 		dst = AppendHex(dst, end, code);
 		dst = AppendStr(dst, end, " ");
@@ -488,6 +511,64 @@ __declspec(dllexport) int __stdcall YaOptVehGetSlot(unsigned index, unsigned *co
 	if (written)
 		*written = g_slots[index].written;
 	return 1;
+}
+
+// Appends a per-code summary to the log file. Called by the managed side on process exit so a
+// session that survived its faults still leaves a record of how many there were. Writes
+// nothing when no fault was ever seen, which keeps the file empty for the managed side to
+// delete.
+__declspec(dllexport) void __stdcall YaOptVehFlushStats(void)
+{
+	unsigned i;
+	LONG any = 0;
+
+	if (g_logFile == INVALID_HANDLE_VALUE)
+		return;
+	for (i = 0; i < YAO_SLOT_COUNT; i++)
+		any += g_slots[i].total;
+	if (any == 0)
+		return;
+	if (InterlockedExchange(&g_busy, 1) != 0)
+		return;
+
+	__try
+	{
+		char *dst = g_buf;
+		const char *end = g_buf + YAO_LOG_BUF_SIZE - 2;
+		DWORD written = 0;
+
+		dst = AppendStr(dst, end, "=== summary at exit: 0xC000 status faults seen ===\r\n");
+		for (i = 0; i < YAO_SLOT_COUNT; i++)
+		{
+			if (g_slots[i].total == 0)
+				continue;
+			dst = AppendStr(dst, end, "  0x");
+			dst = AppendHex(dst, end, g_slots[i].code);
+			dst = AppendStr(dst, end, " ");
+			dst = AppendStr(dst, end, g_slots[i].title);
+			dst = AppendStr(dst, end, ": ");
+			dst = AppendDec(dst, end, (unsigned long)g_slots[i].total);
+			dst = AppendStr(dst, end, " seen, ");
+			dst = AppendDec(dst, end, (unsigned long)g_slots[i].written);
+			dst = AppendStr(dst, end, " recorded");
+			if (g_slots[i].writtenLowAddress > 0)
+			{
+				dst = AppendStr(dst, end, " (plus ");
+				dst = AppendDec(dst, end, (unsigned long)g_slots[i].writtenLowAddress);
+				dst = AppendStr(dst, end, " low-address)");
+			}
+			dst = AppendStr(dst, end, "\r\n");
+		}
+		dst = AppendStr(dst, end, "=================================================\r\n");
+
+		WriteFile(g_logFile, g_buf, (DWORD)(dst - g_buf), &written, NULL);
+		FlushFileBuffers(g_logFile);
+	}
+	__except (EXCEPTION_EXECUTE_HANDLER)
+	{
+	}
+
+	InterlockedExchange(&g_busy, 0);
 }
 
 // --- Self tests ------------------------------------------------------------

@@ -111,6 +111,17 @@ namespace YaOpt.Helpers
 			{
 				return;
 			}
+
+			// Summary goes into the crash log first: Verse.Log is often already closed when
+			// ProcessExit runs, so the file copy is the one that actually survives.
+			try
+			{
+				YaOptVehFlushStats();
+			}
+			catch (Exception)
+			{
+			}
+
 			try
 			{
 				// Per-code totals. Only 0xC000 status faults are counted here; hosted exceptions are
@@ -178,6 +189,9 @@ namespace YaOpt.Helpers
 
 		[DllImport("YaOpt.NativeVEH", EntryPoint = "YaOptVehGetSlot")]
 		private static extern int YaOptVehGetSlot(uint index, out uint code, out int total, out int written);
+
+		[DllImport("YaOpt.NativeVEH", EntryPoint = "YaOptVehFlushStats")]
+		private static extern void YaOptVehFlushStats();
 
 		[DllImport("YaOpt.NativeVEH", EntryPoint = "YaOptVehSelfTest")]
 		private static extern int YaOptVehSelfTest();
