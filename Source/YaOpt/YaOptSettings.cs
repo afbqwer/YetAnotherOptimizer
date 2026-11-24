@@ -23,6 +23,17 @@ namespace YaOpt
 			Default = false
 		};
 
+		/// <summary>
+		/// The stack overflow reporter, backed by the native shim YaOpt.NativeVEH.dll.
+		/// </summary>
+		/// <remarks>
+		/// The VEH callback must be pure native code: on CoreCLR a managed callback (a marshaled
+		/// delegate or an [UnmanagedCallersOnly] method) fail-fasts the process with
+		/// ExecutionEngineException 0x80131506 when entered from a cooperative-mode thread, and a
+		/// stack overflow is always exactly that. The shim records module+offset frame candidates
+		/// of the overflowing thread to YaOpt_StackOverflow_&lt;pid&gt;.log in the save data
+		/// folder, then lets the CLR fail-fast proceed. Source: Source/NativeVEH/YaOptVeh.c.
+		/// </remarks>
 		public OptimizationOption VectoredExceptionHandler { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.VectoredExceptionHandler",
@@ -879,18 +890,7 @@ namespace YaOpt
 			"OptFATextureCache",
 			"OptHARDeLinq",
 			"OptHARTextureCache",
-			"OptVEFMemoryLeakFix",
-
-			// Retired. The old implementation handed a managed delegate to
-			// AddVectoredExceptionHandler. On CoreCLR (1.7 / WaylithClr) that delegate is entered
-			// through a reverse-pinvoke thunk which fail-fasts the process with
-			// "attempted to call a UnmanagedCallersOnly method from managed code" the moment any
-			// first-chance exception (including ones raised by native components) hits while the
-			// thread is in cooperative mode — VEH is process-wide and first-chance, so the
-			// registration turned every such exception into a fatal 0x80131506 crash. The
-			// implementation was removed from this branch (it lives on the 1.6 branch); a working
-			// 1.7 version needs a redesign around [UnmanagedCallersOnly].
-			nameof(VectoredExceptionHandler)
+			"OptVEFMemoryLeakFix"
 		};
 
 		private static void ApplyPlatformLock(OptimizationOption option)

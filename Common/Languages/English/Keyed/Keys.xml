@@ -45,6 +45,8 @@
 	<YaOpt.Setting.Note.Multithread>[Multithread]</YaOpt.Setting.Note.Multithread>
 	<YaOpt.Setting.Option.DebugOutput>Debug Output</YaOpt.Setting.Option.DebugOutput>
 	<YaOpt.Setting.Option.DebugOutput.Desc>Output debug info to the console. Enabling this may slightly reduce game speed, as the game records the entire stack trace for each console message, which is an expensive operation.</YaOpt.Setting.Option.DebugOutput.Desc>
+	<YaOpt.Setting.Option.VectoredExceptionHandler>Catch Stack Overflow Crash</YaOpt.Setting.Option.VectoredExceptionHandler>
+	<YaOpt.Setting.Option.VectoredExceptionHandler.Desc>A stack overflow (usually caused by infinite recursion) kills the game instantly, without any log output. This option installs a native Windows exception handler that records module+offset frame candidates of the overflowing thread to YaOpt_StackOverflow_&lt;pid&gt;.log in the save data folder before the process dies. It cannot prevent the crash; for a full managed stack, launch the game with crash dump environment variables (DOTNET_DbgEnableMiniDump=1, DOTNET_DbgMiniDumpType=4) and analyze the dump. Windows only. Requires a game restart to take effect.</YaOpt.Setting.Option.VectoredExceptionHandler.Desc>
 	<YaOpt.Setting.Option.MaterialGetColor>Material Color Cache</YaOpt.Setting.Option.MaterialGetColor>
 	<YaOpt.Setting.Option.MaterialGetColor.Desc>Caches material colors to reduce the overhead of frequent calls to the underlying engine function. The cache is automatically updated when the material color changes.</YaOpt.Setting.Option.MaterialGetColor.Desc>
 	<YaOpt.Setting.Option.ColoredText>Rich Text Optimization</YaOpt.Setting.Option.ColoredText>

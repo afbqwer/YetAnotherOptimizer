@@ -45,6 +45,8 @@
 	<YaOpt.Setting.Note.Multithread>【多线程】</YaOpt.Setting.Note.Multithread>
 	<YaOpt.Setting.Option.DebugOutput>调试输出</YaOpt.Setting.Option.DebugOutput>
 	<YaOpt.Setting.Option.DebugOutput.Desc>在控制台中输出调试信息，启用这个选项可能会略微降低游戏速度，因为游戏会在每次输出控制台信息时记录整个调用栈，这是一个开销很大的操作。</YaOpt.Setting.Option.DebugOutput.Desc>
+	<YaOpt.Setting.Option.VectoredExceptionHandler>捕获栈溢出导致的闪退</YaOpt.Setting.Option.VectoredExceptionHandler>
+	<YaOpt.Setting.Option.VectoredExceptionHandler.Desc>栈溢出（通常由无限递归导致）会让游戏瞬间闪退且没有任何日志输出。启用此选项后，Mod 会安装一个原生的 Windows 异常处理回调，在进程退出前把溢出线程的“模块+偏移”帧记录到存档目录下的 YaOpt_StackOverflow_&lt;pid&gt;.log。此选项无法阻止闪退；要拿到完整托管栈请配合崩溃 dump 环境变量（DOTNET_DbgEnableMiniDump=1、DOTNET_DbgMiniDumpType=4）并分析 dump 文件。仅限 Windows。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.VectoredExceptionHandler.Desc>
 	<YaOpt.Setting.Option.MaterialGetColor>材质颜色缓存</YaOpt.Setting.Option.MaterialGetColor>
 	<YaOpt.Setting.Option.MaterialGetColor.Desc>缓存材质颜色以减少频繁调用底层引擎函数带来的开销。当颜色发生变化时会自动更新缓存。</YaOpt.Setting.Option.MaterialGetColor.Desc>
 	<YaOpt.Setting.Option.ColoredText>富文本优化</YaOpt.Setting.Option.ColoredText>

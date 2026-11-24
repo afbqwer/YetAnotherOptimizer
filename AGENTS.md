@@ -55,6 +55,7 @@ Root
 │   │   ├── Defines/            # Compile-time compatibility definitions
 │   │   ├── Helpers/            # Utility classes and trampolines
 │   │   └── Patches/            # Harmony patches (Early, Prepatch, ThreadSafe, Compatibility, Debugging)
+│   ├── NativeVEH/              # Native VEH shim (YaOptVeh.c + build.bat, builds YaOpt.NativeVEH.dll)
 │   ├── Settings.props          # Shared build properties
 │   └── YaOpt.sln               # Visual Studio solution
 ├── About/                      # Mod metadata (About.xml, icon)
@@ -147,11 +148,13 @@ The project compiles against a **publicized** copy of `Assembly-CSharp` (`Krafs.
 
 ## 4. Build & Test
 - **Build Config**: Version parameters are in `Source/Settings.props` (shared) and `Source/UserSettings.props` (local, gitignored; copy from `Source/UserSettings.props.template`).
-- **Build**: Run `dotnet build Source\YaOpt.sln` or open `Source/YaOpt.sln` with Visual Studio 2022+.
+- **Build**: Run `dotnet build Source\YaOpt.sln -c Release` or open `Source/YaOpt.sln` with Visual Studio 2022+. Ship Release builds only — the default Debug configuration compiles in the `DEBUG` performance-diagnostics code.
+- **Native VEH shim**: Run `Source/NativeVEH/build.bat` to build `1.7/Assemblies/YaOpt.NativeVEH.dll` (requires the MSVC toolchain paths at the top of the script). The shim backs the stack overflow reporter (`DebugHelper.InstallStackOverflowLogger`); its callback must stay pure native — managed callbacks of any kind fail the reverse-pinvoke cooperative-mode check on CoreCLR.
 - **Output**:
   - Main DLL: `1.7/Assemblies/YaOpt.dll`
+  - Native shim: `1.7/Assemblies/YaOpt.NativeVEH.dll`
 - **Conditional Compilation**: `DEBUG` symbol enables performance diagnostics and profiling output.
-- **Test**: Launch RimWorld with the mod loaded. Verify via in-game TPS display and log messages.
+- **Test**: Launch RimWorld with the mod loaded. Verify via in-game TPS display and log messages. `YAOPT_SO_TEST=1` self-tests the stack overflow logging chain (the game is expected to die from a deliberate overflow; check `YaOpt_StackOverflow_<pid>.log` in the save data folder).
 
 ## 5. Adding a New Optimization
 
