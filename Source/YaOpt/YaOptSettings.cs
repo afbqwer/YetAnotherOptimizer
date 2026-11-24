@@ -615,17 +615,6 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Throttles weather overlay texture panning to once every few ticks.
-		/// </summary>
-		/// <seealso cref="Patches.Verse_WeatherOverlayDualPanner_TickOverlay"/>
-		public OptimizationOption OptWeatherOverlayThrottle { get; } = new OptimizationOption
-		{
-			Name = "YaOpt.Setting.Option.WeatherOverlayThrottle",
-			Desc = "YaOpt.Setting.Option.WeatherOverlayThrottle.Desc",
-			Category = OptimizationCategory.Fps,
-		};
-
-		/// <summary>
 		/// Optimizes the performance of removing things from the game.
 		/// Vanilla maintains various lists (ListerThings) for object classification.
 		/// Removing an object requires a linear search (O(N)) in each list.

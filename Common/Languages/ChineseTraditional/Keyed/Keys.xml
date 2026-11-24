@@ -168,8 +168,6 @@
 	<YaOpt.Setting.Option.TurretTargetPrune>砲塔索敵剪枝</YaOpt.Setting.Option.TurretTargetPrune>
 	<YaOpt.Setting.Option.TurretTargetPrune.Desc>當沒有敵對、狂暴或無派系候選目標，或所有候選目標都超出砲塔有效射程時，跳過完整的砲塔索敵流程。有人操作的砲塔以及候選目標較多的情況仍交還原版處理。</YaOpt.Setting.Option.TurretTargetPrune.Desc>
 	<YaOpt.Setting.Option.TurretTargetPrune.Compatibility>替換了砲塔索敵邏輯的Mod可能與本最佳化衝突。若發現砲塔不再尋找目標，請關閉此選項。</YaOpt.Setting.Option.TurretTargetPrune.Compatibility>
-	<YaOpt.Setting.Option.WeatherOverlayThrottle>天氣疊加層節流</YaOpt.Setting.Option.WeatherOverlayThrottle>
-	<YaOpt.Setting.Option.WeatherOverlayThrottle.Desc>將天氣疊加層的紋理偏移更新從每 tick 一次改為每 4 tick 一次。被跳過的位移會合併到下一次更新中，平均平移速度不變；這能避免純視覺效果反覆爭用材質鎖。</YaOpt.Setting.Option.WeatherOverlayThrottle.Desc>
 	<YaOpt.Setting.Option.CameraUpdateRate>更新速率計算最佳化</YaOpt.Setting.Option.CameraUpdateRate>
 	<YaOpt.Setting.Option.CameraUpdateRate.Desc>遊戲會在每一幀計算物體在螢幕上的可見性，並調低螢幕外物體的更新速率，然而這個計算過於精細了，以至於它本身就有一定的開銷。此最佳化微調了可見性判斷，稍微放寬了判定標準，減少了更新速率計算的開銷，代價是在一些特定條件下可能有少量接近螢幕邊緣但不可見的物體也被誤判為可見，讓系統增加它們的更新速率導致執行開銷。但在大部分情況下，這個最佳化是值得的。</YaOpt.Setting.Option.CameraUpdateRate.Desc>
 	<YaOpt.Setting.Option.GetMapPawns>地圖角色檢索最佳化</YaOpt.Setting.Option.GetMapPawns>
