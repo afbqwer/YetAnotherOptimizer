@@ -75,6 +75,7 @@
 	<YaOpt.Setting.Option.FastPatchOperation.Desc>如果XML补丁中XPath表达式比较简单，形如Defs/定义类型[defName = "定义名"]，那么这个优化将会将XPath表达式简化为简单的节点查询，提高游戏启动速度。</YaOpt.Setting.Option.FastPatchOperation.Desc>
 	<YaOpt.Setting.Option.FastTranslationInjection>优化文本注入</YaOpt.Setting.Option.FastTranslationInjection>
 	<YaOpt.Setting.Option.FastTranslationInjection.Desc>游戏在启动时会将文本文件注入到XML数据中，在此过程中还会检查有无文本文件错误，例如重复对一个字段注入文本。然而这个检查过程是个时间复杂度为O(N^2)的操作，该优化将其中一段循环对比优化成了查表，将时间复杂度降为O(N)。它能加速游戏启动速度，在非英文语言中效果更明显。</YaOpt.Setting.Option.FastTranslationInjection.Desc>
+	<YaOpt.Setting.Option.FastTranslationInjection.Compatibility>与[WG] WOWGAG's Performance Patch改写同一处：对方把「重复注入检查索引」附在「复用类型名查找结果」这一项里，做的也是把O(N^2)的重复检查换成查表。两套改写会同时装上，但对方的实现要求最终方法体里恰好只有一处injections读取，本项已经把那段循环整段删掉，对方数不到那一处，于是它的换表会被自动关闭，实际只有本项生效。不需要为此关闭任何一项；对方的「复用类型名查找结果」还负责类型名查找缓存，不要为了这一处去关它。</YaOpt.Setting.Option.FastTranslationInjection.Compatibility>
 	<YaOpt.Setting.Option.RuntimeInfoCache>类型信息缓存</YaOpt.Setting.Option.RuntimeInfoCache>
 	<YaOpt.Setting.Option.RuntimeInfoCache.Desc>在游戏启动时缓存程序中的类型信息，加快Harmony类型检索，能提高一些Mod的Harmony补丁处理速度。在Mod环境下加快游戏启动速度，在原版环境中无用。</YaOpt.Setting.Option.RuntimeInfoCache.Desc>
 	<YaOpt.Setting.Option.FixTextureAtlas>修复小尺寸纹理集花屏</YaOpt.Setting.Option.FixTextureAtlas>
@@ -90,8 +91,8 @@
 	<YaOpt.Setting.Option.GraphicTextureCache.Desc>缓存Graphic_Multi初始化所需的纹理。原版游戏每次初始化时都需要通过字符串拼接构建东西南北四个朝向的纹理路径并进行资源查找。此优化缓存了这些纹理，消除了重复的字符串拼接和资源查找开销。本优化最初为外星人框架开发，现已整合入本体，供任何频繁重建Graphic_Multi的物体受益。注：这个优化可能会导致开发者选项中的纹理热重载失效。</YaOpt.Setting.Option.GraphicTextureCache.Desc>
 	<YaOpt.Setting.Option.Silhouette>剪影缓存优化</YaOpt.Setting.Option.Silhouette>
 	<YaOpt.Setting.Option.Silhouette.Desc>优化剪影（屏幕拉远后的小图标）缓存的查找性能。</YaOpt.Setting.Option.Silhouette.Desc>
-	<YaOpt.Setting.Option.ToggleTabCheck>标签页检查节流</YaOpt.Setting.Option.ToggleTabCheck>
-	<YaOpt.Setting.Option.ToggleTabCheck.Desc>限制可隐藏标签页（如机械体页面）的可见性检查频率。部分Mod的标签页未实现缓存机制，导致每帧都进行复杂的可见性查询。此优化引入了一套上层缓存，将可见性检查限制为每500毫秒一次。当游戏暂停、解除暂停或切换地图时会强制刷新。</YaOpt.Setting.Option.ToggleTabCheck.Desc>
+	<YaOpt.Setting.Option.ToggleTabCheck>标签页检查去重</YaOpt.Setting.Option.ToggleTabCheck>
+	<YaOpt.Setting.Option.ToggleTabCheck.Desc>可隐藏的标签页（如机械体页面）每次都会被反复询问"这个页签现在该不该禁用"：同一次界面刷新里，绘制、可见性统计和快捷键检查会问四到五次，而一帧内又可能刷新多次。部分Mod的标签页没有缓存机制，每次都要扫一遍地图。此优化让同一帧内的后续询问直接复用第一次的结果，跨帧必定重新计算，所以画面不会滞后超过一帧。</YaOpt.Setting.Option.ToggleTabCheck.Desc>
 	<YaOpt.Setting.Option.ComputeMatrixBurst>ComputeMatrix Burst加速</YaOpt.Setting.Option.ComputeMatrixBurst>
 	<YaOpt.Setting.Option.ComputeMatrixBurst.Desc>在物体渲染准备中，ComputeMatrix是一个运算量较大的步骤。游戏原计划使用Burst加速此过程，但因编程疏忽未能生效。此优化重写了Burst实现，使其正常工作。</YaOpt.Setting.Option.ComputeMatrixBurst.Desc>
 	<YaOpt.Setting.Option.ThingGetComp>物体组件查询加速</YaOpt.Setting.Option.ThingGetComp>

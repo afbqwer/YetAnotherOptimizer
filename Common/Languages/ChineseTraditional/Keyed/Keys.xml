@@ -75,6 +75,7 @@
 	<YaOpt.Setting.Option.FastPatchOperation.Desc>如果XML修補程式中XPath運算式比較簡單，形如Defs/定義類型[defName = "定義名"]，那麼這個最佳化將會將XPath運算式簡化為簡單的節點查詢，提高遊戲啟動速度。</YaOpt.Setting.Option.FastPatchOperation.Desc>
 	<YaOpt.Setting.Option.FastTranslationInjection>最佳化文本注入</YaOpt.Setting.Option.FastTranslationInjection>
 	<YaOpt.Setting.Option.FastTranslationInjection.Desc>遊戲在啟動時會將文本檔案注入到XML資料中，在此過程中還會檢查有無文本檔案錯誤，例如重複對一個欄位注入文本。然而這個檢查過程是個時間複雜度為O(N^2)的操作，該最佳化將其中一段迴圈對比最佳化成了查表，將時間複雜度降為O(N)。它能加速遊戲啟動速度，在非英文語言中效果更明顯。</YaOpt.Setting.Option.FastTranslationInjection.Desc>
+	<YaOpt.Setting.Option.FastTranslationInjection.Compatibility>與[WG] WOWGAG's Performance Patch改寫同一處：對方把「重複注入檢查索引」附在「複用類型名查找結果」這一項裡，做的也是把O(N^2)的重複檢查換成查表。兩套改寫會同時裝上，但對方的實作要求最終方法體內恰好只有一處injections讀取，本項已經把那段迴圈整段刪掉，對方數不到那一處，於是它的換表會被自動關閉，實際只有本項生效。不需要為此關閉任何一項；對方的「複用類型名查找結果」還負責類型名查找快取，不要為了這一處去關它。</YaOpt.Setting.Option.FastTranslationInjection.Compatibility>
 	<YaOpt.Setting.Option.RuntimeInfoCache>類型資訊快取</YaOpt.Setting.Option.RuntimeInfoCache>
 	<YaOpt.Setting.Option.RuntimeInfoCache.Desc>在遊戲啟動時快取程式中的類型資訊，加快Harmony類型檢索，能提高一些Mod的Harmony修補程式處理速度。在Mod環境下加快遊戲啟動速度，在原版環境中無用。</YaOpt.Setting.Option.RuntimeInfoCache.Desc>
 	<YaOpt.Setting.Option.FixTextureAtlas>修復小尺寸紋理集花屏</YaOpt.Setting.Option.FixTextureAtlas>
@@ -90,8 +91,8 @@
 	<YaOpt.Setting.Option.GraphicTextureCache.Desc>快取Graphic_Multi初始化所需的紋理。原版遊戲每次初始化時都需要透過字串拼接構建東西南北四個朝向的紋理路徑並進行資源查找。此最佳化快取了這些紋理，消除了重複的字串拼接和資源查找開銷。本最佳化最初為外星人框架開發，現已整合入本體，供任何頻繁重建Graphic_Multi的物體受益。註：這個最佳化可能會導致開發者選項中的紋理熱重載失效。</YaOpt.Setting.Option.GraphicTextureCache.Desc>
 	<YaOpt.Setting.Option.Silhouette>剪影快取最佳化</YaOpt.Setting.Option.Silhouette>
 	<YaOpt.Setting.Option.Silhouette.Desc>最佳化剪影（螢幕拉遠後的小圖示）快取的查找效能。</YaOpt.Setting.Option.Silhouette.Desc>
-	<YaOpt.Setting.Option.ToggleTabCheck>標籤頁檢查節流</YaOpt.Setting.Option.ToggleTabCheck>
-	<YaOpt.Setting.Option.ToggleTabCheck.Desc>限制可隱藏標籤頁（如機械體頁面）的可見性檢查頻率。部分Mod的標籤頁未實現快取機制，導致每幀都進行複雜的可見性查詢。此最佳化引入了一套上層快取，將可見性檢查限制為每500毫秒一次。當遊戲暫停、解除暫停或切換地圖時會強制重新整理。</YaOpt.Setting.Option.ToggleTabCheck.Desc>
+	<YaOpt.Setting.Option.ToggleTabCheck>標籤頁檢查去重</YaOpt.Setting.Option.ToggleTabCheck>
+	<YaOpt.Setting.Option.ToggleTabCheck.Desc>可隱藏的標籤頁（如機械體頁面）每次都會被反覆詢問「這個標籤頁現在該不該停用」：同一次介面重新整理裡，繪製、可見性統計和快捷鍵檢查會問四到五次，而一幀內又可能重新整理多次。部分Mod的標籤頁沒有快取機制，每次都要掃一遍地圖。此最佳化讓同一幀內的後續詢問直接重用第一次的結果，跨幀必定重新計算，所以畫面不會延遲超過一幀。</YaOpt.Setting.Option.ToggleTabCheck.Desc>
 	<YaOpt.Setting.Option.ComputeMatrixBurst>ComputeMatrix Burst加速</YaOpt.Setting.Option.ComputeMatrixBurst>
 	<YaOpt.Setting.Option.ComputeMatrixBurst.Desc>在物體渲染準備中，ComputeMatrix是一個運算量較大的步驟。遊戲原計畫使用Burst加速此過程，但因編程疏忽未能生效。此最佳化重寫了Burst實現，使其正常工作。</YaOpt.Setting.Option.ComputeMatrixBurst.Desc>
 	<YaOpt.Setting.Option.ThingGetComp>物體組件查詢加速</YaOpt.Setting.Option.ThingGetComp>

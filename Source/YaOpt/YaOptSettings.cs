@@ -240,11 +240,12 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Throttles the visibility check for toggleable tabs (e.g., the Mechanoid tab).
-		/// The game queries whether each tab should be hidden every render frame.
-		/// While vanilla tabs cache this check, some modded tabs perform complex queries every frame without caching.
-		/// This optimization implements an upper-level cache that throttles visibility updates to once every 500ms (real-time).
-		/// The cache is forcibly refreshed when pausing/unpausing or switching maps.
+		/// Reuses the visibility check of toggleable tabs within one frame.
+		/// The UI reads <see cref="MainButtonWorker.Disabled"/> four to five times per event (the <c>Visible</c>
+		/// reads included, since a tab that hides itself reports <c>!Disabled</c>) and runs several events per frame.
+		/// While vanilla tabs cache this check, some modded tabs scan the map every time without caching.
+		/// This optimization answers the later reads of the same frame from the first one, so nothing is
+		/// delayed beyond that frame.
 		/// </summary>
 		/// <seealso cref="Patches.MultiTargets_ToggleTab"/>
 		public OptimizationOption OptToggleTabCheck { get; } = new OptimizationOption
@@ -834,6 +835,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FastTranslationInjection",
 			Desc = "YaOpt.Setting.Option.FastTranslationInjection.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.FastTranslationInjection.Compatibility",
 			Category = OptimizationCategory.Misc
 		};
 
