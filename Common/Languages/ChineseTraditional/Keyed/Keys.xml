@@ -157,7 +157,7 @@
 	<YaOpt.Setting.Option.WindUpdate.Desc>遊戲會在每一個邏輯幀中為所有植物材質更新風力強度參數，這是沒必要的。最佳化後將僅在渲染幀中更新風力強度。</YaOpt.Setting.Option.WindUpdate.Desc>
 	<YaOpt.Setting.Option.FastListerRemove>物體移除最佳化</YaOpt.Setting.Option.FastListerRemove>
 	<YaOpt.Setting.Option.FastListerRemove.Desc>最佳化從遊戲中移除物體時的效率。原版遊戲在移除物體時，需要在多個檢索列表中進行線性搜索以找到並刪除物體。此最佳化為每個物體添加了索引記錄，移除時可直接定位並使用“交換移除”策略（將末尾物體移至空位）。</YaOpt.Setting.Option.FastListerRemove.Desc>
-	<YaOpt.Setting.Option.FastListerRemove.Compatibility>本最佳化依賴對原版移除邏輯的改寫。部分效能類Mod（如[WG] WOWGAG's Performance Patch，以及 GUIPerformancePatch 的「加快物品清單移除」設定）會改寫同一處，讓移除方法中不再出現原本的呼叫。這種情況下本項會在啟動時整體停用，保留對方的實作，本Mod不再插手；此時開關不起作用，滑鼠懸停本項會顯示被哪個方法接管。GUIPerformancePatch 的該項位於其設定視窗的 Tick 標籤頁，本最佳化的索引查找比對方的清單末尾掃描更快，建議關閉對方該項以啟用本最佳化。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
+	<YaOpt.Setting.Option.FastListerRemove.Compatibility>本最佳化依賴對原版移除邏輯的改寫。部分效能類Mod（如[WG] WOWGAG's Performance Patch，以及 GUIPerformancePatch 的「加快物品清單移除」設定）會改寫同一處，讓移除方法中不再出現原本的呼叫。這種情況下本項會在啟動時整體停用，保留對方的實作，本Mod不再插手；此時開關不起作用，滑鼠懸停本項會顯示被哪個方法接管。GUIPerformancePatch 的該項位於其設定視窗的 Tick 標籤頁，本最佳化的索引查找比對方的清單末尾掃描更快，建議關閉對方該項以啟用本最佳化，關閉後需重啟遊戲方可生效。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物體快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>為地圖的已生成物體容器建立索引，使 DeSpawn 時的移除從「線性查找 + 列表搬移」變為 O(1) 的字典查找與交換移除。索引按需構建，若檢測到索引與列表不一致會自動回退原版邏輯。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
 	<YaOpt.Setting.Option.GenTypesLockFree>無鎖密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>

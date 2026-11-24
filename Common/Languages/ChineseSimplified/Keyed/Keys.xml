@@ -157,7 +157,7 @@
 	<YaOpt.Setting.Option.WindUpdate.Desc>游戏会在每一个逻辑帧中为所有植物材质更新风力强度参数，这是没必要的。优化后将仅在渲染帧中更新风力强度。</YaOpt.Setting.Option.WindUpdate.Desc>
 	<YaOpt.Setting.Option.FastListerRemove>物体移除优化</YaOpt.Setting.Option.FastListerRemove>
 	<YaOpt.Setting.Option.FastListerRemove.Desc>优化从游戏中移除物体时的效率。原版游戏在移除物体时，需要在多个检索列表中进行线性搜索以找到并删除物体。此优化为每个物体添加了索引记录，移除时可直接定位并使用“交换移除”策略（将末尾物体移至空位）。</YaOpt.Setting.Option.FastListerRemove.Desc>
-	<YaOpt.Setting.Option.FastListerRemove.Compatibility>本优化依赖对原版移除逻辑的改写。部分性能类Mod（如[WG] WOWGAG's Performance Patch，以及 GUIPerformancePatch 的「加快物品列表移除」设置）会改写同一处，让移除方法中不再出现原本的调用。这种情况下本项会在启动时整体停用，保留对方的实现，本Mod不再插手；此时开关不起作用，鼠标悬停本项会显示被哪个方法接管。GUIPerformancePatch 的该项位于其设置窗口的 Tick 标签页，本优化的索引查找比对方的列表末尾扫描更快，建议关闭对方该项以启用本优化。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
+	<YaOpt.Setting.Option.FastListerRemove.Compatibility>本优化依赖对原版移除逻辑的改写。部分性能类Mod（如[WG] WOWGAG's Performance Patch，以及 GUIPerformancePatch 的「加快物品列表移除」设置）会改写同一处，让移除方法中不再出现原本的调用。这种情况下本项会在启动时整体停用，保留对方的实现，本Mod不再插手；此时开关不起作用，鼠标悬停本项会显示被哪个方法接管。GUIPerformancePatch 的该项位于其设置窗口的 Tick 标签页，本优化的索引查找比对方的列表末尾扫描更快，建议关闭对方该项以启用本优化，关闭后需重启游戏方可生效。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物体快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>为地图的已生成物体容器建立索引，使 DeSpawn 时的移除从“线性查找 + 列表搬移”变为 O(1) 的字典查找与交换移除。索引按需构建，若检测到索引与列表不一致会自动回退原版逻辑。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
 	<YaOpt.Setting.Option.GenTypesLockFree>无锁密封类型检查</YaOpt.Setting.Option.GenTypesLockFree>
