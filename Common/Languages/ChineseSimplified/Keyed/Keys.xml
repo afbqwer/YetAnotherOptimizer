@@ -200,6 +200,8 @@
 	<YaOpt.Setting.Option.ListerBuildingsCache.Desc>按 Def 为殖民者建筑建立索引，让 ColonistsHaveBuilding、AllBuildingsColonistOfDef 和 ColonistsHaveBuildingWithPowerOn 直接查询该地图索引。索引在首次查询时建立，并在增删建筑时维护；列表结果复制到原版结果缓冲区，空结果也会缓存，调用方不会污染索引。</YaOpt.Setting.Option.ListerBuildingsCache.Desc>
 	<YaOpt.Setting.Option.ImmunityCache>免疫检查缓存</YaOpt.Setting.Option.ImmunityCache>
 	<YaOpt.Setting.Option.ImmunityCache.Desc>缓存当前可自然免疫的疾病列表，直到角色的 Hediff 列表发生变化。原版每帧都会为每个角色重建该列表。</YaOpt.Setting.Option.ImmunityCache.Desc>
+	<YaOpt.Setting.Option.InvisibilityCache>隐形状态缓存</YaOpt.Setting.Option.InvisibilityCache>
+	<YaOpt.Setting.Option.InvisibilityCache.Desc>用缓存的逐角色状态回答 IsPsychologicallyInvisible、IsHiddenFromPlayer 和 GetAlpha，不再扫描 Hediff 列表。原版对每个可见角色每帧要执行多次这类扫描。</YaOpt.Setting.Option.InvisibilityCache.Desc>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle>蹒跚怪空闲索敌节流</YaOpt.Setting.Option.ShamblerIdleThrottle>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>将蹒跚怪的空闲周期索敌从 900-1800 帧延长到 15000-17499 帧。已有目标、待触发的警戒或最近 180 帧内交过战的蹒跚怪保持原版频率；受伤、Lord 警戒和附近蹒跚怪的唤醒仍会立即指定目标。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
 	<YaOpt.Setting.Option.RefuelSearchCache>Refuel搜索缓存</YaOpt.Setting.Option.RefuelSearchCache>

@@ -982,6 +982,30 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Publishes the invisibility state into an injected per-pawn field and answers the
+		/// invisibility queries from it.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla answers <c>IsPsychologicallyInvisible</c>, <c>IsHiddenFromPlayer</c> and
+		/// <c>GetAlpha</c> by scanning the pawn's hediff list; the renderer does that three to four
+		/// times per visible pawn per frame, inside the parallel pre-draw job. The state is
+		/// republished from the per-tick path vanilla already runs, so reading it costs one aligned
+		/// 8-byte load. Pawns with several invisibility comps, or a fade duration that does not fit
+		/// the packed field, keep the vanilla path.
+		/// </remarks>
+		/// <seealso cref="Prepatch.PrepatcherFields"/>
+		/// <seealso cref="Helpers.PawnInvisibilityCache"/>
+		/// <seealso cref="Patches.RimWorld_InvisibilityUtility_IsPsychologicallyInvisible"/>
+		/// <seealso cref="Patches.RimWorld_InvisibilityUtility_IsHiddenFromPlayer"/>
+		/// <seealso cref="Patches.RimWorld_InvisibilityUtility_GetAlpha"/>
+		public OptimizationOption OptInvisibilityCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.InvisibilityCache",
+			Desc = "YaOpt.Setting.Option.InvisibilityCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Extends the shambler's idle target-search interval when it has no target at all.
 		/// </summary>
 		/// <remarks>

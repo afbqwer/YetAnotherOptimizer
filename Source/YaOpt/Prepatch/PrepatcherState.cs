@@ -22,6 +22,13 @@ namespace YaOpt.Prepatch
 		internal static bool ImmunityActive;
 		internal static bool RefuelCandidatesActive;
 
+		/// <summary>
+		/// True when the packed invisibility field is injected and the vanilla members the cache
+		/// depends on were resolved. Every invisibility patch checks this in <c>Prepare</c>, because
+		/// calling an uninjected <c>extern</c> accessor would throw at runtime.
+		/// </summary>
+		internal static bool InvisibilityActive;
+
 		internal static void MarkListerPatched()
 		{
 			ListerPatched = true;
@@ -45,6 +52,7 @@ namespace YaOpt.Prepatch
 				ListerBuildingsActive = false;
 				ImmunityActive = false;
 				RefuelCandidatesActive = false;
+				InvisibilityActive = false;
 				return;
 			}
 
@@ -60,6 +68,19 @@ namespace YaOpt.Prepatch
 				HasInjectedField(typeof(Map), typeof(RefuelWorkCandidates.State)) &&
 				HasAccessorBody(nameof(PrepatcherFields.RefuelCandidates)) &&
 				settings.OptRefuelSearchCache.Enabled;
+
+			// The accessor check is the only reliable one here: Pawn already has other long
+			// fields, so a type match would false-positive.
+			InvisibilityActive = settings.OptInvisibilityCache.Enabled &&
+				HasAccessorBody(nameof(PrepatcherFields.Invisibility)) &&
+				PawnInvisibilityCache.Resolve();
+			if (settings.OptInvisibilityCache.Enabled && !InvisibilityActive)
+			{
+				YaOptMod.Warning("Invisibility cache is enabled but stayed inactive: " +
+					(HasAccessorBody(nameof(PrepatcherFields.Invisibility))
+						? "vanilla members could not be resolved."
+						: "the per-pawn field was not injected (field injection unavailable?)."));
+			}
 		}
 
 		private static bool HasInjectedField(System.Type target, System.Type fieldType)

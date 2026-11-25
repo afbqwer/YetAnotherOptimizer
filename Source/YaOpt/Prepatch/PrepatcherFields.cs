@@ -25,6 +25,14 @@ namespace YaOpt.Prepatch
 		[ValueInitializer(nameof(CreateRefuelState))]
 		public static extern ref RefuelWorkCandidates.State RefuelCandidates(this Map target);
 
+		/// <summary>
+		/// Packed invisibility state. Zero means "no invisibility comp", which is also the correct
+		/// answer before the first publish, so a plain default is enough and no initializer is
+		/// needed. See <see cref="YaOpt.Helpers.PawnInvisibilityCache"/> for the bit layout.
+		/// </summary>
+		[PrepatcherField]
+		public static extern ref long Invisibility(this Pawn target);
+
 		public static ListerBuildingsCache.State CreateListerState()
 		{
 			return new ListerBuildingsCache.State();
