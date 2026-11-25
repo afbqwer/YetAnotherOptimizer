@@ -218,6 +218,17 @@
 	<YaOpt.Setting.Option.StatCache.Desc>将角色的舒适温度和污垢率加入原版的属性缓存系统。舒适温度改为每20帧更新一次（装备变动时强制刷新），污垢率每60帧更新一次。这能减少频繁访问这些高开销属性时的性能损耗。</YaOpt.Setting.Option.StatCache.Desc>
 	<YaOpt.Setting.Option.MoveSpeedStatCache>移动速度属性缓存</YaOpt.Setting.Option.MoveSpeedStatCache>
 	<YaOpt.Setting.Option.MoveSpeedStatCache.Desc>在移动调用点为移动速度属性缓存20帧。原版每走一格都会重新求值一次移动速度，而它极少变化。启用后同一数值最多沿用20帧（约三分之一秒）。亡灵被排除，因为其速度随可见时间曲线变化。刚发生的装备、健康或光照变化最多需20帧才会反映到移动速度上。</YaOpt.Setting.Option.MoveSpeedStatCache.Desc>
+	<YaOpt.Setting.Option.PsychicEntropyCache>精神熵属性缓存</YaOpt.Setting.Option.PsychicEntropyCache>
+	<YaOpt.Setting.Option.PsychicEntropyCache.Desc>在 MaxEntropy 和 MaxPotentialEntropy 读取处缓存精神熵上限 20 tick，避免精神熵 Gizmo 和施法路径重复进行完整属性计算。默认关闭，因为装备、基因或 Hediff 的变化最多可能需要 20 tick 才会反映。</YaOpt.Setting.Option.PsychicEntropyCache.Desc>
+	<YaOpt.Setting.Option.PsychicEntropyCache.Compatibility>如果某个 Mod 要求装备、基因或 Hediff 改变后精神熵上限立即更新，请关闭此项。</YaOpt.Setting.Option.PsychicEntropyCache.Compatibility>
+	<YaOpt.Setting.Option.CelestialSunGlowCache>太阳光照缓存</YaOpt.Setting.Option.CelestialSunGlowCache>
+	<YaOpt.Setting.Option.CelestialSunGlowCache.Desc>在同一 tick 内复用当前地图的太阳光照值。天空、光照、阴影和天气代码经常重复请求完全相同的结果。缓存以地图对象和绝对 tick 为键，不产生延迟，重力船移动也无需额外检查 Tile。</YaOpt.Setting.Option.CelestialSunGlowCache.Desc>
+	<YaOpt.Setting.Option.FrameWorkToBuildCache>施工框架工作量缓存</YaOpt.Setting.Option.FrameWorkToBuildCache>
+	<YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>按建筑 Def 和材料缓存 Frame.WorkToBuild，不再在每次施工 tick 和进度读取时重算抽象属性。无材料场景使用按 Def 索引的平铺数组，有材料时使用按 Def 分桶的延迟缓存。默认关闭，读档和通过原版 API 改写属性基础值时会清空。</YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>
+	<YaOpt.Setting.Option.QuestLodgerFastPath>任务访客快速路径</YaOpt.Setting.Option.QuestLodgerFastPath>
+	<YaOpt.Setting.Option.QuestLodgerFastPath.Desc>只扫描一次额外阵营任务部件，直接判断是否存在本地阵营或迷你阵营，不再收集、去重完整列表两次。不缓存结果，并保留原版的任务、难民和受影响 pawn 条件。多个额外阵营任务部件活跃时收益最明显。</YaOpt.Setting.Option.QuestLodgerFastPath.Desc>
+	<YaOpt.Setting.Option.TeetotalerFastPath>禁酒者快速路径</YaOpt.Setting.Option.TeetotalerFastPath>
+	<YaOpt.Setting.Option.TeetotalerFastPath.Desc>对没有意识形态的 pawn，直接检查 DrugDesire 特质，不再分配两个必然被接受的历史事件。有意识形态的 pawn 完全走原版路径，包括随机检查，因此行为和随机流不变。</YaOpt.Setting.Option.TeetotalerFastPath.Desc>
 	<YaOpt.Setting.Option.ConstructDeliverResources>建造资源搬运检查优化</YaOpt.Setting.Option.ConstructDeliverResources>
 	<YaOpt.Setting.Option.ConstructDeliverResources.Desc>优化建造时资源搬运工作的检查顺序，原版在分配建造工作时会重复检测两次可通行性，此优化会剔除掉多余的一次。同时为可通行性的内部运算增加了缓存，提高了大量铺设地板和墙体时的性能。</YaOpt.Setting.Option.ConstructDeliverResources.Desc>
 	<YaOpt.Setting.Option.ConnectivityUpdate>连通性更新优化</YaOpt.Setting.Option.ConnectivityUpdate>

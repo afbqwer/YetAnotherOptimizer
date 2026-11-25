@@ -736,6 +736,62 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches <see cref="StatDefOf.PsychicEntropyMax"/> for 20 ticks at the neural heat getters.
+		/// </summary>
+		/// <seealso cref="Patches.MultiTargets_PsychicEntropyStatCache"/>
+		public OptimizationOption OptPsychicEntropyCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PsychicEntropyCache",
+			Desc = "YaOpt.Setting.Option.PsychicEntropyCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PsychicEntropyCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Caches <see cref="GenCelestial.CurCelestialSunGlow"/> for the remainder of the current tick.
+		/// </summary>
+		/// <seealso cref="Patches.RimWorld_GenCelestial_CurCelestialSunGlow"/>
+		public OptimizationOption OptCelestialSunGlowCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.CelestialSunGlowCache",
+			Desc = "YaOpt.Setting.Option.CelestialSunGlowCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Memoises <see cref="RimWorld.Frame.WorkToBuild"/> by buildable def and stuff.
+		/// </summary>
+		/// <seealso cref="Patches.RimWorld_Frame_WorkToBuild"/>
+		public OptimizationOption OptFrameWorkToBuildCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FrameWorkToBuildCache",
+			Desc = "YaOpt.Setting.Option.FrameWorkToBuildCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Replaces the two-pass quest lodger lookup with one allocation-free scan.
+		/// </summary>
+		/// <seealso cref="Patches.RimWorld_QuestUtility_IsQuestLodger"/>
+		public OptimizationOption OptQuestLodgerFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.QuestLodgerFastPath",
+			Desc = "YaOpt.Setting.Option.QuestLodgerFastPath.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Skips history event allocation when checking pawns without an ideo for teetotalism.
+		/// </summary>
+		/// <seealso cref="Patches.RimWorld_PawnUtility_IsTeetotaler"/>
+		public OptimizationOption OptTeetotalerFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.TeetotalerFastPath",
+			Desc = "YaOpt.Setting.Option.TeetotalerFastPath.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Introduces a restricted multi-threaded handling for pawn updates.
 		/// It implements a multi-threaded job interruption predictor that checks if the current job
 		/// might fail or be interrupted by emergency jobs (e.g. fleeing enemies) in the current frame.

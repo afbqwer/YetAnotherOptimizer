@@ -218,6 +218,17 @@
 	<YaOpt.Setting.Option.StatCache.Desc>將角色的舒適溫度和污垢率加入原版的屬性快取系統。舒適溫度改為每20幀更新一次（裝備變動時強制重新整理），污垢率每60幀更新一次。這能減少頻繁存取這些高開銷屬性時的效能損耗。</YaOpt.Setting.Option.StatCache.Desc>
 	<YaOpt.Setting.Option.MoveSpeedStatCache>移動速度屬性快取</YaOpt.Setting.Option.MoveSpeedStatCache>
 	<YaOpt.Setting.Option.MoveSpeedStatCache.Desc>在移動呼叫點為移動速度屬性快取20 tick。原版每走一格都會重新求值一次移動速度，而它極少變化。啟用後同一數值最多沿用20 tick（約三分之一秒）。亡靈被排除，因為其速度隨可見時間曲線變化。剛發生的裝備、健康或光照變化最多需20 tick 才會反映到移動速度上。</YaOpt.Setting.Option.MoveSpeedStatCache.Desc>
+	<YaOpt.Setting.Option.PsychicEntropyCache>Entropy屬性快取</YaOpt.Setting.Option.PsychicEntropyCache>
+	<YaOpt.Setting.Option.PsychicEntropyCache.Desc>在 MaxEntropy 和 MaxPotentialEntropy 讀取處快取Entropy上限 20 tick，避免Entropy Gizmo 和施法路徑重複進行完整屬性計算。預設關閉，因為裝備、基因或 Hediff 的變化最多可能需要 20 tick 才會反映。</YaOpt.Setting.Option.PsychicEntropyCache.Desc>
+	<YaOpt.Setting.Option.PsychicEntropyCache.Compatibility>如果某個 Mod 要求裝備、基因或 Hediff 改變後Entropy上限立即更新，請關閉此項。</YaOpt.Setting.Option.PsychicEntropyCache.Compatibility>
+	<YaOpt.Setting.Option.CelestialSunGlowCache>太陽光照快取</YaOpt.Setting.Option.CelestialSunGlowCache>
+	<YaOpt.Setting.Option.CelestialSunGlowCache.Desc>在同一個 tick 內重用目前地圖的太陽光照值。天空、光照、陰影和天氣程式碼經常重複請求完全相同的結果。快取以地圖物件和絕對 tick 為鍵，不產生延遲，重力船移動也無需額外檢查 Tile。</YaOpt.Setting.Option.CelestialSunGlowCache.Desc>
+	<YaOpt.Setting.Option.FrameWorkToBuildCache>施工框架工作量快取</YaOpt.Setting.Option.FrameWorkToBuildCache>
+	<YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>按建築 Def 和材料快取 Frame.WorkToBuild，不再在每次施工 tick 和進度讀取時重算抽象屬性。無材料場景使用按 Def 索引的平鋪陣列，有材料時使用按 Def 分桶的延遲快取。預設關閉，讀檔和透過原版 API 改寫屬性基礎值時會清空。</YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>
+	<YaOpt.Setting.Option.QuestLodgerFastPath>任務訪客快速路徑</YaOpt.Setting.Option.QuestLodgerFastPath>
+	<YaOpt.Setting.Option.QuestLodgerFastPath.Desc>只掃描一次額外陣營任務部件，直接判斷是否存在本地陣營或迷你陣營，不再收集、去重完整清單兩次。不快取結果，並保留原版的任務、難民和受影響 pawn 條件。多個額外陣營任務部件活躍時收益最明顯。</YaOpt.Setting.Option.QuestLodgerFastPath.Desc>
+	<YaOpt.Setting.Option.TeetotalerFastPath>禁酒者快速路徑</YaOpt.Setting.Option.TeetotalerFastPath>
+	<YaOpt.Setting.Option.TeetotalerFastPath.Desc>對沒有意識形態的 pawn，直接檢查 DrugDesire 特質，不再配置兩個必然被接受的歷史事件。有意識形態的 pawn 完全走原版路徑，包括隨機檢查，因此行為和隨機流不變。</YaOpt.Setting.Option.TeetotalerFastPath.Desc>
 	<YaOpt.Setting.Option.ConstructDeliverResources>建造資源搬運檢查最佳化</YaOpt.Setting.Option.ConstructDeliverResources>
 	<YaOpt.Setting.Option.ConstructDeliverResources.Desc>最佳化建造時資源搬運工作的檢查順序，原版在分配建造工作時會重複檢測兩次可通行性，此最佳化會剔除多餘的一次。同時為可通行性的內部運算增加了快取，提高了大量鋪設地板和牆體時的效能。</YaOpt.Setting.Option.ConstructDeliverResources.Desc>
 	<YaOpt.Setting.Option.ConnectivityUpdate>連通性更新最佳化</YaOpt.Setting.Option.ConnectivityUpdate>
