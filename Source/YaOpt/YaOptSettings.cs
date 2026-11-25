@@ -837,8 +837,8 @@ namespace YaOpt
 		/// </summary>
 		/// <remarks>
 		/// The vanilla queries scan every colonist building each time. The index is built on the
-		/// first query and maintained by <c>ListerBuildings.Add/Remove</c>; repeated queries of the
-		/// same def return the cached list directly.
+		/// first query and maintained by <c>ListerBuildings.Add/Remove</c>. List results are copied
+		/// into the vanilla result buffer, and empty results stay cached.
 		/// </remarks>
 		/// <seealso cref="Prepatch.PrepatcherFreePatches"/>
 		/// <seealso cref="Patches.Verse_ListerBuildings_Add"/>
@@ -890,8 +890,8 @@ namespace YaOpt
 		/// <remarks>
 		/// A work giver validates a refuel target with <c>CanRefuel</c> and then builds the job with
 		/// <c>RefuelJob</c>; both run the same global closest-fuel search and, for atomic fueling,
-		/// the same region traversal. The result is reused for the current tick. The candidate list
-		/// is rebuilt every 250 ticks and maintained on spawn, despawn, refuel and fuel consumption.
+		/// the same region traversal. Each result is reused once. The broad candidate list is
+		/// maintained on spawn and despawn; vanilla validation checks all dynamic conditions.
 		/// It is only used for the fallback after the normal local region scan.
 		/// </remarks>
 		/// <seealso cref="Prepatch.PrepatcherFreePatches"/>
@@ -910,8 +910,8 @@ namespace YaOpt
 		/// </summary>
 		/// <remarks>
 		/// Witnesses are collected from the twelve-cell radius around the victim instead of every
-		/// living pawn, and relation candidates are materialized once. Memory cleanup walks only
-		/// pawns that can hold the affected memories.
+		/// living pawn, and relation candidates are materialized once. General lost memories still
+		/// cover map, world and temporary pawns; relation-specific cleanup uses relation candidates.
 		/// </remarks>
 		/// <seealso cref="Patches.RimWorld_PawnDiedOrDownedThoughtsUtility_TryGiveThoughts"/>
 		/// <seealso cref="Patches.RimWorld_PawnDiedOrDownedThoughtsUtility_RemoveLostThoughts"/>

@@ -6,18 +6,17 @@ using YaOpt.Prepatch;
 namespace YaOpt.Helpers
 {
 	/// <summary>
-	/// Maintained per-map list of refuelable things that can currently be auto-refueled.
+	/// Maintained per-map list of things that can be considered for refueling.
 	/// </summary>
 	/// <remarks>
-	/// Refuel work givers normally have no global candidate set, so every job that finds nothing
-	/// in the local region scan falls back to walking the whole map. This list is rebuilt every
-	/// 250 ticks and updated on spawn, despawn, refuel and fuel consumption. All candidate kinds
-	/// are kept in one list: the work giver's own <c>CanRefuelThing</c> still filters turrets and
-	/// non-turrets, so a shared list cannot omit either kind.
+	/// The list is intentionally broad. Fuel level, auto-refuel settings, fog, reservations and
+	/// other dynamic conditions are checked by the vanilla work giver when it validates a target.
+	/// Only spawn and despawn need to update the list, avoiding missed candidates after state
+	/// changes that have no dedicated notification.
 	/// </remarks>
 	public static class RefuelWorkCandidates
 	{
-		private const int REBUILD_INTERVAL = 250;
+		private static int _epoch;
 
 		public sealed class State
 		{
@@ -29,15 +28,16 @@ namespace YaOpt.Helpers
 
 			public readonly HashSet<Thing> Set = new HashSet<Thing>();
 
-			public int LastRebuildTick = -99999;
+			public bool Built;
+
+			public int Epoch;
 		}
 
 		public static List<Thing> GetCandidates(Map map, WorkGiver_Scanner scanner)
 		{
-			var tick = Find.TickManager.TicksGame;
 			var state = GetOrCreateState(map);
-			if (tick < state.LastRebuildTick || tick - state.LastRebuildTick >= REBUILD_INTERVAL)
-				Rebuild(map, state, tick);
+			if (!state.Built || state.Epoch != _epoch)
+				Rebuild(map, state);
 
 			var type = scanner.GetType();
 			if (type == typeof(WorkGiver_Refuel))
@@ -45,6 +45,11 @@ namespace YaOpt.Helpers
 			if (type == typeof(WorkGiver_Refuel_Turret))
 				return state.Turrets;
 			return state.All;
+		}
+
+		public static void Invalidate()
+		{
+			_epoch++;
 		}
 
 		public static void NotifyChanged(CompRefuelable comp)
@@ -56,17 +61,7 @@ namespace YaOpt.Helpers
 			if (state == null)
 				return;
 
-			if (CanBeCandidate(thing, comp))
-				Add(state, thing);
-			else
-				Remove(state, thing);
-		}
-
-		public static void NotifyFuelConsumed(CompRefuelable comp)
-		{
-			if (comp.FuelPercentOfTarget > comp.Props.autoRefuelPercent)
-				return;
-			NotifyChanged(comp);
+			Add(state, thing);
 		}
 
 		public static void NotifyRemoved(CompRefuelable comp, Map map)
@@ -80,15 +75,6 @@ namespace YaOpt.Helpers
 			var thing = comp.parent;
 			if (thing != null)
 				Remove(state, thing);
-		}
-
-		private static bool CanBeCandidate(Thing thing, CompRefuelable comp)
-		{
-			if (!thing.Spawned || thing.Fogged() || !comp.allowAutoRefuel)
-				return false;
-			if (comp.FuelPercentOfMax > 0f && !comp.Props.allowRefuelIfNotEmpty)
-				return false;
-			return comp.ShouldAutoRefuelNow;
 		}
 
 		private static void Add(State state, Thing thing)
@@ -113,7 +99,7 @@ namespace YaOpt.Helpers
 				state.NonTurrets.Remove(thing);
 		}
 
-		private static void Rebuild(Map map, State state, int tick)
+		private static void Rebuild(Map map, State state)
 		{
 			state.All.Clear();
 			state.NonTurrets.Clear();
@@ -124,13 +110,12 @@ namespace YaOpt.Helpers
 			for (var i = 0; i < refuelables.Count; i++)
 			{
 				var thing = refuelables[i];
-				var comp = thing.TryGetComp<CompRefuelable>();
-				if (comp == null || !CanBeCandidate(thing, comp))
-					continue;
-				Add(state, thing);
+				if (thing.TryGetComp<CompRefuelable>() != null)
+					Add(state, thing);
 			}
 
-			state.LastRebuildTick = tick;
+			state.Built = true;
+			state.Epoch = _epoch;
 		}
 
 		private static State GetOrCreateState(Map map)

@@ -11,8 +11,8 @@ namespace YaOpt.Helpers
 	/// <remarks>
 	/// A refuel work giver first calls <c>CanRefuel</c> (which runs a global closest-fuel search
 	/// and, for atomic fueling, a region traversal) and then <c>RefuelJob</c> (which repeats the
-	/// same searches). No tick passes between them, so the results are valid for the rest of the
-	/// tick. Entries are discarded as soon as the tick number changes.
+	/// same searches). Entries are consumed on lookup so later searches in the same tick cannot
+	/// reuse results after the pawn, target or fuel state has changed.
 	/// </remarks>
 	internal static class RefuelSearchCache
 	{
@@ -62,7 +62,7 @@ namespace YaOpt.Helpers
 			result = null;
 			if (!BeginTick())
 				return false;
-			return BestFuel.TryGetValue(new Key(pawn, target), out result);
+			return BestFuel.Remove(new Key(pawn, target), out result);
 		}
 
 		public static void StoreBestFuel(Pawn pawn, Thing target, Thing result)
@@ -77,7 +77,7 @@ namespace YaOpt.Helpers
 			result = null;
 			if (!BeginTick())
 				return false;
-			return AllFuel.TryGetValue(new Key(pawn, target), out result);
+			return AllFuel.Remove(new Key(pawn, target), out result);
 		}
 
 		public static void StoreAllFuel(Pawn pawn, Thing target, List<Thing> result)

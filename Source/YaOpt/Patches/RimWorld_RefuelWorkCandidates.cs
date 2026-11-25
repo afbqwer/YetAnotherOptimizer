@@ -54,36 +54,4 @@ namespace YaOpt.Patches
 			RefuelWorkCandidates.NotifyRemoved(__instance, previousMap);
 		}
 	}
-
-	/// <seealso cref="YaOptSettings.OptRefuelSearchCache"/>
-	[HarmonyPatch(typeof(CompRefuelable))]
-	[HarmonyPatch(nameof(CompRefuelable.ConsumeFuel))]
-	internal static class RimWorld_CompRefuelable_ConsumeFuel
-	{
-		static bool Prepare()
-		{
-			return PrepatcherState.RefuelCandidatesActive;
-		}
-
-		static void Postfix(CompRefuelable __instance)
-		{
-			RefuelWorkCandidates.NotifyFuelConsumed(__instance);
-		}
-	}
-
-	/// <seealso cref="YaOptSettings.OptRefuelSearchCache"/>
-	[HarmonyPatch(typeof(CompRefuelable))]
-	[HarmonyPatch(nameof(CompRefuelable.Refuel), new[] { typeof(float) })]
-	internal static class RimWorld_CompRefuelable_Refuel
-	{
-		static bool Prepare()
-		{
-			return PrepatcherState.RefuelCandidatesActive;
-		}
-
-		static void Postfix(CompRefuelable __instance)
-		{
-			RefuelWorkCandidates.NotifyChanged(__instance);
-		}
-	}
 }

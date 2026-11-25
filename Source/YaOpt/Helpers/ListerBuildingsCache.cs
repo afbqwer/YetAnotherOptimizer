@@ -10,37 +10,41 @@ namespace YaOpt.Helpers
 	/// </summary>
 	/// <remarks>
 	/// Vanilla scans every colonist building for each definition query. The index is built lazily
-	/// on the first query and then maintained by <c>ListerBuildings.Add/Remove</c>. Query methods
-	/// return the cached list directly, so repeated lookups of the same definition are O(1).
+	/// on the first query and then maintained by <c>ListerBuildings.Add/Remove</c>. List results
+	/// are copied into the vanilla result buffer so callers cannot mutate the index.
 	/// </remarks>
 	public static class ListerBuildingsCache
 	{
+		private static int _epoch;
+
 		public sealed class State
 		{
 			public readonly Dictionary<ThingDef, List<Building>> ByDef =
 				new Dictionary<ThingDef, List<Building>>();
 
 			public bool Built;
-		}
 
-		private static readonly List<Building> Empty = new List<Building>();
+			public int Epoch;
+		}
 
 		public static bool ColonistsHaveBuilding(ListerBuildings lister, ThingDef def)
 		{
 			if (def == null)
 				return false;
 
-			var cache = GetOrBuild(lister);
-			return cache.ByDef.TryGetValue(def, out var list) && list.Count > 0;
+			var list = GetOrBuild(lister, def);
+			return list.Count > 0;
 		}
 
 		public static List<Building> GetAllBuildingsColonistOfDef(ListerBuildings lister, ThingDef def)
 		{
 			if (def == null)
-				return Empty;
+				return GetResultBuffer();
 
-			var cache = GetOrBuild(lister);
-			return cache.ByDef.TryGetValue(def, out var list) ? list : Empty;
+			var buildings = GetOrBuild(lister, def);
+			var result = GetResultBuffer();
+			result.AddRange(buildings);
+			return result;
 		}
 
 		public static bool ColonistsHaveBuildingWithPowerOn(ListerBuildings lister, ThingDef def)
@@ -48,10 +52,7 @@ namespace YaOpt.Helpers
 			if (def == null)
 				return false;
 
-			var cache = GetOrBuild(lister);
-			if (!cache.ByDef.TryGetValue(def, out var list))
-				return false;
-
+			var list = GetOrBuild(lister, def);
 			for (var i = 0; i < list.Count; i++)
 			{
 				var power = list[i].TryGetComp<CompPowerTrader>();
@@ -89,8 +90,6 @@ namespace YaOpt.Helpers
 				return;
 
 			list.Remove(building);
-			if (list.Count == 0)
-				cache.ByDef.Remove(building.def);
 		}
 
 		public static void OnDisposed(ListerBuildings lister)
@@ -99,27 +98,50 @@ namespace YaOpt.Helpers
 			cache = null;
 		}
 
-		private static State GetOrBuild(ListerBuildings lister)
+		public static void Invalidate()
+		{
+			_epoch++;
+		}
+
+		private static List<Building> GetResultBuffer()
+		{
+			var result = ListerBuildings.allBuildingsColonistOfDefResult;
+			result.Clear();
+			return result;
+		}
+
+		private static List<Building> GetOrBuild(ListerBuildings lister, ThingDef def)
 		{
 			ref var cache = ref PrepatcherFields.Lister(lister);
 			if (cache == null)
 				cache = new State();
-			else if (cache.Built)
-				return cache;
+			else if (cache.Built && cache.Epoch == _epoch &&
+				cache.ByDef.TryGetValue(def, out var cached))
+				return cached;
 
-			cache.ByDef.Clear();
-			for (var i = 0; i < lister.allBuildingsColonist.Count; i++)
+			if (!cache.Built || cache.Epoch != _epoch)
 			{
-				var building = lister.allBuildingsColonist[i];
-				if (!cache.ByDef.TryGetValue(building.def, out var list))
+				cache.ByDef.Clear();
+				for (var i = 0; i < lister.allBuildingsColonist.Count; i++)
 				{
-					list = new List<Building>();
-					cache.ByDef.Add(building.def, list);
+					var building = lister.allBuildingsColonist[i];
+					if (!cache.ByDef.TryGetValue(building.def, out var list))
+					{
+						list = new List<Building>();
+						cache.ByDef.Add(building.def, list);
+					}
+					list.Add(building);
 				}
-				list.Add(building);
+				cache.Built = true;
+				cache.Epoch = _epoch;
 			}
-			cache.Built = true;
-			return cache;
+
+			if (!cache.ByDef.TryGetValue(def, out var buildings))
+			{
+				buildings = new List<Building>();
+				cache.ByDef.Add(def, buildings);
+			}
+			return buildings;
 		}
 	}
 }

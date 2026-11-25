@@ -85,7 +85,14 @@ namespace YaOpt.Patches
 
 				// Apply Harmony patches from the current assembly.
 				YaOptMod.Debug("Patching...");
-				noError &= harmony.TryPatchAll(assembly);
+				var corePatchesSucceeded = harmony.TryPatchAll(assembly);
+				noError &= corePatchesSucceeded;
+				if (corePatchesSucceeded)
+				{
+					// Caches may have been populated before their maintenance patches existed.
+					ListerBuildingsCache.Invalidate();
+					RefuelWorkCandidates.Invalidate();
+				}
 				// Apply submod patches.
 				noError &= YaOptSubMod.PatchAll(YaOptGlobal.SubMods, harmony);
 				_hasPatched = true;

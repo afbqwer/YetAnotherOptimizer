@@ -13,8 +13,9 @@ namespace YaOpt.Helpers
 	/// <remarks>
 	/// The Died path visits pawns near the victim through the thing grid instead of scanning every
 	/// living pawn on every map. Witnesses are deduplicated because a multi-cell pawn is listed in
-	/// every cell it occupies. Relation thoughts use one materialized candidate list, and memory
-	/// cleanup walks only the pawns that can actually hold the removed memories.
+	/// every cell it occupies. Relation thoughts use one materialized candidate list. General lost
+	/// memories are still cleared from map, world and temporary pawns, while relation-specific
+	/// cleanup avoids scanning every pawn for every relation definition.
 	/// </remarks>
 	internal static class DeathThoughtsHelper
 	{
@@ -73,8 +74,7 @@ namespace YaOpt.Helpers
 
 		public static void RemoveLostThoughts(Pawn pawn)
 		{
-			if (pawn.IsColonist && !pawn.IsQuestLodger() && !pawn.IsSlave)
-				RemoveColonistLostThoughts(pawn);
+			RemoveGeneralLostThoughts(pawn);
 
 			var relations = pawn.relations;
 			if (relations == null || !relations.everSeenByPlayer)
@@ -84,8 +84,6 @@ namespace YaOpt.Helpers
 			{
 				FillLostRelationThoughtDefs(pawn);
 				RemoveRelationLostThoughts(pawn, relations);
-				if (pawn.RaceProps.Humanlike)
-					RemoveOpinionLostThoughts(pawn);
 			}
 			finally
 			{
@@ -95,17 +93,14 @@ namespace YaOpt.Helpers
 
 		public static void RemoveResuedRelativeThought(Pawn pawn)
 		{
-			var relations = pawn.relations;
-			if (relations == null || !relations.everSeenByPlayer)
-				return;
-
-			foreach (var related in relations.PotentiallyRelatedPawns)
+			var alivePawns = PawnsFinder.AllMapsWorldAndTemporary_Alive;
+			for (var i = 0; i < alivePawns.Count; i++)
 			{
-				if (related == null || related == pawn || related.Dead ||
-					related.needs == null || related.needs.mood == null)
+				var otherPawn = alivePawns[i];
+				if (otherPawn == pawn || otherPawn.needs == null || otherPawn.needs.mood == null)
 					continue;
 
-				related.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(
+				otherPawn.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(
 					ThoughtDefOf.RescuedRelative, pawn);
 			}
 		}
@@ -294,8 +289,7 @@ namespace YaOpt.Helpers
 				var pawn = alivePawns[i];
 				if (pawn == victim || pawn.needs == null || pawn.needs.mood == null ||
 					!pawn.RaceProps.IsFlesh ||
-					!PawnUtility.ShouldGetThoughtAbout(pawn, victim) ||
-					!ShouldCheckOpinionThoughts(pawn, victim))
+					!PawnUtility.ShouldGetThoughtAbout(pawn, victim))
 					continue;
 
 				var opinion = pawn.relations.OpinionOf(victim);
@@ -320,21 +314,6 @@ namespace YaOpt.Helpers
 				if (pawn != null && pawn.needs != null && pawn.needs.mood != null)
 					RelatedPawns.Add(pawn);
 			}
-		}
-
-		private static bool ShouldCheckOpinionThoughts(Pawn pawn, Pawn victim)
-		{
-			if (pawn.Faction == victim.Faction)
-				return true;
-
-			if (pawn.relations.RelatedToAnyoneOrAnyoneRelatedToMe ||
-				pawn.needs.mood.thoughts.memories.AnyMemoryConcerns(victim))
-				return true;
-
-			if (victim.IsCaravanMember())
-				return pawn.GetCaravan() == victim.GetCaravan();
-
-			return false;
 		}
 
 		private static bool IsExcludedSocialFightWitness(Pawn pawn, Pawn victim)
@@ -402,16 +381,21 @@ namespace YaOpt.Helpers
 			return worldColonists.Count > 0 ? worldColonists[0] : null;
 		}
 
-		private static void RemoveColonistLostThoughts(Pawn pawn)
+		private static void RemoveGeneralLostThoughts(Pawn pawn)
 		{
-			var colonists = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists;
-			for (var i = 0; i < colonists.Count; i++)
+			var alivePawns = PawnsFinder.AllMapsWorldAndTemporary_Alive;
+			for (var i = 0; i < alivePawns.Count; i++)
 			{
-				var colonist = colonists[i];
-				if (colonist == pawn || colonist.needs == null || colonist.needs.mood == null)
+				var otherPawn = alivePawns[i];
+				if (otherPawn == pawn || otherPawn.needs == null || otherPawn.needs.mood == null)
 					continue;
-				colonist.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(
-					ThoughtDefOf.ColonistLost, pawn);
+
+				var memories = otherPawn.needs.mood.thoughts.memories;
+				memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.ColonistLost, pawn);
+				memories.RemoveMemoriesOfDefWhereOtherPawnIs(
+					ThoughtDefOf.PawnWithGoodOpinionLost, pawn);
+				memories.RemoveMemoriesOfDefWhereOtherPawnIs(
+					ThoughtDefOf.PawnWithBadOpinionLost, pawn);
 			}
 		}
 
@@ -432,8 +416,7 @@ namespace YaOpt.Helpers
 			foreach (var related in relations.PotentiallyRelatedPawns)
 			{
 				if (related == null || related == pawn || related.Dead ||
-					related.needs == null || related.needs.mood == null ||
-					!PawnUtility.ShouldGetThoughtAbout(related, pawn))
+					related.needs == null || related.needs.mood == null)
 					continue;
 
 				var memories = related.needs.mood.thoughts.memories;
@@ -441,25 +424,6 @@ namespace YaOpt.Helpers
 				{
 					memories.RemoveMemoriesOfDefWhereOtherPawnIs(LostRelationThoughtDefs[i], pawn);
 				}
-			}
-		}
-
-		private static void RemoveOpinionLostThoughts(Pawn pawn)
-		{
-			var alivePawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive;
-			for (var i = 0; i < alivePawns.Count; i++)
-			{
-				var otherPawn = alivePawns[i];
-				if (otherPawn == pawn || otherPawn.needs == null || otherPawn.needs.mood == null ||
-					!otherPawn.RaceProps.IsFlesh ||
-					!PawnUtility.ShouldGetThoughtAbout(otherPawn, pawn))
-					continue;
-
-				var memories = otherPawn.needs.mood.thoughts.memories;
-				memories.RemoveMemoriesOfDefWhereOtherPawnIs(
-					ThoughtDefOf.PawnWithGoodOpinionLost, pawn);
-				memories.RemoveMemoriesOfDefWhereOtherPawnIs(
-					ThoughtDefOf.PawnWithBadOpinionLost, pawn);
 			}
 		}
 	}
