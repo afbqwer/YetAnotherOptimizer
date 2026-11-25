@@ -25,9 +25,31 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
+		/// Returns true when any foreign patch at all touches the method.
+		/// </summary>
+		/// <remarks>
+		/// Used where a cached result replays a skipped original: a foreign postfix already ran while the
+		/// result was produced and would run again on a replay, applying its transformation twice. A
+		/// foreign prefix can likewise change arguments or side effects that then only run once.
+		/// </remarks>
+		internal static bool HasForeignPatch(MethodBase target)
+		{
+			if (target == null)
+				return true;
+			if (YaOptMod.Instance == null)
+				return true;
+
+			return FindForeignConflict(target, includeAll: true) != null;
+		}
+
+		/// <summary>
 		/// Returns a description of the conflicting patch, or null when the method is untouched.
 		/// </summary>
-		internal static string FindForeignConflict(MethodBase target)
+		/// <param name="includeAll">
+		/// When false only transpilers and boolean prefixes at or below normal priority count as
+		/// conflicts; when true every foreign patch, postfixes included, does.
+		/// </param>
+		internal static string FindForeignConflict(MethodBase target, bool includeAll = false)
 		{
 			if (target == null || YaOptMod.Instance == null)
 				return null;
@@ -50,10 +72,17 @@ namespace YaOpt.Helpers
 			{
 				if (patch.owner == harmonyId || patch.owner == earlyId)
 					continue;
-				if (patch.priority > Priority.Normal)
-					continue;
-				if (patch.PatchMethod.ReturnType == typeof(bool))
+				if (includeAll || (patch.priority <= Priority.Normal && patch.PatchMethod.ReturnType == typeof(bool)))
 					return patch.owner + " (prefix)";
+			}
+
+			if (includeAll)
+			{
+				foreach (var patch in info.Postfixes)
+				{
+					if (patch.owner != harmonyId && patch.owner != earlyId)
+						return patch.owner + " (postfix)";
+				}
 			}
 
 			return null;

@@ -226,7 +226,8 @@
 	<YaOpt.Setting.Option.FrameWorkToBuildCache>施工框架工作量快取</YaOpt.Setting.Option.FrameWorkToBuildCache>
 	<YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>按建築 Def 和材料快取 Frame.WorkToBuild，不再在每次施工 tick 和進度讀取時重算抽象屬性。無材料場景使用按 Def 索引的平鋪陣列，有材料時使用按 Def 分桶的延遲快取。預設關閉，讀檔和透過原版 API 改寫屬性基礎值時會清空。</YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>
 	<YaOpt.Setting.Option.ThingSetMakerSampleCache>物品生成取樣復用</YaOpt.Setting.Option.ThingSetMakerSampleCache>
-	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>當合併後的參數與隨機種子完全相同時，復用物品集合的取樣結果。獎勵與商人庫存生成會先為每個選項跑同一份確定性取樣來構建權重表，再對選中項重新跑一次；該取樣本身已用種子隔離，因此產出物品和隨機數序列都不變。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>
+	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>當合併後的參數、隨機種子和遊戲 tick 都相同時，復用物品集合的取樣結果。任務獎勵與事件物品生成會先為每個選項跑同一份確定性取樣來構建權重表，再對選中項重新跑一次；取樣用種子隔離，因此產出物品和隨機數序列都不變。取樣還會讀取殖民者頭銜、科技進度等世界狀態，所以快取按 tick 失效，並在讀檔時清空。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>
+	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility>若其它模組 patch 了被快取的取樣方法，本項會自動停用，因為回放快取會讓其補丁效果重複生效。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility>
 	<YaOpt.Setting.Option.ThingSetMakerStatCache>物品生成屬性記憶</YaOpt.Setting.Option.ThingSetMakerStatCache>
 	<YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>在一次物品集合取樣內，記住每個候選的最小值、最大值和單件價值，不再反覆向屬性系統求值最多三次。只包裝原版的取值回調，取樣結束即丟棄快取。</YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>
 	<YaOpt.Setting.Option.GenerationDefCache>生成 Def 快取</YaOpt.Setting.Option.GenerationDefCache>

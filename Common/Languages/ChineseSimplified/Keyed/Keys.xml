@@ -226,7 +226,8 @@
 	<YaOpt.Setting.Option.FrameWorkToBuildCache>施工框架工作量缓存</YaOpt.Setting.Option.FrameWorkToBuildCache>
 	<YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>按建筑 Def 和材料缓存 Frame.WorkToBuild，不再在每次施工 tick 和进度读取时重算抽象属性。无材料场景使用按 Def 索引的平铺数组，有材料时使用按 Def 分桶的延迟缓存。默认关闭，读档和通过原版 API 改写属性基础值时会清空。</YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>
 	<YaOpt.Setting.Option.ThingSetMakerSampleCache>物品生成采样复用</YaOpt.Setting.Option.ThingSetMakerSampleCache>
-	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>当合并后的参数与随机种子完全相同时，复用物品集合的采样结果。奖励与商人库存生成会先为每个选项跑同一份确定性采样来构建权重表，再对选中项重新跑一次；该采样本身已用种子隔离，因此产出物品和随机数序列都不变。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>
+	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>当合并后的参数、随机种子和游戏 tick 都相同时，复用物品集合的采样结果。任务奖励与事件物品生成会先为每个选项跑同一份确定性采样来构建权重表，再对选中项重新跑一次；采样用种子隔离，因此产出物品和随机数序列都不变。采样还会读取殖民者头衔、科技进度等世界状态，所以缓存按 tick 失效，并在读档时清空。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>
+	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility>若其它模组 patch 了被缓存的采样方法，本项会自动停用，因为回放缓存会让其补丁效果重复生效。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility>
 	<YaOpt.Setting.Option.ThingSetMakerStatCache>物品生成属性记忆</YaOpt.Setting.Option.ThingSetMakerStatCache>
 	<YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>在一次物品集合采样内，记住每个候选的最小值、最大值和单件价值，不再反复向属性系统求值最多三次。只包装原版的取值回调，采样结束即丢弃缓存。</YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>
 	<YaOpt.Setting.Option.GenerationDefCache>生成 Def 缓存</YaOpt.Setting.Option.GenerationDefCache>

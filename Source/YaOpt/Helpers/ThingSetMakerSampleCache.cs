@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using RimWorld;
-using Verse;
 
 namespace YaOpt.Helpers
 {
@@ -9,10 +8,14 @@ namespace YaOpt.Helpers
 	/// Reuses the deterministic result of <see cref="ThingSetMaker_MarketValue"/>'s sampling.
 	/// </summary>
 	/// <remarks>
-	/// The seeded overload pushes <c>Rand.PushState(seed)</c> around the whole sample, so the result is
-	/// a pure function of the merged parameters and the seed, and skipping the call leaves the ambient
-	/// random stream untouched. Option tables ask many makers for a result and then generate the chosen
-	/// one; the same parameters and seed therefore repeat within a single reward generation.
+	/// The seeded overload pushes <c>Rand.PushState(seed)</c> around the whole sample, so skipping the
+	/// call leaves the ambient random stream untouched. Option tables ask many makers for a result and
+	/// then generate the chosen one; the same parameters and seed therefore repeat within a single
+	/// reward generation.
+	/// The result also depends on world state (colonist titles, research progress, anomaly playstyle,
+	/// the caller's validator), so entries are keyed by the current tick and by an epoch that advances
+	/// on save load. Probed-but-never-chosen makers keep their seed, so without those stamps a later
+	/// generation could reuse a sample taken under different world state.
 	/// A small per-maker ring holds the recent entries, and callers receive a copy so cached lists are
 	/// never mutated.
 	/// </remarks>
@@ -25,6 +28,10 @@ namespace YaOpt.Helpers
 			internal ThingSetMakerParams Params;
 
 			internal int Seed;
+
+			internal int Tick;
+
+			internal int Epoch;
 
 			internal float Total;
 
@@ -57,10 +64,13 @@ namespace YaOpt.Helpers
 			if (!Memos.TryGetValue(maker, out var memo))
 				return false;
 
+			var tick = ThingSetMakerCacheCommon.Tick;
+			var epoch = ThingSetMakerCacheCommon.Epoch;
 			for (var i = 0; i < memo.Count; i++)
 			{
 				ref var entry = ref memo.Entries[i];
-				if (!entry.Valid || entry.Seed != seed || !ParamsEqual(parms, entry.Params))
+				if (!entry.Valid || entry.Epoch != epoch || entry.Tick != tick
+					|| entry.Seed != seed || !ThingSetMakerCacheCommon.ParamsEqual(parms, entry.Params))
 					continue;
 
 				pairs = new List<ThingStuffPairWithQuality>(entry.Pairs);
@@ -75,60 +85,37 @@ namespace YaOpt.Helpers
 			List<ThingStuffPairWithQuality> pairs, float total)
 		{
 			var memo = Memos.GetValue(maker, CreateMemo);
+			var tick = ThingSetMakerCacheCommon.Tick;
+			var epoch = ThingSetMakerCacheCommon.Epoch;
 
 			for (var i = 0; i < memo.Count; i++)
 			{
 				ref var existing = ref memo.Entries[i];
-				if (existing.Valid && existing.Seed == seed && ParamsEqual(parms, existing.Params))
+				if (existing.Valid && existing.Epoch == epoch && existing.Tick == tick
+					&& existing.Seed == seed && ThingSetMakerCacheCommon.ParamsEqual(parms, existing.Params))
 				{
-					Write(ref existing, parms, seed, pairs, total);
+					Write(ref existing, parms, seed, tick, epoch, pairs, total);
 					return;
 				}
 			}
 
 			ref var slot = ref memo.Entries[memo.Next];
-			Write(ref slot, parms, seed, pairs, total);
+			Write(ref slot, parms, seed, tick, epoch, pairs, total);
 			memo.Next = (memo.Next + 1) % MaxEntries;
 			if (memo.Count < MaxEntries)
 				memo.Count++;
 		}
 
-		private static void Write(ref Entry entry, in ThingSetMakerParams parms, int seed,
+		private static void Write(ref Entry entry, in ThingSetMakerParams parms, int seed, int tick, int epoch,
 			List<ThingStuffPairWithQuality> pairs, float total)
 		{
 			entry.Params = parms;
 			entry.Seed = seed;
+			entry.Tick = tick;
+			entry.Epoch = epoch;
 			entry.Total = total;
 			entry.Pairs = new List<ThingStuffPairWithQuality>(pairs);
 			entry.Valid = true;
-		}
-
-		private static bool ParamsEqual(in ThingSetMakerParams a, in ThingSetMakerParams b)
-		{
-			return NullableEqual(a.techLevel, b.techLevel)
-				&& NullableEqual(a.countRange, b.countRange)
-				&& ReferenceEquals(a.filter, b.filter)
-				&& ReferenceEquals(a.validator, b.validator)
-				&& NullableEqual(a.qualityGenerator, b.qualityGenerator)
-				&& NullableEqual(a.maxTotalMass, b.maxTotalMass)
-				&& NullableEqual(a.maxThingMarketValue, b.maxThingMarketValue)
-				&& NullableEqual(a.allowNonStackableDuplicates, b.allowNonStackableDuplicates)
-				&& NullableEqual(a.minSingleItemMarketValuePct, b.minSingleItemMarketValuePct)
-				&& NullableEqual(a.totalMarketValueRange, b.totalMarketValueRange)
-				&& NullableEqual(a.totalNutritionRange, b.totalNutritionRange)
-				&& NullableEqual(a.podContentsType, b.podContentsType)
-				&& ReferenceEquals(a.makingFaction, b.makingFaction)
-				&& ReferenceEquals(a.traderDef, b.traderDef)
-				&& NullableEqual(a.tile, b.tile)
-				&& ReferenceEquals(a.custom, b.custom);
-		}
-
-		private static bool NullableEqual<T>(T? a, T? b) where T : struct
-		{
-			if (a.HasValue != b.HasValue)
-				return false;
-
-			return !a.HasValue || EqualityComparer<T>.Default.Equals(a.GetValueOrDefault(), b.GetValueOrDefault());
 		}
 	}
 }

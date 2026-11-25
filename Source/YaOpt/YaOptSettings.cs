@@ -801,10 +801,11 @@ namespace YaOpt
 		/// same merged parameters and seed.
 		/// </summary>
 		/// <remarks>
-		/// Reward and trader item generation runs the same sample repeatedly: once per option to build
-		/// the weighted option table and again to generate the chosen option. The sample is already wrapped
+		/// Reward and event item generation runs the same sample repeatedly: once per option to build the
+		/// weighted option table and again to generate the chosen option. The sample is already wrapped
 		/// in <c>Rand.PushState(seed)</c>/<c>PopState</c>, so identical parameters and seed always produce
-		/// identical results and skipping the call does not advance the ambient random stream.
+		/// identical results and skipping the call does not advance the ambient random stream. Samples also
+		/// read world state such as colonist titles and research progress, so entries expire every tick.
 		/// </remarks>
 		/// <seealso cref="Patches.RimWorld_ThingSetMaker_MarketValue_GeneratePossibleDefs"/>
 		/// <seealso cref="Helpers.ThingSetMakerSampleCache"/>
@@ -812,6 +813,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ThingSetMakerSampleCache",
 			Desc = "YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility",
 			Category = OptimizationCategory.Tps,
 		};
 

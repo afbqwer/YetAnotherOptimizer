@@ -11,9 +11,10 @@ namespace YaOpt.Patches
 	/// </summary>
 	/// <remarks>
 	/// Option tables query every option with the same merged parameters and seed, then generate the
-	/// chosen one, so the same sample runs many times. The result is a pure function of those two inputs
-	/// and the seeded block restores the ambient random state, so returning the cached list changes
-	/// neither the random stream nor the produced items.
+	/// chosen one, so the same sample runs many times. The seeded block restores the ambient random state,
+	/// so skipping it changes neither the random stream nor the produced items. The sample does read world
+	/// state through the allowed def list, so the cache is keyed by tick and invalidated on load; see
+	/// <see cref="ThingSetMakerSampleCache"/>.
 	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptThingSetMakerSampleCache"/>
 	/// <seealso cref="ThingSetMakerSampleCache"/>
@@ -30,7 +31,12 @@ namespace YaOpt.Patches
 
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings?.OptThingSetMakerSampleCache.Enabled == true;
+			if (YaOptGlobal.Settings?.OptThingSetMakerSampleCache.Enabled != true)
+				return false;
+
+			// The cache replays a call that was skipped: any foreign patch would either be applied twice
+			// or lose its side effects. GenerationOptimizationCompat also bans the setting for the UI.
+			return !PatchConflictGuard.HasForeignPatch(TargetMethod());
 		}
 
 		static bool Prefix(ThingSetMaker_MarketValue __instance, ThingSetMakerParams parms, int seed,
