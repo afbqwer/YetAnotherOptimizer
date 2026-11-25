@@ -38,17 +38,37 @@ namespace YaOpt.Helpers
 
 		private static string _sharedLogPath;
 
-		public static void Init()
+		/// <summary>
+		/// Archives the previous run before the native reporter installs its log with
+		/// CREATE_ALWAYS, which would otherwise truncate a reused-PID report first.
+		/// </summary>
+		public static void Prepare()
 		{
 			try
 			{
 				var dir = GenFilePaths.SaveDataFolderPath;
 				_sharedLogPath = Path.Combine(dir, $"{FilePrefix}{Environment.ProcessId}{LogSuffix}");
-
-				// The two settings are independent: disabling the managed stack writer must not
-				// silently disable the stderr capture the user explicitly enabled.
 				if (YaOptGlobal.Settings.EnhancedCrashLog.Enabled)
 					SummarizePrevious(dir);
+			}
+			catch (Exception e)
+			{
+				YaOptMod.Warning("Failed to summarize the previous crash log. " +
+								 "This does not affect gameplay.\n" + e);
+			}
+		}
+
+		/// <summary>
+		/// Redirects stderr only after the native install, because that install opens the shared
+		/// log with CREATE_ALWAYS and would wipe the first redirected records.
+		/// </summary>
+		public static void Init()
+		{
+			try
+			{
+				if (string.IsNullOrEmpty(_sharedLogPath))
+					_sharedLogPath = Path.Combine(GenFilePaths.SaveDataFolderPath,
+						$"{FilePrefix}{Environment.ProcessId}{LogSuffix}");
 
 				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
 					YaOptGlobal.Settings.FatalStderrCapture.Enabled)
@@ -101,7 +121,7 @@ namespace YaOpt.Helpers
 		/// <summary>
 		/// Removes the shared log when neither a native record, an exception nor stderr output ever reached it.
 		/// </summary>
-		public static void TryDeleteEmptyManagedLog()
+		public static void TryDeleteEmptySharedLog()
 		{
 			try
 			{

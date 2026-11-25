@@ -22,16 +22,21 @@ namespace YaOpt.Helpers
 			try
 			{
 				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
+				// Subscribed unconditionally: the managed log also needs cleanup when the native
+				// reporter is disabled and InstallCrashReporter never runs.
+				AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 
-				// The native install opens the shared log with CREATE_ALWAYS. It must run before
-				// CrashLogEnhancer redirects stderr, otherwise that truncation would wipe the
-				// first stderr records.
+				// Archive first: the native install opens the shared log with CREATE_ALWAYS and
+				// would truncate a previous report whose PID happened to be reused.
+				CrashLogEnhancer.Prepare();
+
 				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
 					YaOptGlobal.Settings.VectoredExceptionHandler.Enabled)
 				{
 					InstallCrashReporter();
 				}
 
+				// Only now redirect stderr - CREATE_ALWAYS above would wipe its first records.
 				CrashLogEnhancer.Init();
 			}
 			catch (Exception e)
@@ -80,7 +85,6 @@ namespace YaOpt.Helpers
 				case 0:
 					_crashReporterInstalled = true;
 					_crashLogPath = logPath;
-					AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 					YaOptMod.Log("Crash reporting installed. Native faults (access violation, illegal " +
 								 "instruction, stack overflow, in-page error, privileged instruction) " +
 								 "are recorded to " + logPath);
@@ -88,7 +92,6 @@ namespace YaOpt.Helpers
 				case 1:
 					_crashReporterInstalled = true;
 					_crashLogPath = logPath;
-					AppDomain.CurrentDomain.ProcessExit += OnProcessExit;
 					YaOptMod.Warning("Crash reporting was already installed.");
 					break;
 				default:
@@ -112,6 +115,10 @@ namespace YaOpt.Helpers
 
 		private static void OnProcessExit(object sender, EventArgs e)
 		{
+			// Runs even when the native reporter is off, because stderr capture can still have
+			// created an empty log that needs removing.
+			CrashLogEnhancer.TryDeleteEmptySharedLog();
+
 			if (!_crashReporterInstalled)
 			{
 				return;
@@ -159,7 +166,6 @@ namespace YaOpt.Helpers
 			}
 
 			TryDeleteEmptyLog();
-			CrashLogEnhancer.TryDeleteEmptyManagedLog();
 		}
 
 		/// <summary>
