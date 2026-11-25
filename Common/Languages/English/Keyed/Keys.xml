@@ -233,6 +233,11 @@
 	<YaOpt.Setting.Option.WorldPawnsListCache.Desc>Reuses the world pawn lists instead of rebuilding them on every access. Vanilla clears and refills them from the alive, mothballed and dead sets each time, even when nothing changed. The lists are rebuilt as soon as a pawn is added or removed, so callers see the same contents as vanilla.</YaOpt.Setting.Option.WorldPawnsListCache.Desc>
 	<YaOpt.Setting.Option.StorableDefsCache>Storable Def List Cache</YaOpt.Setting.Option.StorableDefsCache>
 	<YaOpt.Setting.Option.StorableDefsCache.Desc>Remembers which thing defs can be stored, instead of rescanning every def each time a storage filter is reset. That scan checks several properties on several thousand defs, which adds up when a storage settings window resets filters repeatedly. Invalidated periodically to pick up defs a mod edited after load.</YaOpt.Setting.Option.StorableDefsCache.Desc>
+	<YaOpt.Setting.Option.RoomThingsCache>Room Contents Cache</YaOpt.Setting.Option.RoomThingsCache>
+	<YaOpt.Setting.Option.RoomThingsCache.Desc>Remembers the list of things in a room instead of rebuilding it, and de-duplicating it through a hash set, on every read. One room stat update reads that list a dozen times while scoring the room. Rebuilt as soon as anything in the room is added, removed or moved.</YaOpt.Setting.Option.RoomThingsCache.Desc>
+	<YaOpt.Setting.Option.RoomStatsThrottle>Room Stats Interval</YaOpt.Setting.Option.RoomStatsThrottle>
+	<YaOpt.Setting.Option.RoomStatsThrottle.Desc>Limits a room to one stats and role recompute every 128 ticks. Vanilla recomputes as soon as the room is read after any item inside it spawns or despawns, and each recompute runs every room stat and room role worker, so a busy stockpile can trigger it several times per second. Reads in between return the previous values.</YaOpt.Setting.Option.RoomStatsThrottle.Desc>
+	<YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>Room stats, the room role label and mood thoughts based on the room can lag by up to about two seconds. Turn this off if a mod relies on room stats changing instantly, for example on prison cell conversion.</YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>
 	<YaOpt.Setting.Tab.Main>All</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

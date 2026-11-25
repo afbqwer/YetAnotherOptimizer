@@ -639,6 +639,46 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches <see cref="Room.ContainedAndAdjacentThings"/> until a region of the room or one of
+		/// its thing lists changes.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla rebuilds the list, and de-duplicates it through a <see cref="HashSet{T}"/>, on every
+		/// access. One room stats recompute reads it a dozen times through the stat and role workers.
+		/// The cached contents are copied back into vanilla's own list, so callers see the same object
+		/// and the same ordering.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_Room_ContainedAndAdjacentThings_Cache"/>
+		public OptimizationOption OptRoomThingsCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.RoomThingsCache",
+			Desc = "YaOpt.Setting.Option.RoomThingsCache.Desc",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
+		/// Limits how often a room recomputes its stats and role after something inside it changed.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla recomputes whenever the room is read while <c>statsAndRoleDirty</c> is set, and that
+		/// flag is raised by every non-pawn thing spawned or despawned in the room. Each recompute runs
+		/// every room stat and room role worker, several of which walk all cells of the room. Reads
+		/// return the previous values for up to <see cref="Helpers.RoomContentCache.StatsUpdateInterval"/>
+		/// ticks instead.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_Room_Role_Throttle"/>
+		/// <seealso cref="Patches.Verse_Room_GetStat_Throttle"/>
+		public OptimizationOption OptRoomStatsThrottle { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.RoomStatsThrottle",
+			Desc = "YaOpt.Setting.Option.RoomStatsThrottle.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.RoomStatsThrottle.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Caches <see cref="StatDefOf.MoveSpeed"/> for 20 ticks at the <see cref="Pawn.TicksPerMove"/>
 		/// call site. Vanilla evaluates MoveSpeed once per cell walked and never reads the temporary
 		/// stat cache for it (<c>cacheStaleAfterTicks</c> defaults to -1); MoveSpeed is also not

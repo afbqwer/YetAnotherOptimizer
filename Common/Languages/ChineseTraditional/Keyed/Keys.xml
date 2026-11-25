@@ -233,6 +233,11 @@
 	<YaOpt.Setting.Option.WorldPawnsListCache.Desc>重用世界 pawn 清單，不再每次存取都重建。原版每次都會清空並從存活、封存、死亡三個集合重新填充，即使內容沒有變化。只要有 pawn 增刪清單就會正常重建，呼叫方拿到的內容與原版一致。</YaOpt.Setting.Option.WorldPawnsListCache.Desc>
 	<YaOpt.Setting.Option.StorableDefsCache>可儲存物品清單快取</YaOpt.Setting.Option.StorableDefsCache>
 	<YaOpt.Setting.Option.StorableDefsCache.Desc>記住哪些物品 Def 可以入庫，不再每次重設儲存過濾器時全量掃描。該掃描要在數千個 Def 上檢查多個屬性，儲存設定視窗反覆重設過濾器時開銷明顯。會定期失效，以涵蓋讀檔後被模組改寫的 Def。</YaOpt.Setting.Option.StorableDefsCache.Desc>
+	<YaOpt.Setting.Option.RoomThingsCache>房間內容快取</YaOpt.Setting.Option.RoomThingsCache>
+	<YaOpt.Setting.Option.RoomThingsCache.Desc>記住房間內的物品清單，不再每次讀取都重建一遍並用雜湊集合去重。每次計算房間屬性時這份清單會被讀取十幾次。房間內只要有物品增刪或換位就會正常重建。</YaOpt.Setting.Option.RoomThingsCache.Desc>
+	<YaOpt.Setting.Option.RoomStatsThrottle>房間屬性更新間隔</YaOpt.Setting.Option.RoomStatsThrottle>
+	<YaOpt.Setting.Option.RoomStatsThrottle.Desc>每個房間最多每 128 tick 重算一次屬性與用途。原版只要房間內有物品生成或消失，之後任何一次讀取都會觸發重算，而每次重算要跑完所有房間屬性與房間用途評分，繁忙的倉庫每秒可能觸發多次。間隔內的讀取回傳上一次的結果。</YaOpt.Setting.Option.RoomStatsThrottle.Desc>
+	<YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>房間屬性、房間用途名稱以及基於房間屬性的心情最多會延遲約兩秒。如果某個模組依賴房間屬性立即變化（例如囚室轉換），請關閉此項。</YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>
