@@ -153,7 +153,7 @@ The project compiles against a **publicized** copy of `Assembly-CSharp` (`Krafs.
 - **Output**:
   - Main DLL: `1.7/Assemblies/YaOpt.dll`
   - Native shim: `1.7/Native/YaOpt.NativeVEH.dll`
-  - Crash log: `YaOpt_Crash_<pid>.log` in the save data folder; opened at install, written on the first record, removed on exit if it stayed empty
+  - Crash logs in the save data folder: `YaOpt_Crash_<pid>.log` is the single unified report - native VEH fault records, the managed UnhandledException stack and optional unbuffered stderr all append to it. The native handle is opened with `FILE_APPEND_DATA | FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE` so the CRT and managed `FileStream` can append without overwriting each other; an empty file is removed on exit. `YaOpt_Crash-prev.log` holds a copy of the newest previous report, previewed in the game log at startup; consumed files are renamed to `*.seen` so the summary is not repeated. The native install must run before the stderr redirect because it opens the log with `CREATE_ALWAYS`. Stderr capture yields when `wowgag.guiperformancepatch` is loaded or stderr is already a file/console.
 - **Conditional Compilation**: `DEBUG` symbol enables performance diagnostics and profiling output.
 - **Test**: Launch RimWorld with the mod loaded. Verify via in-game TPS display and log messages. `YAOPT_SO_TEST=1` self-tests the stack overflow path and `YAOPT_AV_TEST=1` the access violation path (the game is expected to die; check `YaOpt_Crash_<pid>.log` in the save data folder).
 

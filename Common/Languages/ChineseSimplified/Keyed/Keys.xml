@@ -49,6 +49,10 @@
 	<YaOpt.Setting.Option.DebugOutput.Desc>在控制台中输出调试信息，启用这个选项可能会略微降低游戏速度，因为游戏会在每次输出控制台信息时记录整个调用栈，这是一个开销很大的操作。</YaOpt.Setting.Option.DebugOutput.Desc>
 	<YaOpt.Setting.Option.VectoredExceptionHandler>捕获原生崩溃现场</YaOpt.Setting.Option.VectoredExceptionHandler>
 	<YaOpt.Setting.Option.VectoredExceptionHandler.Desc>访问冲突、非法指令、栈溢出、页面读取失败这类原生故障会让游戏瞬间闪退，而托管代码完全看不到它们——CLR 不会把它们交给 UnhandledException。启用此选项后，Mod 会安装一个原生的 Windows 异常回调，在进程退出前把故障点（RIP + 模块偏移、读写类型与被访问地址）写进存档目录下的 YaOpt_Crash_&lt;pid&gt;.log，栈溢出还会附上溢出线程的栈上候选帧。每个故障码最多记录 4 次，之后只做计数，不会拖慢游戏。此选项无法阻止闪退；CLR 的 fast-fail（0xC0000409）在用户态无法拦截，要拿到完整托管栈请配合崩溃 dump 环境变量（DOTNET_DbgEnableMiniDump=1、DOTNET_DbgMiniDumpType=4）并分析 dump 文件。仅限 Windows。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.VectoredExceptionHandler.Desc>
+	<YaOpt.Setting.Option.EnhancedCrashLog>增强崩溃日志</YaOpt.Setting.Option.EnhancedCrashLog>
+	<YaOpt.Setting.Option.EnhancedCrashLog.Desc>把托管 UnhandledException 的堆栈（含方法名与源码行）追加到存档目录下的 YaOpt_Crash_&lt;pid&gt;.log，与原生 VEH 的故障现场在同一份报告里。下次启动时，会把最近一次崩溃的报告复制到 YaOpt_Crash-prev.log，并在游戏日志中打印摘要。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.EnhancedCrashLog.Desc>
+	<YaOpt.Setting.Option.FatalStderrCapture>记录致命错误的 stderr 原文</YaOpt.Setting.Option.FatalStderrCapture>
+	<YaOpt.Setting.Option.FatalStderrCapture.Desc>以无缓冲方式把进程 stderr 重定向到 YaOpt_Crash_&lt;pid&gt;.log，让运行时在退出前打出的内容（例如栈溢出时反复出现的函数名）追加到同一份报告。当 [WG] WOWGAG's Performance Patch 已加载，或 stderr 已是文件/控制台时会自动禁用，避免接管其他 Mod 正在使用的全局句柄。仅限 Windows。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.FatalStderrCapture.Desc>
 	<YaOpt.Setting.Option.MaterialGetColor>材质颜色缓存</YaOpt.Setting.Option.MaterialGetColor>
 	<YaOpt.Setting.Option.MaterialGetColor.Desc>缓存材质颜色以减少频繁调用底层引擎函数带来的开销。当颜色发生变化时会自动更新缓存。</YaOpt.Setting.Option.MaterialGetColor.Desc>
 	<YaOpt.Setting.Option.ColoredText>富文本优化</YaOpt.Setting.Option.ColoredText>

@@ -23,11 +23,16 @@ namespace YaOpt.Helpers
 			{
 				AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
 
+				// The native install opens the shared log with CREATE_ALWAYS. It must run before
+				// CrashLogEnhancer redirects stderr, otherwise that truncation would wipe the
+				// first stderr records.
 				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
 					YaOptGlobal.Settings.VectoredExceptionHandler.Enabled)
 				{
 					InstallCrashReporter();
 				}
+
+				CrashLogEnhancer.Init();
 			}
 			catch (Exception e)
 			{
@@ -154,6 +159,7 @@ namespace YaOpt.Helpers
 			}
 
 			TryDeleteEmptyLog();
+			CrashLogEnhancer.TryDeleteEmptyManagedLog();
 		}
 
 		/// <summary>
@@ -210,6 +216,7 @@ namespace YaOpt.Helpers
 				.AppendLine(e.ExceptionObject.ToString());
 			PrintCallStack(stackTrace, sb);
 			sb.AppendLine("================================");
+			CrashLogEnhancer.WriteManagedException(e.ExceptionObject);
 			YaOptMod.Error(sb.ToString());
 		}
 

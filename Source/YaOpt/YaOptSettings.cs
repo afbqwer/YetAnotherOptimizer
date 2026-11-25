@@ -47,6 +47,31 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Managed half of the crash report: appends the UnhandledException stack to the shared
+		/// crash log and surfaces the previous run's report at startup.
+		/// </summary>
+		public OptimizationOption EnhancedCrashLog { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.EnhancedCrashLog",
+			Desc = "YaOpt.Setting.Option.EnhancedCrashLog.Desc",
+			Category = OptimizationCategory.Main,
+			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll
+		};
+
+		/// <summary>
+		/// Redirects the process stderr to the managed crash log so runtime-fatal text survives
+		/// an instant exit. Skipped when gpp is loaded or stderr is already owned by a file/console.
+		/// </summary>
+		public OptimizationOption FatalStderrCapture { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FatalStderrCapture",
+			Desc = "YaOpt.Setting.Option.FatalStderrCapture.Desc",
+			Category = OptimizationCategory.Main,
+			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll,
+			FuncShow = (_) => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+		};
+
+		/// <summary>
 		/// Optimizes <see cref="Material.color"/> by caching the value in a managed container.
 		/// Unity <see cref="Material.color"/> involves a managed-to-native transition,
 		/// which creates significant overhead when called frequently.

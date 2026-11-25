@@ -86,6 +86,14 @@ static wchar_t g_logPath[YAO_LOG_PATH_MAX];
 static int g_logPathSet = 0;
 static int g_headerWritten = 0;
 
+// The VEH callback, the CRT stderr stream and managed exception text all append to this one
+// file. FILE_APPEND_DATA puts every WriteFile at the end regardless of the writer's own file
+// pointer, and the sharing flags let the CRT and a managed FileStream open it while we hold
+// our handle. Without these, a second writer either fails with a sharing violation or
+// overwrites whatever the other writer appended.
+#define YAO_LOG_ACCESS FILE_APPEND_DATA
+#define YAO_LOG_SHARE (FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE)
+
 // Minimal append helpers (no CRT, no heap). dst always stays <= end - 2 so a caller can
 // always terminate with "\r\n\0" afterwards.
 static char *AppendStr(char *dst, const char *end, const char *s)
@@ -204,7 +212,8 @@ static const char *AccessKind(ULONG_PTR op)
 // Opens the log file and writes the header once. The file is opened at install time while the
 // stack is intact - CreateFileW needs real stack, so doing it lazily fails exactly when a
 // stack overflow makes the record most valuable. Nothing is written here until the first
-// record, and the managed side deletes the file on exit if it stayed empty.
+// record, and the managed side deletes the file on exit if it stayed empty. The append/share
+// flags are shared with the managed stderr and exception writers; see YAO_LOG_ACCESS above.
 static int EnsureLogFile(void)
 {
 	char *dst;
@@ -215,9 +224,10 @@ static int EnsureLogFile(void)
 	{
 		if (!g_logPathSet)
 			return 0;
-		// FILE_SHARE_DELETE lets the managed side delete this file on exit when nothing was ever
-		// recorded; without it the delete would fail on the handle we are holding.
-		g_logFile = CreateFileW(g_logPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
+		// Append semantics keep the VEH records behind whatever the CRT/managed writers appended;
+		// FILE_SHARE_WRITE lets those writers in, FILE_SHARE_DELETE lets the managed side remove
+		// an empty file on exit.
+		g_logFile = CreateFileW(g_logPath, YAO_LOG_ACCESS, YAO_LOG_SHARE, NULL,
 								CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (g_logFile == INVALID_HANDLE_VALUE)
 			return 0;
@@ -477,8 +487,9 @@ __declspec(dllexport) int __stdcall YaOptVehInstall(const wchar_t *logPath)
 	g_logPathSet = 1;
 
 	// Open the handle now rather than on the first record: CreateFileW needs a healthy stack,
-	// and a stack overflow is precisely when the record must still be written.
-	g_logFile = CreateFileW(g_logPath, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_DELETE, NULL,
+	// and a stack overflow is precisely when the record must still be written. This truncation
+	// also means the managed side must install its stderr redirect only after this call.
+	g_logFile = CreateFileW(g_logPath, YAO_LOG_ACCESS, YAO_LOG_SHARE, NULL,
 							CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (g_logFile == INVALID_HANDLE_VALUE)
 	{
