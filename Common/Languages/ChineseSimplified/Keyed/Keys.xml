@@ -53,6 +53,10 @@
 	<YaOpt.Setting.Option.FatalStderrCapture.Desc>以无缓冲方式把进程 stderr 重定向到 YaOpt_Crash_&lt;pid&gt;.log，让运行时在退出前打出的内容（例如栈溢出时反复出现的函数名）追加到同一份报告。当 [WG] WOWGAG's Performance Patch 已加载，或 stderr 已是文件/控制台时会自动禁用，避免接管其他 Mod 正在使用的全局句柄。仅限 Windows。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.FatalStderrCapture.Desc>
 	<YaOpt.Setting.Option.MaterialGetColor>材质颜色缓存</YaOpt.Setting.Option.MaterialGetColor>
 	<YaOpt.Setting.Option.MaterialGetColor.Desc>缓存材质颜色以减少频繁调用底层引擎函数带来的开销。当颜色发生变化时会自动更新缓存。</YaOpt.Setting.Option.MaterialGetColor.Desc>
+	<YaOpt.Setting.Option.GlowGridCombine>光照合并优化</YaOpt.Setting.Option.GlowGridCombine>
+	<YaOpt.Setting.Option.GlowGridCombine.Desc>以分区索引替代原版的光照颜色合并流程。原版会对每个脏格遍历全部灯光，在灯附近砌一格挡光的墙就可能带来每帧数百万次矩形判定。此优化只访问与该格所在分区重叠的灯光，同时保持累加顺序不变，因此光照颜色不会改变。</YaOpt.Setting.Option.GlowGridCombine.Desc>
+	<YaOpt.Setting.Option.GasGridTick>气体网格 Tick 优化</YaOpt.Setting.Option.GasGridTick>
+	<YaOpt.Setting.Option.GasGridTick.Desc>用每格一位的占用位图跳过气体消散与扩散扫描中的空 64 格分组，替代原版每 tick 固定探测一批格子（无论气体在哪里）。每格的处理速率保持不变，因此气体模拟结果不变。</YaOpt.Setting.Option.GasGridTick.Desc>
 	<YaOpt.Setting.Option.ColoredText>富文本优化</YaOpt.Setting.Option.ColoredText>
 	<YaOpt.Setting.Option.ColoredText.Desc>优化富文本（如彩色文字）的解析性能。原版游戏在查找标签位置时使用了性能较低的IndexOf重载（涉及区域性相关检查），此优化将其替换为性能更高、只进行直接字节比较的重载。</YaOpt.Setting.Option.ColoredText.Desc>
 	<YaOpt.Setting.Option.EarlyRenderPrepare>提前准备物体渲染</YaOpt.Setting.Option.EarlyRenderPrepare>

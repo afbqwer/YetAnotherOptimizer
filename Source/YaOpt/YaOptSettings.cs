@@ -88,6 +88,43 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Replaces the glow combine pass with a section-indexed implementation.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla re-evaluates every light for every dirty cell, so a single light-blocking wall can
+		/// trigger millions of rect tests. The replacement keeps a per-section light index and a
+		/// compact dirty-cell list, reducing per-cell candidates to the handful of lights that overlap
+		/// the cell's 17x17 section. Accumulation order is preserved, so light colors are unchanged.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_GlowGrid_GlowGridUpdate_First"/>
+		/// <seealso cref="Patches.Verse_GlowGrid_DirtyCell"/>
+		public OptimizationOption OptGlowGridCombine { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.GlowGridCombine",
+			Desc = "YaOpt.Setting.Option.GlowGridCombine.Desc",
+			Category = OptimizationCategory.Fps
+		};
+
+		/// <summary>
+		/// Replaces the gas grid's fixed-size random-cell sweeps with a bitmap-driven skip.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla processes <c>area/64</c> dissipation positions and <c>area/32</c> diffusion
+		/// positions every tick whether or not the map holds any gas. The replacement keeps a
+		/// one-bit-per-cell occupancy bitmap in <c>cellsInRandomOrder</c> order, so the same
+		/// positions are covered per tick but empty 64-cell buckets cost a single word test.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_GasGrid_Tick"/>
+		/// <seealso cref="Patches.Verse_GasGrid_SetDirect_Densities"/>
+		/// <seealso cref="Patches.Verse_GasGrid_SetDirect_Packed"/>
+		public OptimizationOption OptGasGridTick { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.GasGridTick",
+			Desc = "YaOpt.Setting.Option.GasGridTick.Desc",
+			Category = OptimizationCategory.Tps
+		};
+
+		/// <summary>
 		/// Optimizes <see cref="ColoredText.Resolve(TaggedString)"/> and <see cref="ColoredText.StripTags(string)"/>.
 		/// Replaces <see cref="string.IndexOf(string)"/> (culture-sensitive) with <see cref="string.IndexOf(string, StringComparison)"/>
 		/// using <see cref="StringComparison.Ordinal"/> to avoid unnecessary overhead during text tagging.
