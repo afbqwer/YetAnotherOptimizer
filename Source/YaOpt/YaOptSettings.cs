@@ -380,9 +380,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ThingGetComp",
 			Desc = "YaOpt.Setting.Option.ThingGetComp.Desc",
-			NotePrepatch = "YaOpt.Setting.Option.ThingGetComp.Prepatch",
-			Category = OptimizationCategory.Tps,
-			Flags = OptimizationFlags.RequirePrepatcher
+			Category = OptimizationCategory.Tps
 		};
 
 		/// <summary>
@@ -1126,9 +1124,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.LazyTextureLoad",
 			Desc = "YaOpt.Setting.Option.LazyTextureLoad.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.LazyTextureLoad.Compatibility",
-			NotePrepatch = "YaOpt.Setting.Option.LazyTextureLoad.Prepatch",
 			Category = OptimizationCategory.Misc,
-			Flags = OptimizationFlags.RequirePrepatcher,
 			FuncPostDraw = SettingsPanel.LazyTextureLoadPostDraw,
 			FuncExposeData = (settings) =>
 			{

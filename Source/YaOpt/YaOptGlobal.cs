@@ -33,11 +33,6 @@ namespace YaOpt
 		public static bool IsMultiplayer { get; internal set; }
 
 		/// <summary>
-		/// Gets a value indicating whether Prepatcher is installed.
-		/// </summary>
-		public static bool IsPrepatcherAvailable { get; internal set; }
-
-		/// <summary>
 		/// Gets a value indicating whether Burst library is available on the current platform.
 		/// </summary>
 		public static bool IsBurstAvailable { get; internal set; }

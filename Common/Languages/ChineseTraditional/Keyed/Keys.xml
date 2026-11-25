@@ -34,14 +34,12 @@
 	<YaOpt.Setting.Category.Tps>TPS最佳化</YaOpt.Setting.Category.Tps>
 	<YaOpt.Setting.Category.Misc>其他最佳化</YaOpt.Setting.Category.Misc>
 	<YaOpt.Setting.InvalidOption>無法啟用該最佳化：</YaOpt.Setting.InvalidOption>
-	<YaOpt.Setting.InvalidOption.RequirePrepatcher>需要安裝Prepatcher。</YaOpt.Setting.InvalidOption.RequirePrepatcher>
 	<YaOpt.Setting.InvalidOption.RequireBurst>需要正常載入的Burst庫。</YaOpt.Setting.InvalidOption.RequireBurst>
 	<YaOpt.Setting.Message.RequireReload>更改的設定將在載入存檔或重啟遊戲後生效。</YaOpt.Setting.Message.RequireReload>
 	<YaOpt.Setting.Note.Banned>被{0}停用</YaOpt.Setting.Note.Banned>
 	<YaOpt.Setting.Note.FromMod>{0}（來自 {1}）</YaOpt.Setting.Note.FromMod>
 	<YaOpt.Setting.Note.Stability>【穩定性說明】</YaOpt.Setting.Note.Stability>
 	<YaOpt.Setting.Note.Compatibility>【Mod相容性說明】</YaOpt.Setting.Note.Compatibility>
-	<YaOpt.Setting.Note.Prepatch>【預修補程式】</YaOpt.Setting.Note.Prepatch>
 	<YaOpt.Setting.Note.Multithread>【多執行緒】</YaOpt.Setting.Note.Multithread>
 	<YaOpt.Setting.Note.FastListerRemove.Skipped>【已跳過】{0} 已經改寫了同一處程式碼，本最佳化在本次遊戲中不會生效，以對方的實作為準。</YaOpt.Setting.Note.FastListerRemove.Skipped>
 	<YaOpt.Setting.Note.FastListerRemove.SkippedUnknown>【已跳過】無法在原版方法中定位到移除呼叫，可能是其他 Mod 改寫所致，本最佳化在本次遊戲中不會生效。</YaOpt.Setting.Note.FastListerRemove.SkippedUnknown>
@@ -70,7 +68,6 @@
 	<YaOpt.Setting.Option.LazyTextureLoad>延遲紋理載入</YaOpt.Setting.Option.LazyTextureLoad>
 	<YaOpt.Setting.Option.LazyTextureLoad.Desc>原版遊戲會在啟動時將所有Mod紋理載入顯示卡記憶體中。這個最佳化會讓紋理僅在被首次呼叫時載入，能降低啟動耗時和顯示卡記憶體佔用，但會讓遊戲內首次載入紋理時頓卡。需要注意的是，目前尚未實現紋理卸載機制，當你一次遊戲玩得足夠久時，顯示卡記憶體佔用仍可能會逐漸增加至巔峰。此最佳化以及它的所有子選項在更改後都需要重啟遊戲才生效。</YaOpt.Setting.Option.LazyTextureLoad.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad.Compatibility>會導致Graphics Settings+和ImageOpt的統計資料不準。</YaOpt.Setting.Option.LazyTextureLoad.Compatibility>
-	<YaOpt.Setting.Option.LazyTextureLoad.Prepatch>由於Harmony不支援為泛型方法打修補程式，該最佳化透過Prepatcher Mod來實現。開關此最佳化後需要重啟遊戲來生效。</YaOpt.Setting.Option.LazyTextureLoad.Prepatch>
 	<YaOpt.Setting.Option.LazyTextureLoad.DdsOnly>僅延遲載入DDS格式</YaOpt.Setting.Option.LazyTextureLoad.DdsOnly>
 	<YaOpt.Setting.Option.LazyTextureLoad.DdsOnly.Desc>只對DDS格式（以及ImageOpt的Zstd壓縮DDS）紋理啟用延遲載入，非DDS格式圖片在載入時需要花費額外時間將其轉換成能被遊戲引擎渲染的格式，在執行中載入時會有明顯的卡頓。</YaOpt.Setting.Option.LazyTextureLoad.DdsOnly.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad.Radical>更激進的延遲載入</YaOpt.Setting.Option.LazyTextureLoad.Radical>
@@ -117,7 +114,6 @@
 	<YaOpt.Setting.Option.ComputeMatrixBurst.Desc>在物體渲染準備中，ComputeMatrix是一個運算量較大的步驟。遊戲原計畫使用Burst加速此過程，但因編程疏忽未能生效。此最佳化重寫了Burst實現，使其正常工作。</YaOpt.Setting.Option.ComputeMatrixBurst.Desc>
 	<YaOpt.Setting.Option.ThingGetComp>物體組件查詢加速</YaOpt.Setting.Option.ThingGetComp>
 	<YaOpt.Setting.Option.ThingGetComp.Desc>原版遊戲在查找存在的組件時很快，但在查找不存在的組件時非常慢。遺憾的是，判斷組件是否存在的唯一辦法就是透過GetComp查詢並等待失敗結果。該最佳化重寫了GetComp的查詢機制，確保當查找不存在的組件時也能迅速返回失敗結果。</YaOpt.Setting.Option.ThingGetComp.Desc>
-	<YaOpt.Setting.Option.ThingGetComp.Prepatch>由於Harmony不支援為泛型方法打修補程式，該最佳化透過Prepatcher Mod來實現。開關此最佳化後需要重啟遊戲來生效。</YaOpt.Setting.Option.ThingGetComp.Prepatch>
 	<YaOpt.Setting.Option.ParallelPawnTick>並行角色更新</YaOpt.Setting.Option.ParallelPawnTick>
 	<YaOpt.Setting.Option.ParallelPawnTick.Desc>為角色更新引入有限的多執行緒處理。多執行緒處理角色的工作中斷判斷、常態工作判斷。</YaOpt.Setting.Option.ParallelPawnTick.Desc>
 	<YaOpt.Setting.Option.ParallelPawnTick.Stable>如果錯誤日誌的呼叫堆疊中出現了ParallelPawnTickManager字樣，可以嘗試關閉這個最佳化。</YaOpt.Setting.Option.ParallelPawnTick.Stable>

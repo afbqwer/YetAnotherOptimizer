@@ -20,10 +20,8 @@ namespace YaOpt.Patches.ThreadSafe.ThreadLocal
 
 		static bool Prepare()
 		{
-			// Compatibility with Performance Fish. If Prepatcher is installed,
-			// use YaOpt.Patches.Prepatch.Verse_ThingOwnerUtility_GetAllThingsRecursively.
-			return (YaOptGlobal.NeedThreadSafe || YaOptGlobal.Settings.OptParallelWorkGiver.Enabled) &&
-				   !YaOptGlobal.IsPrepatcherAvailable;
+			// The 1.6 parallel paths are locked off on this branch, so this patch stays inactive.
+			return YaOptGlobal.NeedThreadSafe || YaOptGlobal.Settings.OptParallelWorkGiver.Enabled;
 		}
 
 		static bool Prefix(Map __0, ThingRequest __1,

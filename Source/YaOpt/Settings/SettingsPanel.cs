@@ -254,21 +254,18 @@ namespace YaOpt.Settings
 			var label = option.Name.Translate().ToString();
 			var hasNoteS = !string.IsNullOrWhiteSpace(option.NoteStability);
 			var hasNoteC = !string.IsNullOrWhiteSpace(option.NoteCompatibility);
-			var hasNoteP = !string.IsNullOrWhiteSpace(option.NotePrepatch);
 			var hasNoteMT = !string.IsNullOrWhiteSpace(option.NoteMultithread);
 			// Mark the options that are enabled but could not be installed this session, so the
 			// player sees it without having to hover.
 			var isSkipped = option == _settings.OptFastListerRemove &&
 							ListerThingsHelper.FastRemoveConflict != null;
-			if (hasNoteS || hasNoteC || hasNoteP || hasNoteMT || isSkipped)
+			if (hasNoteS || hasNoteC || hasNoteMT || isSkipped)
 			{
 				var sb = new StringBuilder(label);
 				if (hasNoteS)
 					sb.Append(" <color=#FF4040>[S]</color>");
 				if (hasNoteC)
 					sb.Append(" <color=#DEB0D0>[C]</color>");
-				if (hasNoteP)
-					sb.Append(" <color=#88F0F0>[P]</color>");
 				if (hasNoteMT)
 					sb.Append(" <color=#0044FF>[MT]</color>");
 				if (isSkipped)
@@ -365,12 +362,6 @@ namespace YaOpt.Settings
 			{
 				sb.Append("\n\n").Append("<color=#DEB0D0>").Append("YaOpt.Setting.Note.Compatibility".Translate()).Append("\n")
 					.Append(option.NoteCompatibility.Translate()).Append("</color>");
-			}
-
-			if (!string.IsNullOrWhiteSpace(option.NotePrepatch))
-			{
-				sb.Append("\n\n").Append("<color=#88F0F0>").Append("YaOpt.Setting.Note.Prepatch".Translate()).Append("\n")
-					.Append(option.NotePrepatch.Translate()).Append("</color>");
 			}
 
 			if (!string.IsNullOrWhiteSpace(option.NoteMultithread))
