@@ -222,6 +222,13 @@
 	<YaOpt.Setting.Option.ConnectivityUpdate.Desc>最佳化當地圖連通性更新（如建牆、拆牆）時的效能。原版程式碼使用了一個巨大的去重池並在迴圈內反覆清空，造成了顯著的效能開銷。此最佳化將其替換為更小的去重池並將清空操作正確外置，從而提升了效能。</YaOpt.Setting.Option.ConnectivityUpdate.Desc>
 	<YaOpt.Setting.Option.HARNeedCondition>外星種族需求更新最佳化</YaOpt.Setting.Option.HARNeedCondition>
 	<YaOpt.Setting.Option.HARNeedCondition.Desc>Humanoid Alien Races（外星種族框架）在每次寫入小人需求值的時候都會新建一個包含兩個元素的 HashSet&lt;Type&gt;，每幀累計可達數十 KB 的垃圾分配。HAR 只是讀取該參數，因此此最佳化改為重複使用同一個靜態集合。行為完全一致。</YaOpt.Setting.Option.HARNeedCondition.Desc>
+	<YaOpt.Setting.Option.LocalDateCache>地圖時間快取</YaOpt.Setting.Option.LocalDateCache>
+	<YaOpt.Setting.Option.LocalDateCache.Desc>在同一個 tick 內重用每張地圖的當日 tick、小時、日進度和季節。原版每次查詢都要從行星網格重算地塊中心來取得經度，而天空、天氣和天象程式碼每 tick 會為同一張地圖請求十幾次。結果與原版完全一致，只是跳過重複計算。</YaOpt.Setting.Option.LocalDateCache.Desc>
+	<YaOpt.Setting.Option.RecipeUsersCache>配方使用者清單快取</YaOpt.Setting.Option.RecipeUsersCache>
+	<YaOpt.Setting.Option.RecipeUsersCache.Desc>快取能夠執行某個配方的建築清單，不再每次都走訪全部物品 Def。原版每次呼叫都會全量掃描整個 Def 資料庫。Def 清單或該配方自身的使用者清單變化時快取會失效，並且定期重掃，以涵蓋模組直接改寫物品配方清單的情況。</YaOpt.Setting.Option.RecipeUsersCache.Desc>
+	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基礎屬性快取</YaOpt.Setting.Option.ThingDefBaseStatCache>
+	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在遊戲開始後記住每個物品 Def 的基礎質量、基礎易燃性和基礎耐久。原版每次讀取都要走完整屬性系統重算一遍。主要幫助在批次讀取這些值的模組，原版自身很少用到。讀檔時會重新計算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
+	<YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>如果某個模組會在遊戲過程中改寫屬性基礎值而改動沒有生效，請關閉此項。</YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

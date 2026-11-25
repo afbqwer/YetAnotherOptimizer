@@ -222,6 +222,13 @@
 	<YaOpt.Setting.Option.ConnectivityUpdate.Desc>优化当地图连通性更新（如建墙、拆墙）时的性能。原版代码使用了一个巨大的去重池并在循环内反复清空，造成了显著的性能开销。此优化将其替换为更小的去重池并将清空操作正确外置，从而提升了性能。</YaOpt.Setting.Option.ConnectivityUpdate.Desc>
 	<YaOpt.Setting.Option.HARNeedCondition>外星种族需求更新优化</YaOpt.Setting.Option.HARNeedCondition>
 	<YaOpt.Setting.Option.HARNeedCondition.Desc>Humanoid Alien Races（外星种族框架）在每次写入小人需求值的时候都会新建一个包含两个元素的 HashSet&lt;Type&gt;，每帧累计可达数十 KB 的垃圾分配。HAR 只是读取该参数，因此此优化改为复用同一个静态集合。行为完全一致。</YaOpt.Setting.Option.HARNeedCondition.Desc>
+	<YaOpt.Setting.Option.LocalDateCache>地图时间缓存</YaOpt.Setting.Option.LocalDateCache>
+	<YaOpt.Setting.Option.LocalDateCache.Desc>在同一个 tick 内复用每张地图的当日 tick、小时、日进度和季节。原版每次查询都要从行星网格重算地块中心来取得经度，而天空、天气和天象代码每 tick 会为同一张地图请求十几次。结果与原版完全一致，只是跳过重复计算。</YaOpt.Setting.Option.LocalDateCache.Desc>
+	<YaOpt.Setting.Option.RecipeUsersCache>配方使用者列表缓存</YaOpt.Setting.Option.RecipeUsersCache>
+	<YaOpt.Setting.Option.RecipeUsersCache.Desc>缓存能够执行某个配方的建筑列表，不再每次都遍历全部物品 Def。原版每次调用都会全量扫描整个 Def 数据库。Def 列表或该配方自身的使用者列表变化时缓存会失效，并且定期重扫，以覆盖模组直接改写物品配方列表的情况。</YaOpt.Setting.Option.RecipeUsersCache.Desc>
+	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基础属性缓存</YaOpt.Setting.Option.ThingDefBaseStatCache>
+	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在游戏开始后记住每个物品 Def 的基础质量、基础易燃性和基础耐久。原版每次读取都要走完整属性系统重算一遍。主要帮助在批量读取这些值的模组，原版自身很少用到。读档时会重新计算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
+	<YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>如果某个模组会在游戏过程中改写属性基础值而改动没有生效，请关闭此项。</YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

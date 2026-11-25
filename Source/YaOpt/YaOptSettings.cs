@@ -566,6 +566,50 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches <see cref="GenLocalDate"/> lookups for the remainder of the current tick, per map.
+		/// </summary>
+		/// <remarks>
+		/// Each lookup ends in <c>Find.WorldGrid.LongLatOf</c>, which rebuilds the tile centre from the
+		/// planet mesh on every call and is not cached in 1.7. <c>SkyManager</c>, <c>WeatherWorker</c> and
+		/// <c>GenCelestial</c> ask for the same map's date a dozen times per tick.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_GenLocalDate_DayPercent_Map"/>
+		/// <seealso cref="Patches.RimWorld_GenLocalDate_DayTick_Map"/>
+		public OptimizationOption OptLocalDateCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.LocalDateCache",
+			Desc = "YaOpt.Setting.Option.LocalDateCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Caches <see cref="RecipeDef.AllRecipeUsers"/> until the def list or the recipe's own user list
+		/// changes.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_RecipeDef_AllRecipeUsers"/>
+		public OptimizationOption OptRecipeUsersCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.RecipeUsersCache",
+			Desc = "YaOpt.Setting.Option.RecipeUsersCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Memoises <see cref="ThingDef.BaseMass"/>, <see cref="ThingDef.BaseFlammability"/> and
+		/// <see cref="ThingDef.BaseMaxHitPoints"/>.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_ThingDef_BaseMass"/>
+		/// <seealso cref="Patches.Verse_ThingDef_BaseFlammability"/>
+		/// <seealso cref="Patches.Verse_ThingDef_BaseMaxHitPoints"/>
+		public OptimizationOption OptThingDefBaseStatCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ThingDefBaseStatCache",
+			Desc = "YaOpt.Setting.Option.ThingDefBaseStatCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Caches <see cref="StatDefOf.MoveSpeed"/> for 20 ticks at the <see cref="Pawn.TicksPerMove"/>
 		/// call site. Vanilla evaluates MoveSpeed once per cell walked and never reads the temporary
 		/// stat cache for it (<c>cacheStaleAfterTicks</c> defaults to -1); MoveSpeed is also not
