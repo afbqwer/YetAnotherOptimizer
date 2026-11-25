@@ -1,6 +1,6 @@
 # YetAnotherOptimizer Development Guide
 
-This project is a high-performance optimization mod for **RimWorld 1.7**, designed to increase game frame rates (TPS/FPS) through Harmony patches, cache optimization and throttling. The `master` branch is 1.7-only and single-threaded; multithreading, Burst and other-mod compatibility optimizations are disabled. The 1.6 line, including `Source/YaOpt.Unity`, `Source/YaOpt.OtherMod.*` and the 1.6 binaries, is preserved on the `1.6` branch.
+This project is a high-performance optimization mod for **RimWorld 1.7**, designed to increase game frame rates (TPS/FPS) through Harmony patches, cache optimization and throttling. The `master` branch is 1.7-only. The 1.6 line, including `Source/YaOpt.Unity`, `Source/YaOpt.OtherMod.*` and the 1.6 binaries, is preserved on the `1.6` branch. The 1.6 parallel tick/work-giver code stays locked off here, but the branch carries its own 1.7 multithreading, built-in Prepatcher and other-mod compatibility optimizations (see section 6).
 
 ## 1. Project Architecture
 
@@ -11,15 +11,17 @@ The `master` branch contains the core module; the other two modules exist only o
 - **Key Components**:
   - `Patches/`: Harmony patches organized by target namespace. Subdirectories:
     - `Early/` — Patches applied before other mods load via the `EarlyHarmony` instance (ID `"YetAnotherOptimizer.Early"`).
-    - `Prepatch/` — Patches for the Prepatcher mod.
+    - `Prepatch/` — 1.6 Prepatcher patches. **Excluded from the build**; the active Prepatcher code lives in `Source/YaOpt/Prepatch/`.
     - `ThreadSafe/` — Thread-safety patches. Subcategories: `ThreadLocal/` (per-thread instance fields), `ThreadStatic/` (simple `[ThreadStatic]` replacements), `Locked/` (critical section lock injection), `Delayed/` (deferred execution). **1.6 legacy — never applied on this branch, see section 6.**
-    - `Compatibility/` — Runtime compatibility patches for other mods, plus `Unpatcher.cs` for conflict resolution.
+    - `Compatibility/` — Runtime compatibility patches for other mods, plus `Unpatcher.cs` for conflict resolution. **1.6 legacy directory; excluded from the build except `HumanoidAlienRaces/`.** New 1.7 compatibility patches live next to their target (for example `Patches/WorldMap/`).
     - `Debugging/` — Debugging and diagnostic patches.
   - `Helpers/`: Utility classes including:
     - `ParallelPawnTickManager`, `ParallelMapTickManager`, `ParallelWorkGiver` — Multi-threaded tick computations via Unity Job System. **1.6 legacy — locked off on this branch, see section 6.**
+    - `YaOptManagedJobs` — Managed wrappers for Unity jobs used by the render-side parallel patches. `ParallelPreDrawHelper` — render-side compatibility detection plus the active fast `RecacheRequested` path.
     - `UpdateCallbackHelper.cs` — Central event system for game lifecycle hooks (pre-tick, post-tick, pre-render, post-render, cache-clear).
     - `ThreadLocal/` — Per-thread helper classes for common APIs. **1.6 legacy.**
     - `ThreadSafe/` — Lock primitives (`GreedySpinLock`, `GreedyMonitor`) and `LockPatchManager`. **1.6 legacy.**
+  - `Prepatch/`: Built-in Prepatcher free patches (`PrepatcherFreePatches`, `PrepatcherMethods`, `PrepatcherState`, `PrepatcherFields`). These run through 1.7's built-in `RimWorldWaylith.PrepatcherCompat`.
   - `YaOptMod.cs`: Handles initialization, settings loading, early patching, and logging.
   - `YaOptGlobal.cs`: Central hub for mod state, settings, platform capabilities, thread-safety flags.
   - `YaOptSubMod.cs`: Base class for sub-modules with lifecycle hooks (`OnPreInit`, `OnInit`, `OnPostInit`, `OnPatch`, `OnUnpatch`).
@@ -54,7 +56,8 @@ Root
 │   ├── YaOpt/                  # Core C# project
 │   │   ├── Defines/            # Compile-time compatibility definitions
 │   │   ├── Helpers/            # Utility classes and trampolines
-│   │   └── Patches/            # Harmony patches (Early, Prepatch, ThreadSafe, Compatibility, Debugging)
+│   │   ├── Patches/            # Harmony patches (Early, WorldMap, Xml, ThreadSafe, Compatibility, Debugging)
+│   │   └── Prepatch/           # In-game Prepatcher free patches
 │   ├── NativeVEH/              # Native VEH shim (YaOptVeh.c + build.bat, builds YaOpt.NativeVEH.dll)
 │   ├── Settings.props          # Shared build properties
 │   └── YaOpt.sln               # Visual Studio solution
@@ -166,6 +169,7 @@ The project compiles against a **publicized** copy of `Assembly-CSharp` (`Krafs.
 
 ## 6. Threading Model
 
-- **Game tick is single-threaded**: All Thing Tick calls are executed serially on a single thread — there are never two Things ticking concurrently. Parallel work giver assignment and parallel thought updates do execute within the logical tick cycle, but they block the main thread while running, so no other Thing is being ticked simultaneously.
+- **Game tick is single-threaded**: All Thing Tick calls are executed serially on a single thread — there are never two Things ticking concurrently. The legacy 1.6 parallel work giver and parallel thought paths are locked off on this branch, so they cannot run either.
 - **No race conditions in ClearCache**: All `ClearCache` calls are invoked exclusively from the main thread. There are never concurrent cache clears, so caches do not require locks for write operations during invalidation.
-- **Parallel code is 1.6 legacy**: `Helpers/ThreadLocal`, `Helpers/ThreadSafe`, `Patches/ThreadSafe`, the `Parallel*` managers and every `OptParallel*` toggle come from the 1.6 line and are archived with it. On this branch all of those toggles are listed in `YaOptSettings.LockedOffOptimizations`, so `YaOptGlobal.NeedThreadSafe` never becomes true and every patch gated on it is skipped — the code compiles but never runs. Do not extend it, and do not read its presence as evidence that multithreading is supported here. (One known trap lives there: `ThreadLocalReachability.QueueNewOpenRegion` is bound with `AccessTools.MethodDelegate`, which emits `this = null`; it is only safe while the matching prefix replaces the method body.)
+- **1.6 parallel tick code stays locked off**: `Helpers/ThreadLocal`, `Helpers/ThreadSafe`, `Patches/ThreadSafe`, the `Parallel*` tick managers and every `OptParallel*` toggle from the 1.6 line are listed in `YaOptSettings.LockedOffOptimizations`, so `YaOptGlobal.NeedThreadSafe` stays false and every patch gated on it is skipped. Do not extend that code. (One known trap lives there: `ThreadLocalReachability.QueueNewOpenRegion` is bound with `AccessTools.MethodDelegate`, which emits `this = null`; it is only safe while the matching prefix replaces the method body.)
+- **1.7 parallel paths are separate**: `OptWorldMapLandformsParallel` warms the Geological Landforms tile cache with `System.Threading.Tasks`, and the render-side job code uses `YaOptManagedJobs` instead of the 1.6 `Parallel*` managers. These paths are gated by their own settings, not by `NeedThreadSafe`, so they are independent of the locked 1.6 code.
