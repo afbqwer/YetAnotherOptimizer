@@ -587,6 +587,76 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Builds one reverse index for the def-wide recipe and research lookups once defs are
+		/// loaded, so <see cref="ThingDef.AllRecipes"/>, <see cref="RecipeDef.AllRecipeUsers"/>,
+		/// <see cref="ResearchProjectDef.UnlockedDefs"/> and the research prerequisite helpers stop
+		/// rescanning the whole def database.
+		/// </summary>
+		/// <remarks>
+		/// The index is built before the first <c>[StaticConstructorOnStartup]</c> constructor, so
+		/// mods that query these lists during startup also benefit. Vanilla's own per-def caches are
+		/// still filled with fresh copies, and the index is dropped when play data is torn down.
+		/// </remarks>
+		/// <seealso cref="Helpers.DefLookupIndex"/>
+		/// <seealso cref="Patches.Early.Verse_ThingDef_AllRecipes"/>
+		/// <seealso cref="Patches.Early.Verse_ResearchPrerequisitesUtility_ComputeResearchPrerequisites"/>
+		public OptimizationOption OptDefLookupCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.DefLookupCache",
+			Desc = "YaOpt.Setting.Option.DefLookupCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.DefLookupCache.Compatibility",
+			SubCategory = "Startup",
+			Category = OptimizationCategory.Misc,
+		};
+
+		/// <summary>
+		/// Builds each biome's wild animal list and commonality tables in one pass after defs load.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla scans every <see cref="PawnKindDef"/> on each <see cref="BiomeDef.AllWildAnimals"/>
+		/// access and lazily builds the commonality dictionaries with <c>Dictionary.Add</c>, which
+		/// throws and leaves the table half filled when a kind is listed twice.
+		/// </remarks>
+		/// <seealso cref="Helpers.BiomeAnimalIndex"/>
+		/// <seealso cref="Patches.Early.Verse_BiomeDef_AllWildAnimals"/>
+		public OptimizationOption OptBiomeAnimalIndex { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.BiomeAnimalIndex",
+			Desc = "YaOpt.Setting.Option.BiomeAnimalIndex.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility",
+			SubCategory = "Startup",
+			Category = OptimizationCategory.Misc,
+		};
+
+		/// <summary>
+		/// Persists GiddyUp's session-only draw-offset cache across launches.
+		/// </summary>
+		/// <seealso cref="Helpers.GiddyUpOffsetCache"/>
+		/// <seealso cref="Patches.Early.GiddyUp_Setup_ProcessPawnKinds"/>
+		public OptimizationOption OptGiddyUpOffsetCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.GiddyUpOffsetCache",
+			Desc = "YaOpt.Setting.Option.GiddyUpOffsetCache.Desc",
+			SubCategory = "Startup",
+			Category = OptimizationCategory.Misc,
+			FuncShow = (_) => YaOptGlobal.HasType("GiddyUp.Setup"),
+		};
+
+		/// <summary>
+		/// Replaces Exosuit's full-document XML class rename with a value-only walk.
+		/// </summary>
+		/// <seealso cref="Helpers.ExosuitXmlBackCompatFast"/>
+		/// <seealso cref="Patches.Early.Exosuit_XmlBackCompat_ApplyWorker"/>
+		public OptimizationOption OptExosuitXmlFast { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ExosuitXmlFast",
+			Desc = "YaOpt.Setting.Option.ExosuitXmlFast.Desc",
+			SubCategory = "Startup",
+			Category = OptimizationCategory.Misc,
+			FuncShow = (_) => YaOptGlobal.HasType("Exosuit.XmlBackCompat"),
+		};
+
+		/// <summary>
 		/// Memoises <see cref="ThingDef.BaseMass"/>, <see cref="ThingDef.BaseFlammability"/> and
 		/// <see cref="ThingDef.BaseMaxHitPoints"/>.
 		/// </summary>
@@ -1195,6 +1265,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FastPatchOperation",
 			Desc = "YaOpt.Setting.Option.FastPatchOperation.Desc",
+			SubCategory = "Startup",
 			Category = OptimizationCategory.Misc
 		};
 
@@ -1212,6 +1283,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.FastTranslationInjection",
 			Desc = "YaOpt.Setting.Option.FastTranslationInjection.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.FastTranslationInjection.Compatibility",
+			SubCategory = "Startup",
 			Category = OptimizationCategory.Misc
 		};
 

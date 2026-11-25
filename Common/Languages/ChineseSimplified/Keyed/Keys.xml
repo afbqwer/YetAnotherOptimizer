@@ -248,6 +248,17 @@
 	<YaOpt.Setting.Option.LocalDateCache.Desc>在同一个 tick 内复用每张地图的当日 tick、小时、日进度和季节。原版每次查询都要从行星网格重算地块中心来取得经度，而天空、天气和天象代码每 tick 会为同一张地图请求十几次。结果与原版完全一致，只是跳过重复计算。</YaOpt.Setting.Option.LocalDateCache.Desc>
 	<YaOpt.Setting.Option.RecipeUsersCache>配方使用者列表缓存</YaOpt.Setting.Option.RecipeUsersCache>
 	<YaOpt.Setting.Option.RecipeUsersCache.Desc>缓存能够执行某个配方的建筑列表，不再每次都遍历全部物品 Def。原版每次调用都会全量扫描整个 Def 数据库。Def 列表或该配方自身的使用者列表变化时缓存会失效，并且定期失效，以覆盖模组直接改写物品配方列表的情况。</YaOpt.Setting.Option.RecipeUsersCache.Desc>
+	<YaOpt.Setting.SubCategory.Startup>启动加速</YaOpt.Setting.SubCategory.Startup>
+	<YaOpt.Setting.Option.DefLookupCache>Def 查找索引</YaOpt.Setting.Option.DefLookupCache>
+	<YaOpt.Setting.Option.DefLookupCache.Desc>在所有 Def 加载完成后，为跨 Def 的配方与研究查询建立一次索引。物品的配方列表、配方的使用者列表、研究项目的解锁列表以及研究前置映射都从索引直接返回，不再每次扫描整个 Def 数据库；其他模组的启动构造器也能受益。索引会在每次加载时重建，并在 Def 数据销毁时丢弃。</YaOpt.Setting.Option.DefLookupCache.Desc>
+	<YaOpt.Setting.Option.DefLookupCache.Compatibility>当其他 Mod 补丁了被索引的查询，或存在重复的 Def 索引提供者时，本项会自动禁用。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
+	<YaOpt.Setting.Option.BiomeAnimalIndex>生物群系动物索引</YaOpt.Setting.Option.BiomeAnimalIndex>
+	<YaOpt.Setting.Option.BiomeAnimalIndex.Desc>在所有 Def 加载完成后一次构建每个生物群系的野生动物列表与常见度表。原版每次访问都会全量扫描全部动物种类，而且惰性构建常见度表时遇到重复项会抛异常并留下不完整的表；此优化会合并重复项并保留较高的常见度。</YaOpt.Setting.Option.BiomeAnimalIndex.Desc>
+	<YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>当其他 Mod 补丁了 BiomeDef.AllWildAnimals 时，本项会自动禁用。</YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>
+	<YaOpt.Setting.Option.GiddyUpOffsetCache>GiddyUp 绘制偏移缓存</YaOpt.Setting.Option.GiddyUpOffsetCache>
+	<YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>持久化 GiddyUp 每次启动都会重新计算的绘制偏移。GiddyUp 每次启动都会渲染并逐像素扫描每个生命阶段的贴图；本项会从校验过的文件恢复其会话缓存，只丢弃贴图发生变化的条目。</YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>
+	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>
+	<YaOpt.Setting.Option.ExosuitXmlFast.Desc>用一次只遍历取值的查表替换 Exosuit 的全文档类名替换补丁操作，XML 补丁阶段不再为每个节点重建类名字典。</YaOpt.Setting.Option.ExosuitXmlFast.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基础属性缓存</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在游戏开始后记住每个物品 Def 的基础质量、基础易燃性和基础耐久。原版每次读取都要走完整属性系统重算一遍。主要帮助在批量读取这些值的模组，原版自身很少用到。读档时会重新计算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>如果某个模组会在游戏过程中改写属性基础值而改动没有生效，请关闭此项。</YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>

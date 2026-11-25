@@ -14,6 +14,7 @@ namespace YaOpt
 			DefInjectionHelper.ClearCache();
 			CompatibilityDefines.Load();
 			WorldMapOptimizationHelper.CheckConflicts();
+			DefLookupCacheHelper.CheckConflicts();
 			TypeSearcher.Init(); // Must init before patcher. Some patchers depend it.
 			DebugHelper.Init();
 			Patcher.Init();

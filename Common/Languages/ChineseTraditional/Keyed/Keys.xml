@@ -248,6 +248,17 @@
 	<YaOpt.Setting.Option.LocalDateCache.Desc>在同一個 tick 內重用每張地圖的當日 tick、小時、日進度和季節。原版每次查詢都要從行星網格重算地塊中心來取得經度，而天空、天氣和天象程式碼每 tick 會為同一張地圖請求十幾次。結果與原版完全一致，只是跳過重複計算。</YaOpt.Setting.Option.LocalDateCache.Desc>
 	<YaOpt.Setting.Option.RecipeUsersCache>配方使用者清單快取</YaOpt.Setting.Option.RecipeUsersCache>
 	<YaOpt.Setting.Option.RecipeUsersCache.Desc>快取能夠執行某個配方的建築清單，不再每次都走訪全部物品 Def。原版每次呼叫都會全量掃描整個 Def 資料庫。Def 清單或該配方自身的使用者清單變化時快取會失效，並且定期失效，以涵蓋模組直接改寫物品配方清單的情況。</YaOpt.Setting.Option.RecipeUsersCache.Desc>
+	<YaOpt.Setting.SubCategory.Startup>啟動加速</YaOpt.Setting.SubCategory.Startup>
+	<YaOpt.Setting.Option.DefLookupCache>Def 查找索引</YaOpt.Setting.Option.DefLookupCache>
+	<YaOpt.Setting.Option.DefLookupCache.Desc>在所有 Def 載入完成後，為跨 Def 的配方與研究查詢建立一次索引。物品的配方清單、配方的使用者清單、研究專案的解鎖清單以及研究前置對應都從索引直接回傳，不再每次掃描整個 Def 資料庫；其他模組的啟動建構子也能受益。索引會在每次載入時重建，並在 Def 資料銷毀時丟棄。</YaOpt.Setting.Option.DefLookupCache.Desc>
+	<YaOpt.Setting.Option.DefLookupCache.Compatibility>當其他 Mod 補丁了被索引的查詢，或存在重複的 Def 索引提供者時，本項會自動停用。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
+	<YaOpt.Setting.Option.BiomeAnimalIndex>生物群系動物索引</YaOpt.Setting.Option.BiomeAnimalIndex>
+	<YaOpt.Setting.Option.BiomeAnimalIndex.Desc>在所有 Def 載入完成後一次建構每個生物群系的野生動物清單與常見度表。原版每次存取都會全量掃描全部動物種類，而且惰性建構常見度表時遇到重複項目會拋出例外並留下不完整的表；此最佳化會合併重複項目並保留較高的常見度。</YaOpt.Setting.Option.BiomeAnimalIndex.Desc>
+	<YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>當其他 Mod 補丁了 BiomeDef.AllWildAnimals 時，本項會自動停用。</YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>
+	<YaOpt.Setting.Option.GiddyUpOffsetCache>GiddyUp 繪製偏移快取</YaOpt.Setting.Option.GiddyUpOffsetCache>
+	<YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>持久化 GiddyUp 每次啟動都會重新計算的繪製偏移。GiddyUp 每次啟動都會渲染並逐像素掃描每個生命階段的貼圖；本項會從校驗過的檔案恢復其工作階段快取，只丟棄貼圖發生變化的項目。</YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>
+	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>
+	<YaOpt.Setting.Option.ExosuitXmlFast.Desc>用一次只走訪取值的查表取代 Exosuit 的全文件類名取代補丁操作，XML 補丁階段不再為每個節點重建類名字典。</YaOpt.Setting.Option.ExosuitXmlFast.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基礎屬性快取</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在遊戲開始後記住每個物品 Def 的基礎質量、基礎易燃性和基礎耐久。原版每次讀取都要走完整屬性系統重算一遍。主要幫助在批次讀取這些值的模組，原版自身很少用到。讀檔時會重新計算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>如果某個模組會在遊戲過程中改寫屬性基礎值而改動沒有生效，請關閉此項。</YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>
