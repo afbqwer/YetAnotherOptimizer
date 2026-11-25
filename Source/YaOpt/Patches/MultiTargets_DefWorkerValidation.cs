@@ -15,9 +15,9 @@ namespace YaOpt.Patches
 
 		public override float ChanceFactorNow(IIncidentTarget target) => 0f;
 
-		public override bool CanFireNowSub(IncidentParms parms) => true;
+		protected override bool CanFireNowSub(IncidentParms parms) => true;
 
-		public override bool TryExecuteWorker(IncidentParms parms) => true;
+		protected override bool TryExecuteWorker(IncidentParms parms) => true;
 	}
 
 	/// <summary>

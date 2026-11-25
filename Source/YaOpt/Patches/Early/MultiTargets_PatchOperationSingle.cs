@@ -14,10 +14,17 @@ namespace YaOpt.Patches.Early
 	[EarlyPatch]
 	internal static class MultiTargets_PatchOperationSingle
 	{
+		/// <summary>
+		/// <c>ApplyWorker</c> is <c>protected</c> on <see cref="PatchOperation"/> and on every override
+		/// of it, and virtual members are excluded from publicization, so <c>nameof</c> cannot reach it.
+		/// Reflection resolves the name regardless of accessibility.
+		/// </summary>
+		private const string ApplyWorker = "ApplyWorker";
+
 		static IEnumerable<MethodBase> TargetMethods()
 		{
-			yield return AccessTools.Method(typeof(PatchOperationConditional), nameof(PatchOperationConditional.ApplyWorker));
-			yield return AccessTools.Method(typeof(PatchOperationTest), nameof(PatchOperationTest.ApplyWorker));
+			yield return AccessTools.Method(typeof(PatchOperationConditional), ApplyWorker);
+			yield return AccessTools.Method(typeof(PatchOperationTest), ApplyWorker);
 		}
 
 		static bool Prepare()

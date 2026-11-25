@@ -72,9 +72,17 @@
 		<PackageReference Include="Lib.Harmony" Version="3.0.0-rc.2" />
 	</ItemGroup>
 
+	<!-- Virtual members stay protected on purpose. Publicizing a virtual slot makes a bad
+	     `public override` compile against a `Family` runtime slot, which is a type-load failure
+	     rather than a compile error. Members we only *read* or *call* (never override) are
+	     opted back in individually. -->
 	<ItemGroup>
-		<Publicize Include="0Harmony" />
-		<Publicize Include="Assembly-CSharp" />
+		<Publicize Include="0Harmony" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		<Publicize Include="Assembly-CSharp" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+		<Publicize Include="Assembly-CSharp:Verse.Thing.MinTickIntervalRate" />
+		<Publicize Include="Assembly-CSharp:Verse.Thing.MaxTickIntervalRate" />
+		<Publicize Include="Assembly-CSharp:Verse.Thing.UpdateRateTickOffset" />
+		<Publicize Include="Assembly-CSharp:Verse.ThingOwner`1.NotifyRemoved" />
 	</ItemGroup>
 
 	</Project>

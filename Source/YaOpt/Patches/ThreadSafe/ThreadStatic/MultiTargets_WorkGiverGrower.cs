@@ -16,14 +16,20 @@ namespace YaOpt.Patches.ThreadSafe.ThreadStatic
 		[ThreadStatic]
 		public static ThingDef WantedPlantDef = null;
 
+		/// <summary>
+		/// <c>ExtraRequirements</c> is <c>protected virtual</c> on <see cref="WorkGiver_GrowerSow"/> and
+		/// virtual members are excluded from publicization, so <c>nameof</c> cannot reach it. Reflection
+		/// resolves the name regardless of accessibility.
+		/// </summary>
+		private const string ExtraRequirements = "ExtraRequirements";
+
 		static IEnumerable<MethodBase> TargetMethods()
 		{
 			yield return AccessTools.Method(typeof(WorkGiver_GrowerHarvest),
 				nameof(WorkGiver_GrowerHarvest.HasJobOnCell));
 			yield return AccessTools.Method(typeof(WorkGiver_GrowerSow),
 				nameof(WorkGiver_GrowerSow.JobOnCell));
-			yield return AccessTools.Method(typeof(WorkGiver_GrowerSow),
-				nameof(WorkGiver_GrowerSow.ExtraRequirements));
+			yield return AccessTools.Method(typeof(WorkGiver_GrowerSow), ExtraRequirements);
 			foreach (var nestedType in typeof(WorkGiver_Grower).GetNestedTypes(
 						 BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic))
 			{

@@ -25,7 +25,7 @@ namespace YaOpt.Patches.Xml
 		private PatchOperation nomatch;
 #pragma warning restore CS0649
 
-		public override bool ApplyWorker(XmlDocument xml)
+		protected override bool ApplyWorker(XmlDocument xml)
 		{
 			var operation = IsSettingEnabled(setting) ? match : nomatch;
 			if (operation == null)
