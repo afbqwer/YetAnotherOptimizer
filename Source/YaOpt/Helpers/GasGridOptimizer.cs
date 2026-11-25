@@ -176,12 +176,9 @@ namespace YaOpt.Helpers
 				return _cachedState;
 			}
 
-			if (!States.TryGetValue(grid, out var state))
-			{
-				state = new GasState();
-				States.Add(grid, state);
-			}
-
+			// GetValue is atomic; Add would race if a profiling mod ticks different maps on
+			// different threads.
+			var state = States.GetValue(grid, static _ => new GasState());
 			if (!state.Ready && !Initialize(grid, state))
 			{
 				return null;

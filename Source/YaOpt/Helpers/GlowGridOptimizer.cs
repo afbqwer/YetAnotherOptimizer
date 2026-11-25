@@ -30,6 +30,12 @@ namespace YaOpt.Helpers
 		/// <summary>Below this many dirty cells the combine runs inline; the job scheduler costs more than the work.</summary>
 		private const int ParallelThreshold = 2048;
 
+		/// <summary>
+		/// Frames between unconditional index rebuilds. Covers a mod that rewrites <c>lights</c>
+		/// directly without going through the registration methods we hook.
+		/// </summary>
+		private const int SanityRebuildFrames = 300;
+
 		private const int ComponentShift = 16;
 		private const int ComponentMask = 0xFFFF;
 
@@ -59,6 +65,7 @@ namespace YaOpt.Helpers
 			public int SizeZ;
 			public int NumCells;
 			public int IndexedLightCount;
+			public int FramesSinceRebuild;
 			public bool HasCavePlants;
 			public bool IndexValid;
 
@@ -367,9 +374,20 @@ namespace YaOpt.Helpers
 
 				if (state.DirtyCells.Count > 0)
 				{
-					if (lightsChanged || !state.IndexValid ||
-						state.IndexedLightCount != grid.lights.Length ||
-						state.NumCells != grid.indices.NumGridCells)
+					var rebuild = lightsChanged || !state.IndexValid ||
+								  state.IndexedLightCount != grid.lights.Length ||
+								  state.NumCells != grid.indices.NumGridCells;
+					if (rebuild)
+					{
+						state.FramesSinceRebuild = 0;
+					}
+					else if (++state.FramesSinceRebuild >= SanityRebuildFrames)
+					{
+						state.FramesSinceRebuild = 0;
+						rebuild = true;
+					}
+
+					if (rebuild)
 					{
 						RebuildIndex(grid, state);
 					}
