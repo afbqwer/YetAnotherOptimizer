@@ -283,11 +283,6 @@ namespace YaOpt.Settings
 			if (result != enabled && !disabledByDef)
 			{
 				option._enabled = result;
-				if (!option.Validate(false, false, true, out var reason))
-				{
-					Messages.Message("YaOpt.Setting.InvalidOption".Translate().ToString() + reason,
-						null, MessageTypeDefOf.RejectInput, false);
-				}
 				CheckIfOptionChanged();
 			}
 			if (option.FuncPostDraw != null)
@@ -432,90 +427,6 @@ namespace YaOpt.Settings
 						panel._showingDesc = "YaOpt.Setting.Option.MapMeshUpdateThrottle.UpdateInterval.Desc".Translate();
 					}
 				}
-			}
-		}
-
-		public static void ParallelPawnTickPostDraw(SettingsPanel panel,
-			Listing_Standard listing, OptimizationOption option)
-		{
-			if (option.Enabled)
-			{
-				listing.Indent();
-
-				{
-					listing.Gap(listing.verticalSpacing);
-					var check = panel._settings.ParallelPawnJobFailurePrediction;
-					DrawCheckboxLabeled(listing,
-						"YaOpt.Setting.Option.ParallelPawnTick.JobFailurePrediction".Translate(),
-						check, false, out var mouseOver, out var result, -12);
-					if (mouseOver)
-					{
-						panel._lastMouseOverOption = null;
-						panel._showingDesc =
-							"YaOpt.Setting.Option.ParallelPawnTick.JobFailurePrediction.Desc".Translate();
-					}
-					if (check != result)
-						panel._settings.ParallelPawnJobFailurePrediction = result;
-				}
-
-				{
-					listing.Gap(listing.verticalSpacing);
-					var check = panel._settings.ParallelPawnConstantJobPrediction;
-					DrawCheckboxLabeled(listing,
-						"YaOpt.Setting.Option.ParallelPawnTick.ConstantJobPrediction".Translate(),
-						check, false, out var mouseOver, out var result, -12);
-					if (mouseOver)
-					{
-						panel._lastMouseOverOption = null;
-						panel._showingDesc =
-							"YaOpt.Setting.Option.ParallelPawnTick.ConstantJobPrediction.Desc".Translate();
-					}
-					if (check != result)
-						panel._settings.ParallelPawnConstantJobPrediction = result;
-				}
-
-				listing.Outdent();
-				listing.Gap(listing.verticalSpacing);
-			}
-		}
-
-		public static void LazyTextureLoadPostDraw(SettingsPanel panel,
-			Listing_Standard listing, OptimizationOption option)
-		{
-			if (option.Enabled)
-			{
-				listing.Indent();
-
-				{
-					listing.Gap(listing.verticalSpacing);
-					var ddsOnly = panel._settings.LazyTextureLoadDdsOnly;
-					DrawCheckboxLabeled(listing, "YaOpt.Setting.Option.LazyTextureLoad.DdsOnly".Translate(),
-						ddsOnly, false, out var mouseOver, out var result, -12);
-					if (mouseOver)
-					{
-						panel._lastMouseOverOption = null;
-						panel._showingDesc = "YaOpt.Setting.Option.LazyTextureLoad.DdsOnly.Desc".Translate();
-					}
-					if (ddsOnly != result)
-						panel._settings.LazyTextureLoadDdsOnly = result;
-				}
-
-				{
-					listing.Gap(listing.verticalSpacing);
-					var radical = panel._settings.LazyTextureLoadRadical;
-					DrawCheckboxLabeled(listing, "YaOpt.Setting.Option.LazyTextureLoad.Radical".Translate(),
-						radical, false, out var mouseOver, out var result, -12);
-					if (mouseOver)
-					{
-						panel._lastMouseOverOption = null;
-						panel._showingDesc = "YaOpt.Setting.Option.LazyTextureLoad.Radical.Desc".Translate();
-					}
-					if (radical != result)
-						panel._settings.LazyTextureLoadRadical = result;
-				}
-
-				listing.Outdent();
-				listing.Gap(listing.verticalSpacing);
 			}
 		}
 

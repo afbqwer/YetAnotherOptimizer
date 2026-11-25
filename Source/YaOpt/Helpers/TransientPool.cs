@@ -143,12 +143,6 @@ namespace YaOpt.Helpers
 				_lock.Exit();
 			}
 		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static T BorrowIfNotMainThread(T t)
-		{
-			return YaOptGlobal.IsInMainThread ? t : Borrow();
-		}
 	}
 
 	internal static class TransientPoolDebug

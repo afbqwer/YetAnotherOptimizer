@@ -13,7 +13,7 @@ Optimizations are grouped into three categories, all configurable in the in-game
 - **FPS** — Pawn render node caching, silhouette cache optimization, texture lookup caching, mesh update throttling, and text parsing improvements.
 - **Misc** — Accelerated XML/translation processing and startup-time caches.
 
-The 1.7 line ships its own multithreading, built-in Prepatcher and other-mod compatibility optimizations. The 1.6 parallel and compatibility implementations stay locked off, and Burst acceleration is not available on 1.7.
+The 1.7 line includes loading-only world-map prewarming, built-in Prepatcher patches and targeted compatibility optimizations. The retired 1.6 implementations have been removed; their setting IDs remain only as hidden save-compatibility placeholders. Burst acceleration is not available on 1.7.
 
 ## Requirements
 

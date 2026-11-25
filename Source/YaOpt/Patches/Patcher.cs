@@ -76,7 +76,6 @@ namespace YaOpt.Patches
 				{
 					YaOptMod.Debug("Uninstalling exist patches...");
 					harmony.UnpatchAll(harmony.Id);
-					YaOptSubMod.UnpatchAll(YaOptGlobal.SubMods, harmony);
 					_hasPatched = false;
 				}
 
@@ -95,8 +94,6 @@ namespace YaOpt.Patches
 					ListerBuildingsCache.Invalidate();
 					RefuelWorkCandidates.Invalidate();
 				}
-				// Apply submod patches.
-				noError &= YaOptSubMod.PatchAll(YaOptGlobal.SubMods, harmony);
 				_hasPatched = true;
 				YaOptMod.Debug("Patcher complated");
 			}

@@ -24,30 +24,6 @@
 		<OutputPath>..\..\1.7\Assemblies\</OutputPath>
 	</PropertyGroup>
 
-	<!-- Compatibility submodules and Prepatcher prepatches are intentionally excluded in 1.7:
-	     mod compatibility/parallelism was retired, Prepatcher is built into the game. -->
-	<ItemGroup>
-		<Compile Remove="Patches\Compatibility\**\*.cs" />
-		<Compile Remove="Patches\Prepatch\**\*.cs" />
-		<!-- Depends on the Burst assembly, which cannot be built against the 1.7 math stubs. -->
-		<Compile Remove="Patches\Verse_PawnRenderTree_TryGetMatrix.cs" />
-		<!-- Multithreaded drawable-removal half of OptFastListerRemove; retired in 1.7. -->
-		<Compile Remove="Patches\Verse_DynamicDrawManager_DeRegisterDrawable.cs" />
-		<!-- Depend on retired compatibility/prepatch code. -->
-		<Compile Remove="Helpers\GetCompHelper.cs" />
-		<Compile Remove="Helpers\ParallelRegionTraverser.cs" />
-		<Compile Remove="Patches\MultiTargets_ThingGetComp.cs" />
-		<Compile Remove="Patches\Verse_ThingWithComps_InitializeComps.cs" />
-		<Compile Remove="Patches\Verse_ThingOwnerUtility_AppendThingHoldersFromThings.cs" />
-		<Compile Remove="Patches\ThreadSafe\Verse_RegionTraverser_BreadthFirstTraverse.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<!-- The HAR need-condition fix applies to 1.7 as well: it reaches HAR only through
-		     reflection and does not depend on any retired compatibility type. -->
-		<Compile Include="Patches\Compatibility\HumanoidAlienRaces\**\*.cs" />
-	</ItemGroup>
-
 	<ItemGroup>
 		<Reference Include="Assembly-CSharp">
 			<HintPath>$(RimWorldDir)Assembly-CSharp.dll</HintPath>

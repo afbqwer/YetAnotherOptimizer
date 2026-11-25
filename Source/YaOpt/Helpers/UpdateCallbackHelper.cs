@@ -28,8 +28,6 @@ namespace YaOpt.Helpers
 
 		private static readonly List<UpdateCallback> postRenderMethods = new List<UpdateCallback>();
 
-		private static readonly List<UpdateCallback> preDynamicDrawMethods = new List<UpdateCallback>();
-
 		private static readonly List<ClearCacheCallback> clearCacheMethods = new List<ClearCacheCallback>();
 
 		/// <summary>
@@ -81,18 +79,6 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
-		/// Registers a callback to be invoked before each DynamicDrawManager.DrawDynamicThings.
-		/// </summary>
-		public static void RegisterPreDynamicDrawCallback(UpdateCallback callback)
-		{
-			lock (preDynamicDrawMethods)
-			{
-				CheckRegister(callback, preDynamicDrawMethods);
-				preDynamicDrawMethods.Add(callback);
-			}
-		}
-
-		/// <summary>
 		/// Registers a callback to be invoked when caches should be cleared (game load).
 		/// </summary>
 		public static void RegisterClearCacheCallback(ClearCacheCallback callback)
@@ -124,7 +110,6 @@ namespace YaOpt.Helpers
 
 		public static void PreRender()
 		{
-			YaOptGlobal.IsRendering = true;
 			var tick = Find.TickManager.TicksGame;
 			for (var i = 0; i < preRenderMethods.Count; i++)
 			{
@@ -142,7 +127,6 @@ namespace YaOpt.Helpers
 
 		public static void PostRender()
 		{
-			YaOptGlobal.IsRendering = false;
 			var tick = Find.TickManager.TicksGame;
 			for (var i = 0; i < postRenderMethods.Count; i++)
 			{
@@ -181,23 +165,6 @@ namespace YaOpt.Helpers
 			for (var i = 0; i < postTickMethods.Count; i++)
 			{
 				var callback = postTickMethods[i];
-				try
-				{
-					callback(tick);
-				}
-				catch (Exception ex)
-				{
-					Log.Error(ex.ToString());
-				}
-			}
-		}
-
-		public static void PreDynamicDraw()
-		{
-			var tick = Find.TickManager.TicksGame;
-			for (var i = 0; i < preDynamicDrawMethods.Count; i++)
-			{
-				var callback = preDynamicDrawMethods[i];
 				try
 				{
 					callback(tick);

@@ -1,7 +1,6 @@
 using HarmonyLib;
 using RimWorld;
 using System;
-using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using Verse;
@@ -44,12 +43,6 @@ namespace YaOpt
 		public YaOptSettings Settings { get; }
 
 		/// <summary>
-		/// Gets the list of loaded sub-modules for mod compatibility.
-		/// </summary>
-		/// <seealso cref="YaOptSubMod"/>
-		public List<YaOptSubMod> SubMods { get; } = new List<YaOptSubMod>();
-
-		/// <summary>
 		/// Initializes a new instance of the <see cref="YaOptMod"/> class.
 		/// </summary>
 		public YaOptMod(ModContentPack content) : base(content)
@@ -59,14 +52,8 @@ namespace YaOpt
 			Log("Now loading...");
 			YaOptGlobal.IsMultiplayer = YaOptGlobal.HasMod("rwmt.Multiplayer");
 
-			// Initialize compatibility submods.
-			InitSubMods();
-
 			// Load settings.
 			Settings = GetSettings<YaOptSettings>();
-
-			// Load and burst libraries.
-			NativeLoader.LoadLibraries(content);
 			YaOptGlobal.IsLibraryLoaded = true;
 
 			// Fix compatibility with Hyperdrive mod.
@@ -77,19 +64,12 @@ namespace YaOpt
 			ApplyEarlyPatches();
 		}
 
-		private void InitSubMods()
-		{
-			SubMods.AddRange(YaOptSubMod.LoadAll());
-			YaOptSubMod.PreInitAll(SubMods);
-		}
-
 		/// <summary>
 		/// Validates and applies the current settings.
 		/// </summary>
 		private void ApplySettings()
 		{
-			Settings.ValidateOptions(true, false);
-			YaOptSubMod.InitAll(SubMods);
+			Settings.ValidateOptions();
 			PrepatcherState.Refresh();
 
 #if false && DEBUG
@@ -106,7 +86,6 @@ namespace YaOpt
 			try
 			{
 				noError &= EarlyHarmony.TryPatchAll(Assembly.GetExecutingAssembly(), true);
-				noError &= YaOptSubMod.PrePatchAll(SubMods, EarlyHarmony);
 			}
 			catch (Exception ex)
 			{
@@ -119,13 +98,6 @@ namespace YaOpt
 				Panic("Error(s) happened while early patching. The game may not run properly.");
 				Messages.Message("YaOpt.Message.ErrorWhileEarlyPatching".Translate().ToString(),
 					null, MessageTypeDefOf.CautionInput, false);
-			}
-
-			if (Settings.OptLazyTextureLoad.Enabled)
-			{
-				ContentManager.Init();
-				ContentManager.OnlyLazilyLoadDds = Settings.LazyTextureLoadDdsOnly;
-				ContentManager.EnableDownsampling = Settings.LazyTextureLoadRadical;
 			}
 		}
 

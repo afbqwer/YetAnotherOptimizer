@@ -8,7 +8,6 @@ namespace YaOpt.Settings
 		None = 0,
 		MultiplayerIncompatible = 0b0000_0001,
 		LockedOff               = 0b0000_0100,
-		RequireBurst            = 0b0001_0000,
 
 		NoSnapshot            = 0b0001_0000_0000_0000,
 		IgnoreEnableAll       = 0b0010_0000_0000_0000,

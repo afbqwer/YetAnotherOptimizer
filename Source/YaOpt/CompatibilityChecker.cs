@@ -210,12 +210,6 @@ namespace YaOpt
 		{
 			var type = patchObj.GetType();
 			var name = type.FullName;
-			if (name == "PerformanceFish.AccessToolsCaching+AllTypes" &&
-				YaOptGlobal.Settings.OptRuntimeInfoCache.Enabled)
-			{
-				error = "YaOpt.Message.PerformanceFish.RuntimeInfoCache".Translate();
-				return false;
-			}
 			if (name == "PerformanceFish.MiscOptimizations+WindManager_WindManagerTick" &&
 				YaOptGlobal.Settings.OptWindUpdate.Enabled)
 			{
@@ -228,12 +222,6 @@ namespace YaOpt
 				error = "YaOpt.Message.PerformanceFish.BedThrottle".Translate();
 				return false;
 			}
-			if (name == "PerformanceFish.Hauling.StorageSettingsPatches+AllowedToAcceptPatch" &&
-				YaOptGlobal.Settings.OptParallelWorkGiver.Enabled)
-			{
-				error = "YaOpt.Message.PerformanceFish.ParallelWorkGiver".Translate();
-				return false;
-			}
 			error = null;
 			return true;
 		}
@@ -242,30 +230,6 @@ namespace YaOpt
 		{
 			var type = patchObj.GetType();
 			var name = type.FullName;
-			if (name == "PerformanceFish.GetCompCaching+ThingCompPatch" &&
-				YaOptGlobal.Settings.OptThingGetComp.Enabled)
-			{
-				error = "YaOpt.Message.PerformanceFish.ThingGetComp".Translate();
-				return false;
-			}
-			if (name == "PerformanceFish.Rendering.ContentFinderCaching+Get_Patch" &&
-				YaOptGlobal.Settings.OptLazyTextureLoad.Enabled)
-			{
-				error = "YaOpt.Message.PerformanceFish.LazyTextureLoad".Translate();
-				return false;
-			}
-			if (name == "PerformanceFish.Rendering.DynamicDrawManagerPatches+DrawDynamicThingsPatch" &&
-				YaOptGlobal.Settings.OptEarlyRenderPrepare.Enabled)
-			{
-				error = "YaOpt.Message.PerformanceFish.EarlyRenderPrepare".Translate();
-				return false;
-			}
-			if (name == "PerformanceFish.Rendering.PawnRenderingOptimizations+PawnRenderTreeComputeMatrixPatch" &&
-				YaOptGlobal.Settings.OptComputeMatrixBurst.Enabled)
-			{
-				error = "YaOpt.Message.PerformanceFish.ComputeMatrixBurst".Translate();
-				return false;
-			}
 			if ((name == "PerformanceFish.Listers.ThingsPrepatches+GetThingsOfTypeIntoListPatch" ||
 				 name == "PerformanceFish.Listers.ThingsPrepatches+AddPatch" ||
 				 name == "PerformanceFish.Listers.ThingsPrepatches+ContainsPatch" ||

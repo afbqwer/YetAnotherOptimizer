@@ -22,8 +22,6 @@ namespace YaOpt.Settings
 					return false;
 				if (!string.IsNullOrWhiteSpace(RequiredMod) && !YaOptGlobal.HasMod(RequiredMod))
 					return false;
-				if (RequiredOption != null && !RequiredOption.Enabled)
-					return false;
 				if (CompatibilityDefines.CachedBannedOptimizations.Contains(SettingId))
 					return false;
 				return _enabled;
@@ -66,8 +64,6 @@ namespace YaOpt.Settings
 
 		public OptimizationFlags Flags { get; set; }
 
-		public OptimizationOption RequiredOption;
-
 		public Func<YaOptSettings, bool> FuncShow { get; set; } = null;
 
 		public Action<SettingsPanel, Listing_Standard, OptimizationOption> FuncPostDraw { get; set; } = null;
@@ -76,34 +72,10 @@ namespace YaOpt.Settings
 
 		public bool MultiplayerCompatibility => (Flags & OptimizationFlags.MultiplayerIncompatible) == 0;
 
-		public bool Validate(bool dryRun, bool printError, bool translateMessage, out string message)
+		public void Validate()
 		{
-			message = string.Empty;
 			if (IsLockedOff)
-			{
-				if (!dryRun)
-					_enabled = false;
-				return true;
-			}
-			// Validator doesn't validate multiplay and mod requirements. They are validated in the getter of Enabled
-			var error = false;
-			if (_enabled && (Flags & OptimizationFlags.RequireBurst) > 0 && !YaOptGlobal.IsBurstAvailable)
-			{
-				if (!dryRun)
-					_enabled = false;
-				error = true;
-				message = "YaOpt.Setting.InvalidOption.RequireBurst";
-				if (translateMessage)
-					message = message.Translate().ToString();
-			}
-			if (printError && error)
-			{
-				var name = Name;
-				if (translateMessage)
-					name = name.Translate();
-				YaOptMod.Error($"Optimization {name} has been disabled because {message}");
-			}
-			return !error;
+				_enabled = false;
 		}
 
 		public bool ShouldShow(YaOptSettings settings)

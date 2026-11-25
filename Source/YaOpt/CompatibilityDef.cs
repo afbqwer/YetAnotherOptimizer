@@ -18,40 +18,11 @@ namespace YaOpt
 			get => ignoredToggleTabCaching; set => ignoredToggleTabCaching = value;
 		}
 
-		public List<JobDef> IgnoredJobFailurePredicting
-		{
-			get => ignoredJobFailurePredicting; set => ignoredJobFailurePredicting = value;
-		}
-
-		public List<WorkGiverCompatibility> WorkGiverCompatibilities
-		{
-			get => workGiverCompatibilities; set => workGiverCompatibilities = value;
-		}
-
-		public List<ThreadLocalPatch> ThreadLocalPatches
-		{
-			get => threadLocalPatches; set => threadLocalPatches = value;
-		}
-
-		public List<LockPatch> LockPatches
-		{
-			get => lockPatches; set => lockPatches = value;
-		}
-
 		[NoTranslate]
 		private List<string> bannedOptimizations;
 
 		[NoTranslate]
 		private List<string> ignoredToggleTabCaching;
-
-		[NoTranslate]
-		private List<JobDef> ignoredJobFailurePredicting;
-
-		private List<WorkGiverCompatibility> workGiverCompatibilities;
-
-		private List<ThreadLocalPatch> threadLocalPatches;
-
-		private List<LockPatch> lockPatches;
 
 		public void Cache()
 		{
@@ -89,11 +60,6 @@ namespace YaOpt
 					YaOptMod.Debug($"Toggle tab {toggleTabTypeName} will not be cached because of {defName} from {mod}.");
 					CompatibilityDefines.CachedIgnoredToggleTabCaching.Add(type);
 				}
-			}
-
-			if (IgnoredJobFailurePredicting != null)
-			{
-				CompatibilityDefines.CachedIgnoredJobFailurePredicting.AddRange(IgnoredJobFailurePredicting);
 			}
 		}
 	}

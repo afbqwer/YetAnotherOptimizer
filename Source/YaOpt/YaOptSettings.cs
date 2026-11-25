@@ -72,14 +72,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Optimizes <see cref="Material.color"/> by caching the value in a managed container.
-		/// Unity <see cref="Material.color"/> involves a managed-to-native transition,
-		/// which creates significant overhead when called frequently.
-		/// This option patchs the setter of <see cref="Material.color"/> to update the cache and
-		/// the getter of <see cref="Material.GetColor(string)"/> to retrieve the value from cache.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Patches.UnityEngine_Material_GetColor"/>
-		/// <seealso cref="Patches.UnityEngine_Material_SetColor"/>
 		public OptimizationOption OptMaterialGetColor { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.MaterialGetColor",
@@ -152,22 +146,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Starts the render preparation for dynamic objects earlier.
-		/// <br/>
-		/// Details:
-		/// <list type="bullet">
-		/// <item>Removes <c>ComputeCulledThings</c>, <c>DynamicDrawPhase(DrawPhase.EnsureInitialized)</c>,
-		///		and <c>PreDrawVisibleThings</c> from <c>DynamicDrawManager.DrawDynamicThings</c>.</item>
-		/// <item>Runs camera culling (<c>ComputeCulledThings</c>) before <c>MapMeshDrawerUpdate_First</c>.</item>
-		/// <item>Runs initialization and parallel preparation before <c>DrawMapMesh</c>.</item>
-		/// </list>
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Patches.Verse_DynamicDrawManager_ComputeCulledThings"/>
-		/// <seealso cref="Patches.Verse_DynamicDrawManager_DrawDynamicThings"/>
-		/// <seealso cref="Patches.Verse_DynamicDrawManager_PreDrawVisibleThings"/>
-		/// <seealso cref="Patches.Verse_Map_MapUpdate"/>
-		/// <seealso cref="Patches.YaOpt_Helpers_ParallelPreDrawHelper_StartPreDrawJob"/>
-		/// <seealso cref="Patches.YaOpt_Helpers_ParallelPreDrawHelper_StartCullingJob"/>
 		public OptimizationOption OptEarlyRenderPrepare { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.EarlyRenderPrepare",
@@ -177,14 +157,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Optimizes the batch size for parallel render preparation.
-		/// Vanilla uses a large batch size for parallel render preparation.
-		/// However, rendering costs vary significantly between objects (e.g., pawns vs. items),
-		/// and objects are often clustered (e.g., raids).
-		/// This can lead to thread imbalance where some threads finish early while others are stuck with heavy batches.
-		/// This optimization reduces the batch size, allowing the work-stealing algorithm to distribute the load more evenly.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Patches.Verse_DynamicDrawManager_PreDrawVisibleThings"/>
 		public OptimizationOption OptPrepareBatchCount { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.PrepareBatchCount",
@@ -193,15 +167,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Moves material parameter updates (e.g., via <see cref="PawnRenderNodeWorker"/>)
-		/// to the parallel rendering preparation phase.
-		/// Vanilla performs these updates on the main thread, but they are generally thread-safe.
-		/// If a mod overrides the update logic in a way that might not be thread-safe,
-		/// YaOpt will detect this and falls back to the main thread for those specific objects.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_GetMaterialPropertyBlock"/>
-		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_PreDraw"/>
-		/// <seealso cref="Patches.Verse_PawnRenderTree_ParallelPreDraw"/>
 		public OptimizationOption OptParallelMaterialUpdate { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ParallelMaterialUpdate",
@@ -391,28 +358,18 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Accelerates the matrix computation step in render preparation using Burst.
-		/// Vanilla intended to use Burst for this computationally expensive step but failed due to an implementation oversight.
-		/// This optimization rewrites the Burst implementation to make it functional.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Patches.Verse_PawnRenderTree_TryGetMatrix"/>
 		public OptimizationOption OptComputeMatrixBurst { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ComputeMatrixBurst",
 			Desc = "YaOpt.Setting.Option.ComputeMatrixBurst.Desc",
 			Category = OptimizationCategory.Fps,
-			Flags = OptimizationFlags.RequireBurst,
 		};
 
 		/// <summary>
-		/// Accelerates <see cref="ThingWithComps.GetComp{T}"/>.
-		/// Vanilla lookup is fast for existing components but very slow for missing ones,
-		/// as it iterates through the entire component list.
-		/// Unfortunately, checking if a component exists requires calling GetComp and waiting for a null result.
-		/// This optimization rewrites the lookup mechanism to ensure fast failure for missing components.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="MultiTargets_ThingGetComp"/>
-		/// <seealso cref="Patches.Prepatch.Verse_ThingWithComps_GetComp"/>
 		public OptimizationOption OptThingGetComp { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ThingGetComp",
@@ -870,68 +827,19 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Introduces a restricted multi-threaded handling for pawn updates.
-		/// It implements a multi-threaded job interruption predictor that checks if the current job
-		/// might fail or be interrupted by emergency jobs (e.g. fleeing enemies) in the current frame.
-		/// If the prediction passes (no interruption), the main thread skips the redundant check.
-		/// Otherwise, the main thread performs the standard check.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <remarks>
-		/// Locked off on this branch: the option is listed in <see cref="LockedOffOptimizations"/>, so
-		/// <see cref="OptimizationOption.Enabled"/> always returns false and every patch gated on it is
-		/// skipped, together with <see cref="YaOptGlobal.NeedThreadSafe"/>. 1.7 is maintained
-		/// single-threaded: <c>ParallelPawnTickManager</c> and <c>JobPredictor</c> are neither exercised
-		/// nor tested here. Re-verify them in-game before removing the entry from the lock list.
-		/// </remarks>
-		/// <seealso cref="Patches.Verse_AI_JobDriver_DriverTick"/>
-		/// <seealso cref="Patches.Verse_AI_Pawn_JobTracker_JobTrackerTickInterval"/>
-		/// <seealso cref="Patches.Verse_TickList_Tick"/>
-		/// <seealso cref="YaOptGlobal.NeedThreadSafe"/>
 		public OptimizationOption OptParallelPawnTick { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ParallelPawnTick",
 			Desc = "YaOpt.Setting.Option.ParallelPawnTick.Desc",
-			NoteStability = "YaOpt.Setting.Option.ParallelPawnTick.Stable",
-			NoteCompatibility = "YaOpt.Setting.Option.ParallelPawnTick.Compatibility",
-			NoteMultithread = "YaOpt.Setting.Option.ParallelPawnTick.Multithread",
 			Category = OptimizationCategory.Tps,
 			Flags = OptimizationFlags.MultiplayerIncompatible,
-			FuncPostDraw = SettingsPanel.ParallelPawnTickPostDraw,
-			FuncExposeData = (settings) =>
-			{
-				var jobFailurePrediction = settings.ParallelPawnJobFailurePrediction;
-				var constantJobPrediction = settings.ParallelPawnConstantJobPrediction;
-				Scribe_Values.Look(ref jobFailurePrediction, "OptLazyTextureLoad_JobFailurePrediction", true);
-				Scribe_Values.Look(ref constantJobPrediction, "OptLazyTextureLoad_ConstantJobPrediction", true);
-				settings.ParallelPawnJobFailurePrediction = jobFailurePrediction;
-				settings.ParallelPawnConstantJobPrediction = constantJobPrediction;
-			}
 		};
 
-		[field: Unsaved]
-		public bool ParallelPawnJobFailurePrediction { get; set; } = true;
-
-		[field: Unsaved]
-		public bool ParallelPawnConstantJobPrediction { get; set; } = true;
-
 		/// <summary>
-		/// Optimizes work giving by checking work priorities in parallel.
-		/// Work giving is one of the most expensive operations. It iterates through a prioritized list of allowed works
-		/// until a valid one is found. This optimization uses multiple threads to check this list.
-		/// When a thread finds a valid work, it truncates the list (discarding lower priority works)
-		/// and waits for threads checking higher priority works to finish.
-		/// Finally, the valid work with the highest priority is selected.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <remarks>
-		/// Locked off on this branch: listed in <see cref="LockedOffOptimizations"/>, so
-		/// <see cref="OptimizationOption.Enabled"/> is always false. This is the switch that keeps the
-		/// entire <c>Helpers/ThreadLocal</c> and <c>Helpers/ThreadSafe</c> machinery dormant:
-		/// <see cref="YaOptGlobal.NeedThreadSafe"/> is false without it, and every ThreadSafe/Reach patch
-		/// gates on these two. <c>ParallelWorkGiver</c>, <c>JobPredictor</c> and the per-thread
-		/// <c>Reachability</c> state are untested on 1.7 — re-test in-game before unlocking.
-		/// </remarks>
-		/// <seealso cref="Patches.RimWorld_JobGiver_Work_TryIssueJobPackage"/>
-		/// <seealso cref="YaOptGlobal.NeedThreadSafe"/>
 		public OptimizationOption OptParallelWorkGiver { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ParallelWorkGiver",
@@ -944,15 +852,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Moves situational thought creation for the mood update onto worker threads.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <remarks>
-		/// Locked off on this branch: listed in <see cref="LockedOffOptimizations"/>, so
-		/// <see cref="OptimizationOption.Enabled"/> is always false and
-		/// <see cref="Helpers.ParallelThoughtUpdater"/> never runs. The option only exists to keep
-		/// settings files from the 1.6 branch loadable; the code path itself is unmaintained on 1.7.
-		/// </remarks>
-		/// <seealso cref="Patches.RimWorld_SituationalThoughtHandler_UpdateAllMoodThoughts"/>
 		public OptimizationOption OptParallelThoughtUpdate { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ParallelThoughtUpdate",
@@ -964,19 +865,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Optimizes map post-tick processing by running independent updates in parallel.
-		/// Supports steady environment effects, temp terrain and gas updates.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <remarks>
-		/// Locked off on this branch: listed in <see cref="LockedOffOptimizations"/>, so
-		/// <see cref="OptimizationOption.Enabled"/> is always false. Consequently
-		/// <see cref="Patches.Verse_Map_MapPostTick"/> is never applied (steady environment effects,
-		/// temp terrain and gas keep ticking inline inside <c>Map.MapPostTick</c>) and
-		/// <see cref="Patches.Verse_TickManager_DoSingleTick"/> skips its
-		/// <c>ParallelMapTickManager.FinishPostMapTick</c> injection.
-		/// </remarks>
-		/// <seealso cref="Patches.Verse_Map_MapPostTick"/>
-		/// <seealso cref="Patches.Verse_TickManager_DoSingleTick"/>
 		public OptimizationOption OptParallelPostMapTick { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ParallelPostMapTick",
@@ -1254,7 +1144,9 @@ namespace YaOpt
 			Category = OptimizationCategory.Tps,
 		};
 
-		/// <seealso cref="Patches.Verse_ThingOwnerUtility_AppendThingHoldersFromThings"/>
+		/// <summary>
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
+		/// </summary>
 		public OptimizationOption OptAppendThingHolders { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.AppendThingHolders",
@@ -1280,39 +1172,15 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Delays texture loading until they are first requested.
-		/// Vanilla loads all mod textures into VRAM at startup.
-		/// This optimization reduces startup time and initial VRAM usage,
-		/// but may cause stutters when textures are loaded during gameplay.
-		/// Note: Texture unloading is not implemented, so VRAM usage may increase over time.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Verse_ContentFinder_Get"/>
-		/// <seealso cref="Patches.Early.MultiTargets_PatchOperationMulti"/>
-		/// <seealso cref="Patches.Early.MultiTargets_PatchOperationSingle"/>
-		/// <seealso cref="Patches.Early.Verse_ModContentLoader_LoadTexture"/>
 		public OptimizationOption OptLazyTextureLoad { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.LazyTextureLoad",
 			Desc = "YaOpt.Setting.Option.LazyTextureLoad.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.LazyTextureLoad.Compatibility",
 			Category = OptimizationCategory.Misc,
-			FuncPostDraw = SettingsPanel.LazyTextureLoadPostDraw,
-			FuncExposeData = (settings) =>
-			{
-				var ddsOnly = settings.LazyTextureLoadDdsOnly;
-				var radical = settings.LazyTextureLoadRadical;
-				Scribe_Values.Look(ref ddsOnly, "OptLazyTextureLoad_DdsOnly", true);
-				Scribe_Values.Look(ref radical, "OptLazyTextureLoad_Radical", false);
-				settings.LazyTextureLoadDdsOnly = ddsOnly;
-				settings.LazyTextureLoadRadical = radical;
-			}
 		};
-
-		[field: Unsaved]
-		public bool LazyTextureLoadDdsOnly { get; set; } = true;
-
-		[field: Unsaved]
-		public bool LazyTextureLoadRadical { get; set; } = false;
 
 		/// <summary>
 		/// Optimizes XML patch operations by simplifying common XPath expressions.
@@ -1348,12 +1216,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Caches type information at startup to accelerate Harmony type retrieval.
-		/// This speeds up Harmony patch processing for some mods, improving game startup time in modded environments.
-		/// It has no effect in a vanilla environment.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Patches.Early.HarmonyLib_AccessTools_TypeByName"/>
-		/// <seealso cref="Patches.Early.System_Reflection_RuntimeAssembly_FullName"/>
 		public OptimizationOption OptRuntimeInfoCache { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.RuntimeInfoCache",
@@ -1362,13 +1226,8 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Fixes a vanilla bug where texture atlases smaller than 512x512 have Mipmaps enabled but not populated.
-		/// This causes visual corruption (colored stripes) when zooming out on objects using these atlases.
-		/// The issue often affects scatterable items (e.g., pebbles) from high-res texture mods.
-		/// Vanilla avoids this by using known-good built-in atlases, and large modlists avoid it by filling the atlas to >512x512.
-		/// The bug only manifests in intermediate-sized modlists where the atlas size falls into the problematic range.
+		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
-		/// <seealso cref="Patches.Early.MultiTargets_CalcRectsForAtlas"/>
 		public OptimizationOption OptFixTextureAtlas { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.FixTextureAtlas",
@@ -1405,18 +1264,6 @@ namespace YaOpt
 			nameof(OptFixTextureAtlas),
 			nameof(OptRuntimeInfoCache),
 			nameof(OptLazyTextureLoad),
-
-			// Other-mod compatibility submodules
-			"OptCELineOfSightBurst",
-			"OptFAParallelUpdate",
-			"OptFADeLinq",
-			"OptFADeLinqBurst",
-			"OptFAAnimCache",
-			"OptFAPawnSpawn",
-			"OptFATextureCache",
-			"OptHARDeLinq",
-			"OptHARTextureCache",
-			"OptVEFMemoryLeakFix"
 		};
 
 		private static void ApplyPlatformLock(OptimizationOption option)
@@ -1461,23 +1308,6 @@ namespace YaOpt
 				}
 			}
 
-			foreach (var subMod in YaOptGlobal.SubMods)
-			{
-				try
-				{
-					var subModOptions = subMod.OnCreateSettings();
-					foreach (var option in subModOptions)
-					{
-						_allOptimizations.Add(option);
-						ApplyPlatformLock(option);
-					}
-				}
-				catch (Exception ex)
-				{
-					YaOptMod.Error($"Failed to run OnCreateSettings for {subMod.GetType().FullName}\n{ex}");
-				}
-			}
-
 			_allOptimizations.Sort((a, b) =>
 			{
 				var i = a.Category.CompareTo(b.Category);
@@ -1503,7 +1333,7 @@ namespace YaOpt
 			base.ExposeData();
 			if (YaOptGlobal.IsLibraryLoaded && Scribe.mode == LoadSaveMode.Saving)
 			{
-				ValidateOptions(true);
+				ValidateOptions();
 			}
 			foreach (var option in _allOptimizations)
 			{
@@ -1516,15 +1346,15 @@ namespace YaOpt
 			}
 			if (YaOptGlobal.IsLibraryLoaded && Scribe.mode == LoadSaveMode.LoadingVars)
 			{
-				ValidateOptions(true);
+				ValidateOptions();
 			}
 		}
 
-		public void ValidateOptions(bool printError, bool translateMessage = true)
+		public void ValidateOptions()
 		{
 			foreach (var option in _allOptimizations)
 			{
-				option.Validate(false, printError, translateMessage, out _);
+				option.Validate();
 			}
 		}
 

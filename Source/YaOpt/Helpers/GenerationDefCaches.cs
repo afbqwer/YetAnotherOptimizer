@@ -92,19 +92,6 @@ namespace YaOpt.Helpers
 			DerpWeapons[(thing, stuff)] = value;
 		}
 
-		internal static bool TryGetAllowedStuffs(BuildableDef def, TechLevel techLevel,
-			bool checkAllowedInStuffGeneration, out List<ThingDef> value)
-		{
-			EnsureDefCount();
-			return AllowedStuffs.TryGetValue(
-				new AllowedStuffsKey
-				{
-					Def = def,
-					TechLevel = techLevel,
-					CheckAllowedInStuffGeneration = checkAllowedInStuffGeneration
-				}, out value);
-		}
-
 		/// <summary>
 		/// Builds the same sequence that <see cref="GenStuff.AllowedStuffsFor"/> yields and caches it.
 		/// </summary>

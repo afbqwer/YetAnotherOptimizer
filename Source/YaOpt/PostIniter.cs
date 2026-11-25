@@ -14,11 +14,9 @@ namespace YaOpt
 			DefInjectionHelper.ClearCache();
 			CompatibilityDefines.Load();
 			WorldMapOptimizationHelper.CheckConflicts();
-			ContentManager.PostInit();
 			TypeSearcher.Init(); // Must init before patcher. Some patchers depend it.
 			DebugHelper.Init();
 			Patcher.Init();
-			YaOptSubMod.PostInitAll(YaOptGlobal.SubMods);
 			CacheWarmer.PostInit();
 		}
 	}

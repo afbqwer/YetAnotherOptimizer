@@ -33,21 +33,14 @@ namespace YaOpt
 		public static bool IsMultiplayer { get; internal set; }
 
 		/// <summary>
-		/// Gets a value indicating whether Burst library is available on the current platform.
-		/// </summary>
-		public static bool IsBurstAvailable { get; internal set; }
-
-		/// <summary>
 		/// Gets a value indicating whether all required libraries have been loaded.
 		/// </summary>
 		public static bool IsLibraryLoaded { get; internal set; }
 
 		/// <summary>
-		/// Gets a value indicating whether parallel material property update is enabled.
+		/// Gets a value indicating whether the current thread is the Unity main thread.
 		/// </summary>
-		/// <seealso cref="YaOpt.Patches.Verse_PawnRenderTree_ParallelPreDraw"/>
-		/// <seealso cref="YaOpt.YaOptSettings.OptParallelMaterialUpdate"/>
-		public static bool IsParallelMaterialUpdateEnabled { get; internal set; }
+		public static bool IsInMainThread => _isInMainThread;
 
 		/// <summary>
 		/// Gets a value indicating whether idle check throttle is enabled.
@@ -55,72 +48,6 @@ namespace YaOpt
 		/// <seealso cref="YaOpt.Helpers.IdleHelper"/>
 		/// <seealso cref="YaOpt.YaOptSettings.OptIdleThrottle"/>
 		public static bool IsIdleThrottleEnabled { get; internal set; }
-
-		/// <summary>
-		/// Gets a value indicating whether the current thread is the Unity main thread.
-		/// </summary>
-		/// <remarks>
-		/// <para>
-		/// It's similar to UnityData.IsInMainThread, but faster because it doesn't need to read the thread ID.
-		/// </para>
-		/// <para>
-		/// Note that it returns <c>false</c> when loading a save because loading is done in a background thread.
-		/// </para>
-		/// </remarks>
-		public static bool IsInMainThread => _isInMainThread;
-
-		/// <summary>
-		/// Gets a value indicating whether the current thread is a worker thread.
-		/// </summary>
-		/// <remarks>
-		/// Unity's <c>JobsUtility.IsExecutingJob</c> does not exist in 1.7, so job execution is
-		/// inferred from the main-thread flag. Only the locked-off 1.6 delayed patches consume it.
-		/// </remarks>
-		public static bool IsExecutingJob => !IsInMainThread;
-
-		/// <summary>
-		/// Gets a value indicating whether thread-safe code paths are required.
-		/// </summary>
-		/// <seealso cref="YaOptSettings.OptParallelPawnTick"/>
-		/// <seealso cref="YaOptSettings.OptParallelWorkGiver"/>
-		/// <seealso cref="YaOptSettings.OptParallelThoughtUpdate"/>
-		/// <seealso cref="YaOptSettings.OptParallelPostMapTick"/>
-		public static bool NeedThreadSafe => YaOptMod.Instance.Settings.OptParallelPawnTick.Enabled ||
-											 YaOptMod.Instance.Settings.OptParallelWorkGiver.Enabled ||
-											 YaOptMod.Instance.Settings.OptParallelThoughtUpdate.Enabled ||
-											 YaOptMod.Instance.Settings.OptParallelPostMapTick.Enabled;
-
-		/// <summary>
-		/// Gets or sets a value indicating whether a parallel program is currently running in tick update.
-		/// It only returns True when ParallelWorkGiver, ParallelThoughtUpdater or JobPredictor is running.
-		/// </summary>
-		/// <seealso cref="Helpers.JobPredictor"/>
-		/// <seealso cref="ParallelWorkGiver"/>
-		/// <seealso cref="Helpers.ParallelThoughtUpdater"/>
-		public static bool IsParallelRunningInTick
-		{
-			get => _isParallelRunningInTick;
-			set => _isParallelRunningInTick = value;
-		}
-
-		private static volatile bool _isParallelRunningInTick;
-
-		/// <summary>
-		/// Gets or sets a value indicating whether the game world is currently being rendered.
-		/// It is false during tick updating and GUI rendering.
-		/// </summary>
-		/// <remarks>
-		/// During rendering, the game world is frozen in state, allowing some multi-threading
-		/// restrictions to be relaxed. Essentially, this value functions the same as
-		/// <c>IsParallelRunningInTick</c>, telling the program to relax thread safety checks.
-		/// </remarks>
-		public static bool IsRendering
-		{
-			get => _isRendering;
-			set => _isRendering = value;
-		}
-
-		private static volatile bool _isRendering;
 
 		/// <summary>
 		/// Gets the singleton mod instance.
@@ -137,27 +64,15 @@ namespace YaOpt
 		/// </summary>
 		public static Harmony Harmony => YaOptMod.Instance.Harmony;
 
-		/// <summary>
-		/// Gets the list of loaded compatibility sub-modules.
-		/// </summary>
-		/// <seealso cref="YaOptSubMod"/>
-		public static List<YaOptSubMod> SubMods => Mod.SubMods;
-
 		private static readonly Dictionary<string, bool> _modLookup = new Dictionary<string, bool>();
 
 		private static readonly Dictionary<string, bool> _typeLookup = new Dictionary<string, bool>();
 
-		private static readonly Dictionary<OptimizationOption, bool> _optionSnapshot =
-			new Dictionary<OptimizationOption, bool>();
-
-		/// <summary>
-		/// Thread-local flag indicating whether the current thread is the Unity main thread.
-		/// </summary>
-		/// <remarks>
-		/// Set by <see cref="MarkAsMainThread"/> during initialization.
-		/// </remarks>
 		[ThreadStatic]
 		private static bool _isInMainThread;
+
+		private static readonly Dictionary<OptimizationOption, bool> _optionSnapshot =
+			new Dictionary<OptimizationOption, bool>();
 
 		/// <summary>
 		/// Checks whether a type with the specified full name exists in the loaded assemblies.
@@ -210,8 +125,20 @@ namespace YaOpt
 					_optionSnapshot[option] = option._enabled;
 				}
 			}
-			IsParallelMaterialUpdateEnabled = Settings.OptParallelMaterialUpdate.Enabled;
 			IsIdleThrottleEnabled = Settings.OptIdleThrottle.Enabled;
+		}
+
+		/// <summary>
+		/// Marks the current thread as the Unity main thread during startup.
+		/// </summary>
+		internal static void MarkAsMainThread()
+		{
+			if (!UnityData.IsInMainThread)
+			{
+				YaOptMod.Error($"Thread {Thread.CurrentThread.Name} is not the Unity main thread, " +
+							   $"but MarkAsMainThread was called within it.");
+			}
+			_isInMainThread = true;
 		}
 
 		/// <summary>
@@ -229,23 +156,6 @@ namespace YaOpt
 					return true;
 			}
 			return false;
-		}
-
-		/// <summary>
-		/// Marks the current thread as the Unity main thread.
-		/// </summary>
-		/// <remarks>
-		/// This method should only be called once during initialization from the actual main thread.
-		/// It enables <see cref="IsInMainThread"/> checks throughout the codebase.
-		/// </remarks>
-		internal static void MarkAsMainThread()
-		{
-			if (!UnityData.IsInMainThread)
-			{
-				YaOptMod.Error($"Thread {Thread.CurrentThread.Name} is not the Unity main thread, " +
-							   $"but MarkAsMainThread was called within it.");
-			}
-			_isInMainThread = true;
 		}
 	}
 }

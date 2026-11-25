@@ -2,7 +2,6 @@ using RimWorld;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Verse;
-using YaOpt.Helpers.ThreadLocal;
 
 namespace YaOpt.Helpers
 {
@@ -36,7 +35,7 @@ namespace YaOpt.Helpers
 		public static List<Pawn> FreeColonistsAndSubhumansControllable(MapPawns mapPawns)
 		{
 			var faction = Faction.OfPlayer;
-			var pawnList = ThreadLocalMapPawns.GetPooledList();
+			var pawnList = TransientPool<List<Pawn>>.Borrow();
 			pawnList.Clear();
 			foreach (var pawn in mapPawns.AllPawns)
 			{
@@ -51,7 +50,7 @@ namespace YaOpt.Helpers
 		public static List<Pawn> FreeColonistsAndPrisoners(MapPawns mapPawns)
 		{
 			var faction = Faction.OfPlayer;
-			var pawnList = ThreadLocalMapPawns.GetPooledList();
+			var pawnList = TransientPool<List<Pawn>>.Borrow();
 			pawnList.Clear();
 			foreach (var pawn in mapPawns.AllPawns)
 			{
@@ -65,7 +64,7 @@ namespace YaOpt.Helpers
 
 		public static List<Pawn> AllMapsCaravansAndTravellingTransporters_Alive_FreeColonistsAndPrisoners()
 		{
-			var pawnList = ThreadLocalMapPawns.GetPooledList();
+			var pawnList = TransientPool<List<Pawn>>.Borrow();
 			pawnList.Clear();
 			foreach (var pawn in PawnsFinder.AllMaps)
 			{
