@@ -610,6 +610,35 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Skips the rebuild of <c>WorldPawns.AllPawnsAlive</c> and <c>WorldPawns.AllPawnsAliveOrDead</c>
+		/// while the backing pawn sets are unchanged.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla clears the result list and bulk-copies both backing <see cref="HashSet{T}"/>s into it
+		/// on every access. The patch returns vanilla's own result field, so callers see the same list
+		/// identity and no extra memory is retained.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_Planet_WorldPawns_AllPawnsAlive"/>
+		public OptimizationOption OptWorldPawnsListCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.WorldPawnsListCache",
+			Desc = "YaOpt.Setting.Option.WorldPawnsListCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Caches <c>ThingFilter.AllStorableThingDefs</c>, a LINQ scan over the whole thing def database
+		/// that <c>SetAllowAll</c> enumerates whenever a storage filter is reset.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_ThingFilter_AllStorableThingDefs"/>
+		public OptimizationOption OptStorableDefsCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.StorableDefsCache",
+			Desc = "YaOpt.Setting.Option.StorableDefsCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Caches <see cref="StatDefOf.MoveSpeed"/> for 20 ticks at the <see cref="Pawn.TicksPerMove"/>
 		/// call site. Vanilla evaluates MoveSpeed once per cell walked and never reads the temporary
 		/// stat cache for it (<c>cacheStaleAfterTicks</c> defaults to -1); MoveSpeed is also not

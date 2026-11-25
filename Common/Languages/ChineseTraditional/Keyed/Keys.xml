@@ -225,10 +225,14 @@
 	<YaOpt.Setting.Option.LocalDateCache>地圖時間快取</YaOpt.Setting.Option.LocalDateCache>
 	<YaOpt.Setting.Option.LocalDateCache.Desc>在同一個 tick 內重用每張地圖的當日 tick、小時、日進度和季節。原版每次查詢都要從行星網格重算地塊中心來取得經度，而天空、天氣和天象程式碼每 tick 會為同一張地圖請求十幾次。結果與原版完全一致，只是跳過重複計算。</YaOpt.Setting.Option.LocalDateCache.Desc>
 	<YaOpt.Setting.Option.RecipeUsersCache>配方使用者清單快取</YaOpt.Setting.Option.RecipeUsersCache>
-	<YaOpt.Setting.Option.RecipeUsersCache.Desc>快取能夠執行某個配方的建築清單，不再每次都走訪全部物品 Def。原版每次呼叫都會全量掃描整個 Def 資料庫。Def 清單或該配方自身的使用者清單變化時快取會失效，並且定期重掃，以涵蓋模組直接改寫物品配方清單的情況。</YaOpt.Setting.Option.RecipeUsersCache.Desc>
+	<YaOpt.Setting.Option.RecipeUsersCache.Desc>快取能夠執行某個配方的建築清單，不再每次都走訪全部物品 Def。原版每次呼叫都會全量掃描整個 Def 資料庫。Def 清單或該配方自身的使用者清單變化時快取會失效，並且定期失效，以涵蓋模組直接改寫物品配方清單的情況。</YaOpt.Setting.Option.RecipeUsersCache.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基礎屬性快取</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在遊戲開始後記住每個物品 Def 的基礎質量、基礎易燃性和基礎耐久。原版每次讀取都要走完整屬性系統重算一遍。主要幫助在批次讀取這些值的模組，原版自身很少用到。讀檔時會重新計算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>如果某個模組會在遊戲過程中改寫屬性基礎值而改動沒有生效，請關閉此項。</YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>
+	<YaOpt.Setting.Option.WorldPawnsListCache>世界 pawn 清單快取</YaOpt.Setting.Option.WorldPawnsListCache>
+	<YaOpt.Setting.Option.WorldPawnsListCache.Desc>重用世界 pawn 清單，不再每次存取都重建。原版每次都會清空並從存活、封存、死亡三個集合重新填充，即使內容沒有變化。只要有 pawn 增刪清單就會正常重建，呼叫方拿到的內容與原版一致。</YaOpt.Setting.Option.WorldPawnsListCache.Desc>
+	<YaOpt.Setting.Option.StorableDefsCache>可儲存物品清單快取</YaOpt.Setting.Option.StorableDefsCache>
+	<YaOpt.Setting.Option.StorableDefsCache.Desc>記住哪些物品 Def 可以入庫，不再每次重設儲存過濾器時全量掃描。該掃描要在數千個 Def 上檢查多個屬性，儲存設定視窗反覆重設過濾器時開銷明顯。會定期失效，以涵蓋讀檔後被模組改寫的 Def。</YaOpt.Setting.Option.StorableDefsCache.Desc>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>
