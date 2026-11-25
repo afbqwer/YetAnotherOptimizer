@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using Verse;
 using YaOpt.Helpers;
+using YaOpt.Prepatch;
 
 namespace YaOpt.Patches
 {
@@ -52,6 +53,7 @@ namespace YaOpt.Patches
 		/// </summary>
 		public static void TryPatch(bool force, bool changeLongEventTitle, bool updateOptionSnapshot = true)
 		{
+			PrepatcherState.Refresh();
 			if (!force && !YaOptGlobal.AnyOptionChanged())
 				return;
 

@@ -91,7 +91,7 @@
 	<YaOpt.Setting.Option.GraphicTextureCache.Desc>缓存Graphic_Multi初始化所需的纹理。原版游戏每次初始化时都需要通过字符串拼接构建东西南北四个朝向的纹理路径并进行资源查找。此优化缓存了这些纹理，消除了重复的字符串拼接和资源查找开销。本优化最初为外星人框架开发，现已整合入本体，供任何频繁重建Graphic_Multi的物体受益。注：这个优化可能会导致开发者选项中的纹理热重载失效。</YaOpt.Setting.Option.GraphicTextureCache.Desc>
 	<YaOpt.Setting.SubCategory.WorldMap>世界地图</YaOpt.Setting.SubCategory.WorldMap>
 	<YaOpt.Setting.Option.WorldMapTextureCache>世界地图纹理查找缓存</YaOpt.Setting.Option.WorldMapTextureCache>
-	<YaOpt.Setting.Option.WorldMapTextureCache.Desc>缓存世界地图图层对纹理路径的重复解析。原版每次查找都可能遍历全部已加载Mod，此优化将重复查询变为字典命中，并在Mod内容重载时清空缓存。</YaOpt.Setting.Option.WorldMapTextureCache.Desc>
+	<YaOpt.Setting.Option.WorldMapTextureCache.Desc>缓存纹理路径的重复解析，对所有ContentFinder&lt;Texture2D&gt;.Get调用生效（世界地图图层逐地块查询时收益最大）。原版每次查找都会遍历全部已加载Mod，必要时再调用Resources.Load；此优化将重复查询变为字典命中，并在Mod内容重载时清空缓存。</YaOpt.Setting.Option.WorldMapTextureCache.Desc>
 	<YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>如果其他Mod也修改ContentFinder&lt;Texture2D&gt;.Get，本项会自动禁用；启动后才出现的冲突也会回退原版，避免缓存覆盖对方的结果。</YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>
 	<YaOpt.Setting.Option.WorldMapSubMeshCache>世界地图子网格查找缓存</YaOpt.Setting.Option.WorldMapSubMeshCache>
 	<YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>世界绘制层每处理一个地块都会线性扫描子网格列表以查找材质。此优化按图层缓存“材质→下标”，并在子网格填满、重置或销毁时正确失效，保持原版的分网格顺序。</YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>
@@ -192,6 +192,17 @@
 	<YaOpt.Setting.Option.GetMapPawns.Compatibility>装了头像栏类Mod且其功能失效时，关闭本项。</YaOpt.Setting.Option.GetMapPawns.Compatibility>
 	<YaOpt.Setting.Option.AttackTargetFinder>索敌优化</YaOpt.Setting.Option.AttackTargetFinder>
 	<YaOpt.Setting.Option.AttackTargetFinder.Desc>优化战斗时的索敌计算，消除了一些重复计算。</YaOpt.Setting.Option.AttackTargetFinder.Desc>
+	<YaOpt.Setting.Option.ListerBuildingsCache>建筑查询缓存</YaOpt.Setting.Option.ListerBuildingsCache>
+	<YaOpt.Setting.Option.ListerBuildingsCache.Desc>按 Def 为殖民者建筑建立索引，让 ColonistsHaveBuilding、AllBuildingsColonistOfDef 和 ColonistsHaveBuildingWithPowerOn 直接查询该地图索引。索引在首次查询时建立，并在增删建筑时维护；同一 Def 的重复查询会直接返回缓存列表。</YaOpt.Setting.Option.ListerBuildingsCache.Desc>
+	<YaOpt.Setting.Option.ImmunityCache>免疫检查缓存</YaOpt.Setting.Option.ImmunityCache>
+	<YaOpt.Setting.Option.ImmunityCache.Desc>缓存当前可自然免疫的疾病列表，直到角色的 Hediff 列表发生变化。原版每帧都会为每个角色重建该列表。</YaOpt.Setting.Option.ImmunityCache.Desc>
+	<YaOpt.Setting.Option.ShamblerIdleThrottle>蹒跚者空闲索敌节流</YaOpt.Setting.Option.ShamblerIdleThrottle>
+	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>将蹒跚者的空闲周期索敌从 900-1800 帧延长到 15000-17499 帧。已有目标、待触发的警戒或最近 180 帧内交过战的蹒跚者保持原版频率；受伤、Lord 警戒和附近蹒跚者的唤醒仍会立即指定目标。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
+	<YaOpt.Setting.Option.RefuelSearchCache>加油搜索缓存</YaOpt.Setting.Option.RefuelSearchCache>
+	<YaOpt.Setting.Option.RefuelSearchCache.Desc>在加油工作的可执行检查与任务创建之间复用最佳燃料和全部燃料的搜索结果，并提供一份持续维护的地图加油候选列表。搜索缓存仅在当前游戏帧内有效；候选列表每 250 帧重建，并在生成、消失、加油和消耗燃料时更新。该列表只用于正常局部扫描之后的全局回退。</YaOpt.Setting.Option.RefuelSearchCache.Desc>
+	<YaOpt.Setting.Option.DeathThoughts>死亡思想优化</YaOpt.Setting.Option.DeathThoughts>
+	<YaOpt.Setting.Option.DeathThoughts.Desc>只在死者周围 12 格查找见证者，而不是扫描所有存活角色；对多格角色去重，避免重复叠加见证思想；并缩小关系候选和记忆清理范围。跨地图见证以及部分从未被玩家见过的角色清理会被省略。</YaOpt.Setting.Option.DeathThoughts.Desc>
+	<YaOpt.Setting.Option.DeathThoughts.Compatibility>改写了死亡或救援思想逻辑的 Mod 可能被绕过。死亡相关记忆出现异常时关闭本项。</YaOpt.Setting.Option.DeathThoughts.Compatibility>
 	<YaOpt.Setting.Option.AppendThingHolders>物体容器检索优化</YaOpt.Setting.Option.AppendThingHolders>
 	<YaOpt.Setting.Option.AppendThingHolders.Desc>优化对物体容器的递归搜索，减少了对非容器的内容物的检查开销。</YaOpt.Setting.Option.AppendThingHolders.Desc>
 	<YaOpt.Setting.Option.MeditationTick>冥想更新节流</YaOpt.Setting.Option.MeditationTick>

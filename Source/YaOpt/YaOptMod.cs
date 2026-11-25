@@ -7,6 +7,7 @@ using UnityEngine;
 using Verse;
 using YaOpt.Helpers;
 using YaOpt.Patches;
+using YaOpt.Prepatch;
 
 namespace YaOpt
 {
@@ -92,6 +93,7 @@ namespace YaOpt
 		{
 			Settings.ValidateOptions(true, false);
 			YaOptSubMod.InitAll(SubMods);
+			PrepatcherState.Refresh();
 
 #if false && DEBUG
 			HarmonyLib.Harmony.DEBUG = true;

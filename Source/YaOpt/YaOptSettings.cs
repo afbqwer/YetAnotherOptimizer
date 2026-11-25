@@ -807,6 +807,98 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Indexes colonist buildings by <see cref="ThingDef"/> and answers the definition-based
+		/// building queries from that map-local index.
+		/// </summary>
+		/// <remarks>
+		/// The vanilla queries scan every colonist building each time. The index is built on the
+		/// first query and maintained by <c>ListerBuildings.Add/Remove</c>; repeated queries of the
+		/// same def return the cached list directly.
+		/// </remarks>
+		/// <seealso cref="Prepatch.PrepatcherFreePatches"/>
+		/// <seealso cref="Patches.Verse_ListerBuildings_Add"/>
+		/// <seealso cref="Patches.Verse_ListerBuildings_Remove"/>
+		/// <seealso cref="Patches.Verse_ListerBuildings_Dispose"/>
+		public OptimizationOption OptListerBuildingsCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ListerBuildingsCache",
+			Desc = "YaOpt.Setting.Option.ListerBuildingsCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Caches <see cref="ImmunityHandler.NeededImmunitiesNow"/> until the hediff list changes.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla rebuilds the needed-immunity list on every health tick for every pawn.
+		/// The list only depends on the hediff defs, so the hediff list identity and
+		/// <c>List&lt;T&gt;._version</c> are sufficient invalidation keys.
+		/// </remarks>
+		/// <seealso cref="Prepatch.PrepatcherFreePatches"/>
+		/// <seealso cref="Helpers.ImmunityCache"/>
+		public OptimizationOption OptImmunityCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ImmunityCache",
+			Desc = "YaOpt.Setting.Option.ImmunityCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Extends the shambler's idle target-search interval when it has no target at all.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla searches every 900-1800 ticks even while the shambler is standing idle.
+		/// Idle search is stretched to 15000-17499 ticks. Active shamblers, the 180-tick
+		/// post-engagement grace and delayed alerts keep vanilla timing.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_Hediff_Shambler_TickInterval"/>
+		public OptimizationOption OptShamblerIdleThrottle { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ShamblerIdleThrottle",
+			Desc = "YaOpt.Setting.Option.ShamblerIdleThrottle.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Reuses refuel fuel searches and supplies a maintained per-map refuel candidate list.
+		/// </summary>
+		/// <remarks>
+		/// A work giver validates a refuel target with <c>CanRefuel</c> and then builds the job with
+		/// <c>RefuelJob</c>; both run the same global closest-fuel search and, for atomic fueling,
+		/// the same region traversal. The result is reused for the current tick. The candidate list
+		/// is rebuilt every 250 ticks and maintained on spawn, despawn, refuel and fuel consumption.
+		/// It is only used for the fallback after the normal local region scan.
+		/// </remarks>
+		/// <seealso cref="Prepatch.PrepatcherFreePatches"/>
+		/// <seealso cref="Patches.RimWorld_CompRefuelable_PostSpawnSetup"/>
+		/// <seealso cref="Patches.RimWorld_RefuelWorkGiverUtility_FindBestFuel"/>
+		/// <seealso cref="Patches.RimWorld_RefuelWorkGiverUtility_FindAllFuel"/>
+		public OptimizationOption OptRefuelSearchCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.RefuelSearchCache",
+			Desc = "YaOpt.Setting.Option.RefuelSearchCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Narrows death-thought witness and relation scans and deduplicates multi-cell witnesses.
+		/// </summary>
+		/// <remarks>
+		/// Witnesses are collected from the twelve-cell radius around the victim instead of every
+		/// living pawn, and relation candidates are materialized once. Memory cleanup walks only
+		/// pawns that can hold the affected memories.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_PawnDiedOrDownedThoughtsUtility_TryGiveThoughts"/>
+		/// <seealso cref="Patches.RimWorld_PawnDiedOrDownedThoughtsUtility_RemoveLostThoughts"/>
+		public OptimizationOption OptDeathThoughts { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.DeathThoughts",
+			Desc = "YaOpt.Setting.Option.DeathThoughts.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.DeathThoughts.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Short-circuits turret target searches when no candidate can possibly be in range.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_Building_TurretGun_TryFindNewTarget"/>

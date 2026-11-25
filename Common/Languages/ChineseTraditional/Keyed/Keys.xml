@@ -91,7 +91,7 @@
 	<YaOpt.Setting.Option.GraphicTextureCache.Desc>快取Graphic_Multi初始化所需的紋理。原版遊戲每次初始化時都需要透過字串拼接構建東西南北四個朝向的紋理路徑並進行資源查找。此最佳化快取了這些紋理，消除了重複的字串拼接和資源查找開銷。本最佳化最初為外星人框架開發，現已整合入本體，供任何頻繁重建Graphic_Multi的物體受益。註：這個最佳化可能會導致開發者選項中的紋理熱重載失效。</YaOpt.Setting.Option.GraphicTextureCache.Desc>
 	<YaOpt.Setting.SubCategory.WorldMap>世界地圖</YaOpt.Setting.SubCategory.WorldMap>
 	<YaOpt.Setting.Option.WorldMapTextureCache>世界地圖紋理查找快取</YaOpt.Setting.Option.WorldMapTextureCache>
-	<YaOpt.Setting.Option.WorldMapTextureCache.Desc>快取世界地圖圖層對紋理路徑的重複解析。原版每次查找都可能遍歷全部已載入Mod，此最佳化將重複查詢變為字典命中，並在Mod內容重載時清空快取。</YaOpt.Setting.Option.WorldMapTextureCache.Desc>
+	<YaOpt.Setting.Option.WorldMapTextureCache.Desc>快取紋理路徑的重複解析，對所有ContentFinder&lt;Texture2D&gt;.Get呼叫生效（世界地圖圖層逐地塊查詢時收益最大）。原版每次查找都會遍歷全部已載入Mod，必要時再呼叫Resources.Load；此最佳化將重複查詢變為字典命中，並在Mod內容重載時清空快取。</YaOpt.Setting.Option.WorldMapTextureCache.Desc>
 	<YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>如果其他Mod也修改ContentFinder&lt;Texture2D&gt;.Get，本項會自動停用；啟動後才出現的衝突也會回退原版，避免快取覆蓋對方的結果。</YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>
 	<YaOpt.Setting.Option.WorldMapSubMeshCache>世界地圖子網格查找快取</YaOpt.Setting.Option.WorldMapSubMeshCache>
 	<YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>世界繪製層每處理一個地塊都會線性掃描子網格列表以查找材質。此最佳化按圖層快取「材質→下標」，並在子網格填滿、重設或銷毀時正確失效，保持原版的分網格順序。</YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>
@@ -192,6 +192,17 @@
 	<YaOpt.Setting.Option.GetMapPawns.Compatibility>裝了頭像欄類Mod且其功能失效時，關閉本項。</YaOpt.Setting.Option.GetMapPawns.Compatibility>
 	<YaOpt.Setting.Option.AttackTargetFinder>索敵最佳化</YaOpt.Setting.Option.AttackTargetFinder>
 	<YaOpt.Setting.Option.AttackTargetFinder.Desc>最佳化戰鬥時的索敵計算，消除了一些重複計算。</YaOpt.Setting.Option.AttackTargetFinder.Desc>
+	<YaOpt.Setting.Option.ListerBuildingsCache>建築查詢快取</YaOpt.Setting.Option.ListerBuildingsCache>
+	<YaOpt.Setting.Option.ListerBuildingsCache.Desc>按 Def 為殖民者建築建立索引，讓 ColonistsHaveBuilding、AllBuildingsColonistOfDef 和 ColonistsHaveBuildingWithPowerOn 直接查詢該地圖索引。索引在首次查詢時建立，並在增刪建築時維護；同一 Def 的重複查詢會直接傳回快取清單。</YaOpt.Setting.Option.ListerBuildingsCache.Desc>
+	<YaOpt.Setting.Option.ImmunityCache>免疫檢查快取</YaOpt.Setting.Option.ImmunityCache>
+	<YaOpt.Setting.Option.ImmunityCache.Desc>快取目前可自然免疫的疾病清單，直到角色的 Hediff 清單發生變化。原版每幀都會為每個角色重建該清單。</YaOpt.Setting.Option.ImmunityCache.Desc>
+	<YaOpt.Setting.Option.ShamblerIdleThrottle>蹣跚者閒置索敵節流</YaOpt.Setting.Option.ShamblerIdleThrottle>
+	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>將蹣跚者的閒置週期索敵從 900-1800 幀延長到 15000-17499 幀。已有目標、待觸發的警戒或最近 180 幀內交過戰的蹣跚者保持原版頻率；受傷、Lord 警戒和附近蹣跚者的喚醒仍會立即指定目標。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
+	<YaOpt.Setting.Option.RefuelSearchCache>加油搜尋快取</YaOpt.Setting.Option.RefuelSearchCache>
+	<YaOpt.Setting.Option.RefuelSearchCache.Desc>在加油工作的可執行檢查與任務建立之間重用最佳燃料和全部燃料的搜尋結果，並提供一份持續維護的地圖加油候選清單。搜尋快取僅在目前遊戲幀內有效；候選清單每 250 幀重建，並在生成、消失、加油和消耗燃料時更新。該清單只用於正常局部掃描之後的全域回退。</YaOpt.Setting.Option.RefuelSearchCache.Desc>
+	<YaOpt.Setting.Option.DeathThoughts>死亡思想最佳化</YaOpt.Setting.Option.DeathThoughts>
+	<YaOpt.Setting.Option.DeathThoughts.Desc>只在死者周圍 12 格尋找見證者，而不是掃描所有存活角色；對多格角色去重，避免重複疊加見證思想；並縮小關係候選和記憶清理範圍。跨地圖見證以及部分從未被玩家見過的角色清理會被省略。</YaOpt.Setting.Option.DeathThoughts.Desc>
+	<YaOpt.Setting.Option.DeathThoughts.Compatibility>改寫了死亡或救援思想邏輯的 Mod 可能被繞過。死亡相關記憶出現異常時關閉本項。</YaOpt.Setting.Option.DeathThoughts.Compatibility>
 	<YaOpt.Setting.Option.AppendThingHolders>物體容器檢索最佳化</YaOpt.Setting.Option.AppendThingHolders>
 	<YaOpt.Setting.Option.AppendThingHolders.Desc>最佳化對物體容器的遞迴搜索，減少了對非容器的內容物的檢查開銷。</YaOpt.Setting.Option.AppendThingHolders.Desc>
 	<YaOpt.Setting.Option.MeditationTick>冥想更新節流</YaOpt.Setting.Option.MeditationTick>
