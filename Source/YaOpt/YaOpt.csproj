@@ -61,6 +61,10 @@
 			<HintPath>$(RimWorldDir)Waylith.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
+		<Reference Include="Waylith.Injection">
+			<HintPath>$(RimWorldDir)Waylith.Injection.dll</HintPath>
+			<Private>false</Private>
+		</Reference>
 		<Reference Include="RimWorldWaylith.PrepatcherCompat">
 			<HintPath>$(RimWorldDir)RimWorldWaylith.PrepatcherCompat.dll</HintPath>
 			<Private>false</Private>

@@ -1,5 +1,8 @@
+using System;
 using System.Reflection;
+using System.Text;
 using Verse;
+using Waylith.Injection;
 using YaOpt.Helpers;
 
 namespace YaOpt.Prepatch
@@ -57,30 +60,98 @@ namespace YaOpt.Prepatch
 			}
 
 			ListerBuildingsActive = ListerPatched &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.Lister), typeof(ListerBuildings)) &&
 				HasInjectedField(typeof(ListerBuildings), typeof(ListerBuildingsCache.State)) &&
-				HasAccessorBody(nameof(PrepatcherFields.Lister)) &&
 				settings.OptListerBuildingsCache.Enabled;
 			ImmunityActive = ImmunityPatched &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.Immunity), typeof(ImmunityHandler)) &&
 				HasInjectedField(typeof(ImmunityHandler), typeof(ImmunityCache.State)) &&
-				HasAccessorBody(nameof(PrepatcherFields.Immunity)) &&
 				settings.OptImmunityCache.Enabled;
 			RefuelCandidatesActive = RefuelPatched &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.RefuelCandidates), typeof(Map)) &&
 				HasInjectedField(typeof(Map), typeof(RefuelWorkCandidates.State)) &&
-				HasAccessorBody(nameof(PrepatcherFields.RefuelCandidates)) &&
 				settings.OptRefuelSearchCache.Enabled;
 
-			// The accessor check is the only reliable one here: Pawn already has other long
-			// fields, so a type match would false-positive.
+			// A field-name match is the reliable gate here: Pawn already has other long fields,
+			// so a type match would false-positive, and the rewritten accessor's IL body is not
+			// observable through GetMethodBody (Waylith rewrites at the JIT layer).
 			InvisibilityActive = settings.OptInvisibilityCache.Enabled &&
-				HasAccessorBody(nameof(PrepatcherFields.Invisibility)) &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.Invisibility), typeof(Pawn)) &&
 				PawnInvisibilityCache.Resolve();
 			if (settings.OptInvisibilityCache.Enabled && !InvisibilityActive)
+				WarnInvisibilityInactive();
+		}
+
+		/// <summary>
+		/// Explains why the invisibility gate stayed closed. The injected field is the reliable
+		/// signal; the accessor body is reported only as evidence that <c>GetMethodBody</c> cannot
+		/// observe a JIT-layer rewrite.
+		/// </summary>
+		private static void WarnInvisibilityInactive()
+		{
+			var field = HasInjectedAccessorField(nameof(PrepatcherFields.Invisibility), typeof(Pawn));
+			var sb = new StringBuilder("Invisibility cache is enabled but stayed inactive: ");
+			if (field)
+				sb.Append("vanilla members could not be resolved. ");
+			else
+				sb.Append("the per-pawn field was not injected (field injection unavailable?). ");
+
+			sb.Append("[diag] ")
+				.Append("fieldInjection=").Append(FieldInjectionSupported()).Append(", ")
+				.Append("injectedField=").Append(field).Append(", ")
+				.Append("accessorBody=").Append(HasAccessorBody(nameof(PrepatcherFields.Invisibility)))
+				.Append(", ")
+				.Append("resolve=").Append(DescribeResolve()).Append(", ")
+				.Append("fieldPeers=").Append(DescribeFieldPeers()).Append(", ")
+				.Append("bodyPeers=").Append(DescribeBodyPeers());
+			YaOptMod.Warning(sb.ToString());
+		}
+
+		/// <summary>
+		/// Reports the runtime field-injection capability the built-in Prepatcher depends on.
+		/// </summary>
+		private static string FieldInjectionSupported()
+		{
+			return Injection.IsSupported.ToString();
+		}
+
+		/// <summary>
+		/// Reports which vanilla members <see cref="PawnInvisibilityCache.Resolve"/> managed to
+		/// bind. Safe to call here: Resolve caches its attempt, so a repeat only reads state.
+		/// </summary>
+		private static string DescribeResolve()
+		{
+			try
 			{
-				YaOptMod.Warning("Invisibility cache is enabled but stayed inactive: " +
-					(HasAccessorBody(nameof(PrepatcherFields.Invisibility))
-						? "vanilla members could not be resolved."
-						: "the per-pawn field was not injected (field injection unavailable?)."));
+				var resolved = PawnInvisibilityCache.Resolve();
+				var curve = PawnInvisibilityCache.RevealCurveAvailable;
+				return "resolved=" + resolved + ", revealCurve=" + curve;
 			}
+			catch (Exception ex)
+			{
+				return "probe threw " + ex.GetType().Name;
+			}
+		}
+
+		/// <summary>
+		/// Reliable peer state from the injected fields. If all four are present the gate logic
+		/// is sound and the local failure is specific to invisibility's vanilla members.
+		/// </summary>
+		private static string DescribeFieldPeers()
+		{
+			return "lister=" + HasInjectedAccessorField(nameof(PrepatcherFields.Lister), typeof(ListerBuildings)) +
+				", immunity=" + HasInjectedAccessorField(nameof(PrepatcherFields.Immunity), typeof(ImmunityHandler)) +
+				", refuel=" + HasInjectedAccessorField(nameof(PrepatcherFields.RefuelCandidates), typeof(Map));
+		}
+
+		/// <summary>
+		/// Unreliable peer state, kept only to show that GetMethodBody cannot see JIT rewrites.
+		/// </summary>
+		private static string DescribeBodyPeers()
+		{
+			return "lister=" + HasAccessorBody(nameof(PrepatcherFields.Lister)) +
+				", immunity=" + HasAccessorBody(nameof(PrepatcherFields.Immunity)) +
+				", refuel=" + HasAccessorBody(nameof(PrepatcherFields.RefuelCandidates));
 		}
 
 		private static bool HasInjectedField(System.Type target, System.Type fieldType)
@@ -99,6 +170,44 @@ namespace YaOpt.Prepatch
 			catch
 			{
 				// Fall through to the accessor check.
+			}
+			return false;
+		}
+
+		/// <summary>
+		/// Detects a successful injection by the field it added to the target type. This is
+		/// reliable: WaylithClr really inserts the field into the runtime type, so reflection
+		/// sees it. Unlike that, the accessor's rewritten IL body lives in the JIT layer and is
+		/// not visible through <c>GetMethodBody</c>.
+		/// </summary>
+		/// <remarks>
+		/// The field name is generated by Waylith.Injection as
+		/// <c>assemblyName + accessorName + (MetadataToken &amp; 0xFFFFFF)</c>. Reproducing that
+		/// formula on the same accessor gives an exact name, so there is no type-collision risk
+		/// (which is why the invisibility gate cannot use a long-field type match).
+		/// </remarks>
+		private static bool HasInjectedAccessorField(string accessorName, Type target)
+		{
+			try
+			{
+				var accessor = typeof(PrepatcherFields).GetMethod(accessorName,
+					BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+				if (accessor == null)
+					return false;
+
+				var expected = accessor.Module.Assembly.GetName().Name + accessor.Name +
+					(accessor.MetadataToken & 0xFFFFFF);
+				var fields = target.GetFields(BindingFlags.Instance | BindingFlags.Public |
+											 BindingFlags.NonPublic);
+				for (var i = 0; i < fields.Length; i++)
+				{
+					if (fields[i].Name == expected)
+						return true;
+				}
+			}
+			catch
+			{
+				// Injection may still be pending; treat as not injected.
 			}
 			return false;
 		}
