@@ -134,6 +134,15 @@ namespace YaOpt.Helpers
 				var bucket = pos >> 6;
 				var offset = pos & 63;
 				var bits = coverage[bucket] & (ulong.MaxValue << offset);
+
+				// Only process bits inside this tick's scan window. Without this clamp the last
+				// partial word can advance a cell outside the window, visibly changing the cloud
+				// footprint over time.
+				if (remaining < 64 - offset)
+				{
+					bits &= ((1UL << remaining) - 1UL) << offset;
+				}
+
 				if (bits == 0)
 				{
 					var step = 64 - offset;

@@ -20,16 +20,22 @@ namespace YaOpt.Helpers
 	/// </remarks>
 	internal static class GridOptimizationCompat
 	{
-		internal static void Refresh()
+		/// <summary>
+		/// Refreshes the conflict bans before patching.
+		/// </summary>
+		/// <returns>True when a new optimization was banned.</returns>
+		internal static bool Refresh()
 		{
+			var changed = false;
 			var fish = PerformanceFishReason();
 			if (fish != null)
 			{
-				Ban(nameof(YaOptSettings.OptGasGridTick), fish);
+				changed |= Ban(nameof(YaOptSettings.OptGasGridTick), fish);
 			}
 
-			Check(nameof(YaOptSettings.OptGasGridTick), GasTargets());
-			Check(nameof(YaOptSettings.OptGlowGridCombine), GlowTargets());
+			changed |= Check(nameof(YaOptSettings.OptGasGridTick), GasTargets());
+			changed |= Check(nameof(YaOptSettings.OptGlowGridCombine), GlowTargets());
+			return changed;
 		}
 
 		private static MethodInfo[] GasTargets()
@@ -55,11 +61,14 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(ComputeGlowGridsJob), nameof(ComputeGlowGridsJob.PrepareFill)),
 				AccessTools.Method(typeof(ComputeGlowGridsJob), nameof(ComputeGlowGridsJob.Flood)),
 				AccessTools.Method(typeof(ComputeGlowGridsJob), nameof(ComputeGlowGridsJob.SetGlowFromDist)),
-				AccessTools.Method(typeof(GlowGrid.CombineColorsJob), nameof(GlowGrid.CombineColorsJob.Execute))
+				AccessTools.Method(typeof(GlowGrid.CombineColorsJob), nameof(GlowGrid.CombineColorsJob.Execute)),
+				AccessTools.Method(typeof(GlowGrid.CombineColorsJob), nameof(GlowGrid.CombineColorsJob.AddColors)),
+				AccessTools.Method(typeof(GlowGrid), nameof(GlowGrid.DirtyCell)),
+				AccessTools.Method(typeof(GlowGrid), nameof(GlowGrid.DevDirtyRect))
 			};
 		}
 
-		private static void Check(string settingId, MethodInfo[] targets)
+		private static bool Check(string settingId, MethodInfo[] targets)
 		{
 			foreach (var target in targets)
 			{
@@ -74,12 +83,14 @@ namespace YaOpt.Helpers
 					continue;
 				}
 
-				Ban(settingId, "其他 Mod 补丁：" + conflict + " → " +
-							   target.DeclaringType?.Name + "." + target.Name);
+				var changed = Ban(settingId, "其他 Mod 补丁：" + conflict + " → " +
+										  target.DeclaringType?.Name + "." + target.Name);
 				YaOptMod.Warning($"{settingId} disabled: {conflict} patches " +
 								 $"{target.DeclaringType?.FullName}.{target.Name}.");
-				return;
+				return changed;
 			}
+
+			return false;
 		}
 
 		/// <summary>
@@ -135,15 +146,16 @@ namespace YaOpt.Helpers
 			return null;
 		}
 
-		private static void Ban(string settingId, string reason)
+		private static bool Ban(string settingId, string reason)
 		{
 			if (CompatibilityDefines.CachedBannedOptimizations.Contains(settingId))
 			{
-				return;
+				return false;
 			}
 
 			CompatibilityDefines.CachedBannedOptimizations.Add(settingId);
 			CompatibilityDefines.CachedBannedBy[settingId] = reason;
+			return true;
 		}
 
 		/// <summary>

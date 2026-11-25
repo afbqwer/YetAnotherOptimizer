@@ -31,8 +31,9 @@ namespace YaOpt.Helpers
 		private const int ParallelThreshold = 2048;
 
 		/// <summary>
-		/// Frames between unconditional index rebuilds. Covers a mod that rewrites <c>lights</c>
-		/// directly without going through the registration methods we hook.
+		/// Frames between unconditional index invalidations. Covers a mod that rewrites
+		/// <c>lights</c> directly without going through the registration methods we hook; the index is
+		/// rebuilt on the next combine or <c>DirtyLightsAround</c> call.
 		/// </summary>
 		private const int SanityRebuildFrames = 300;
 
@@ -256,7 +257,9 @@ namespace YaOpt.Helpers
 			try
 			{
 				var state = GetState(grid);
-				if (!state.IndexValid)
+				if (!state.IndexValid ||
+					state.IndexedLightCount != grid.lights.Length ||
+					state.NumCells != grid.indices.NumGridCells)
 				{
 					RebuildIndex(grid, state);
 				}
@@ -359,6 +362,20 @@ namespace YaOpt.Helpers
 			var state = GetState(grid);
 			try
 			{
+				state.FramesSinceRebuild++;
+				if (state.FramesSinceRebuild >= SanityRebuildFrames)
+				{
+					state.FramesSinceRebuild = 0;
+					state.IndexValid = false;
+				}
+
+				// A foreign or debug path may set the vanilla dirty bitmap without going through our
+				// DirtyCell postfix. Let vanilla consume it when we have no tracked cells to combine.
+				if (grid.hasRunInitially && grid.anyDirtyCell && state.DirtyCells.Count == 0)
+				{
+					return false;
+				}
+
 				var lightsChanged = grid.anyDirtyLight;
 				if (lightsChanged)
 				{
@@ -380,15 +397,6 @@ namespace YaOpt.Helpers
 					if (rebuild)
 					{
 						state.FramesSinceRebuild = 0;
-					}
-					else if (++state.FramesSinceRebuild >= SanityRebuildFrames)
-					{
-						state.FramesSinceRebuild = 0;
-						rebuild = true;
-					}
-
-					if (rebuild)
-					{
 						RebuildIndex(grid, state);
 					}
 
@@ -466,6 +474,7 @@ namespace YaOpt.Helpers
 				Pool = grid.glowPool.pool,
 				SizeX = grid.indices.SizeX,
 				SizeZ = grid.indices.SizeZ,
+				MapSize = grid.map.Size,
 				LeftDirty = state.LeftDirty,
 				Signatures = state.Signatures,
 				Cache = state.FillCache
@@ -546,6 +555,7 @@ namespace YaOpt.Helpers
 			public NativeList<LocalGlowArea> Pool;
 			public int SizeX;
 			public int SizeZ;
+			public IntVec3 MapSize;
 			public bool[] LeftDirty;
 			public ulong[] Signatures;
 			public ConcurrentDictionary<int, CachedGlow> Cache;
@@ -587,7 +597,9 @@ namespace YaOpt.Helpers
 				}
 				Signatures[index] = signature;
 
-				if (!blocked)
+				var positionInMap = (uint)light.position.x < (uint)MapSize.x &&
+									(uint)light.position.z < (uint)MapSize.z;
+				if (!blocked && positionInMap)
 				{
 					FillRadial(ref light, Pool[light.localGlowPoolIndex].colors);
 					light.dirty = false;
@@ -737,6 +749,11 @@ namespace YaOpt.Helpers
 					IsCavePlant = light.isCavePlant,
 					Colors = pool[light.localGlowPoolIndex].colors.Ptr
 				};
+
+				if (state.Lights[i].Colors == null)
+				{
+					continue;
+				}
 
 				if (maxX < 0 || maxZ < 0 || minX >= sizeX || minZ >= sizeZ)
 				{

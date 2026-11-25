@@ -54,9 +54,9 @@ namespace YaOpt.Patches
 		public static void TryPatch(bool force, bool changeLongEventTitle, bool updateOptionSnapshot = true)
 		{
 			PrepatcherState.Refresh();
-			GridOptimizationCompat.Refresh();
+			var gridCompatibilityChanged = GridOptimizationCompat.Refresh();
 			GenerationOptimizationCompat.Refresh();
-			if (!force && !YaOptGlobal.AnyOptionChanged())
+			if (!force && !gridCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())
 				return;
 
 			if (changeLongEventTitle)
