@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using LudeonTK;
 using RimWorld;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 using Verse;
@@ -58,6 +61,38 @@ namespace YaOpt.Helpers
 			public int IndexedLightCount;
 			public bool HasCavePlants;
 			public bool IndexValid;
+
+			/// <summary>Per-light scratch used by the prefill job.</summary>
+			public bool[] LeftDirty = Array.Empty<bool>();
+			public ulong[] Signatures = Array.Empty<ulong>();
+
+			/// <summary>Last computed local colors per light id, keyed for re-registration reuse.</summary>
+			public readonly ConcurrentDictionary<int, CachedGlow> FillCache =
+				new ConcurrentDictionary<int, CachedGlow>();
+		}
+
+		/// <summary>
+		/// Cached result of the flood fill for one light. Reused when a light is re-registered with
+		/// identical geometry, color and blocker pattern, which is what happens on every power/flick
+		/// toggle because <c>CompGlower.UpdateLit</c> deregisters and re-registers.
+		/// </summary>
+		internal sealed class CachedGlow
+		{
+			public const int MaxEntries = 1024;
+
+			public int Diameter;
+			public float Radius;
+			public float Overlight;
+			public ColorInt Color;
+			public ulong Signature;
+			public Color32[] Colors;
+
+			public bool Matches(in GlowLight light, ulong signature)
+			{
+				return Diameter == light.diameter && Radius == light.glowRadius &&
+					   Overlight == light.overlightRadius && Color == light.glowColor &&
+					   Signature == signature && Colors.Length == Diameter * Diameter;
+			}
 		}
 
 		/// <summary>Flattened per-light data used by the innermost loop.</summary>
@@ -193,6 +228,81 @@ namespace YaOpt.Helpers
 			_cachedState = null;
 		}
 
+		/// <summary>Called from the light registration/unregistration postfixes; the index must be rebuilt.</summary>
+		internal static void NotifyLightsChanged(GlowGrid grid)
+		{
+			GetState(grid).IndexValid = false;
+		}
+
+		/// <summary>
+		/// Section-indexed replacement for <c>GlowGrid.DirtyLightsAround</c>: only lights whose rect
+		/// overlaps the cell's section are considered instead of every light on the map.
+		/// </summary>
+		/// <returns>True when the call was handled.</returns>
+		internal static bool DirtyLightsAround(GlowGrid grid, IntVec3 cell)
+		{
+			if (!grid.hasRunInitially || !IsReady(grid))
+			{
+				return false;
+			}
+
+			try
+			{
+				var state = GetState(grid);
+				if (!state.IndexValid)
+				{
+					RebuildIndex(grid, state);
+				}
+
+				if ((uint)cell.x >= (uint)state.SizeX || (uint)cell.z >= (uint)state.SizeZ)
+				{
+					return false;
+				}
+
+				var section = (cell.z / SectionSize) * state.SectionsX + (cell.x / SectionSize);
+				var start = state.SectionStart[section];
+				var end = state.SectionStart[section + 1];
+				var lights = grid.lights;
+				for (var t = start; t < end; t++)
+				{
+					var index = state.SectionLights[t];
+					if ((uint)index >= (uint)lights.Length)
+					{
+						continue;
+					}
+					var light = lights[index];
+					if (light.dirty)
+					{
+						continue;
+					}
+
+					var rect = light.AffectedRect;
+					if (!rect.Contains(cell))
+					{
+						continue;
+					}
+
+					light.dirty = true;
+					lights[index] = light;
+					foreach (var c in rect)
+					{
+						if (c.InBounds(grid.map) && grid.indices.Contains(c))
+						{
+							grid.DirtyCell(c);
+						}
+					}
+					grid.anyDirtyLight = true;
+				}
+
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Log.Error(ex.ToString());
+				return false;
+			}
+		}
+
 		/// <summary>Records a cell as needing a combine.</summary>
 		internal static void MarkDirty(GlowGrid grid, int x, int z)
 		{
@@ -245,7 +355,7 @@ namespace YaOpt.Helpers
 				var lightsChanged = grid.anyDirtyLight;
 				if (lightsChanged)
 				{
-					RunComputeGlowGridsJob(grid);
+					RunComputeGlowGridsJob(grid, state);
 					grid.anyDirtyLight = false;
 				}
 
@@ -310,9 +420,39 @@ namespace YaOpt.Helpers
 			return true;
 		}
 
-		private static void RunComputeGlowGridsJob(GlowGrid grid)
+		private static void RunComputeGlowGridsJob(GlowGrid grid, State state)
 		{
 			var lights = grid.lights;
+			var count = lights.Length;
+			if (count == 0)
+			{
+				return;
+			}
+
+			if (state.LeftDirty.Length < count)
+			{
+				state.LeftDirty = new bool[count];
+			}
+			if (state.Signatures.Length < count)
+			{
+				state.Signatures = new ulong[count];
+			}
+			Array.Clear(state.LeftDirty, 0, count);
+
+			var batch = UnityData.GetIdealBatchCount(count);
+			var prefill = new PrefillJob
+			{
+				Lights = lights,
+				Blockers = grid.lightBlockers,
+				Indices = grid.indices,
+				Pool = grid.glowPool.pool,
+				SizeX = grid.indices.SizeX,
+				SizeZ = grid.indices.SizeZ,
+				LeftDirty = state.LeftDirty,
+				Signatures = state.Signatures,
+				Cache = state.FillCache
+			}.Schedule(count, batch);
+
 			new ComputeGlowGridsJob
 			{
 				lights = lights,
@@ -321,7 +461,204 @@ namespace YaOpt.Helpers
 				statePool = GlowGrid.FloodFillerPool.pool,
 				glowPool = grid.glowPool.pool,
 				mapSize = grid.map.Size
-			}.Schedule(lights.Length, UnityData.GetIdealBatchCount(lights.Length)).Complete();
+			}.Schedule(count, batch, prefill).Complete();
+
+			StoreCache(grid, state, count);
+		}
+
+		/// <summary>Copies the freshly computed local colors of every light the job handled into the cache.</summary>
+		private static void StoreCache(GlowGrid grid, State state, int count)
+		{
+			var left = state.LeftDirty;
+			var lights = grid.lights;
+			var pool = grid.glowPool.pool;
+			var cache = state.FillCache;
+			for (var i = 0; i < count; i++)
+			{
+				if (!left[i])
+				{
+					continue;
+				}
+				left[i] = false;
+
+				var light = lights[i];
+				var cells = light.diameter * light.diameter;
+				unsafe
+				{
+					var colors = pool[light.localGlowPoolIndex].colors;
+					if (colors.Ptr == null || colors.Length < cells)
+					{
+						continue;
+					}
+
+					if (cache.Count >= CachedGlow.MaxEntries)
+					{
+						cache.Clear();
+					}
+
+					var copy = new Color32[cells];
+					var src = colors.Ptr;
+					for (var k = 0; k < cells; k++)
+					{
+						copy[k] = src[k];
+					}
+					cache[light.id] = new CachedGlow
+					{
+						Diameter = light.diameter,
+						Radius = light.glowRadius,
+						Overlight = light.overlightRadius,
+						Color = light.glowColor,
+						Signature = state.Signatures[i],
+						Colors = copy
+					};
+				}
+			}
+		}
+
+		/// <summary>
+		/// Fills unobstructed lights with the exact octile distance field and restores lights whose
+		/// blocker pattern and color are unchanged from the cache, so the vanilla flood fill only runs
+		/// for genuinely new geometry.
+		/// </summary>
+		private struct PrefillJob : IJobParallelFor
+		{
+			public NativeList<GlowLight> Lights;
+			public NativeBitArray Blockers;
+			public CellIndices Indices;
+			public NativeList<LocalGlowArea> Pool;
+			public int SizeX;
+			public int SizeZ;
+			public bool[] LeftDirty;
+			public ulong[] Signatures;
+			public ConcurrentDictionary<int, CachedGlow> Cache;
+
+			public void Execute(int index)
+			{
+				var light = Lights[index];
+				if (!light.dirty)
+				{
+					return;
+				}
+
+				var minX = light.localGlowGridStartPos.x;
+				var minZ = light.localGlowGridStartPos.z;
+				var x0 = Math.Max(0, minX);
+				var z0 = Math.Max(0, minZ);
+				var x1 = Math.Min(SizeX - 1, minX + light.diameter - 1);
+				var z1 = Math.Min(SizeZ - 1, minZ + light.diameter - 1);
+
+				var signature = 14695981039346656037UL;
+				signature ^= (ulong)(uint)light.position.x;
+				signature *= 1099511628211UL;
+				signature ^= (ulong)(uint)light.position.z;
+				signature *= 1099511628211UL;
+				var blocked = false;
+				for (var z = z0; z <= z1; z++)
+				{
+					var row = z * SizeX;
+					for (var x = x0; x <= x1; x++)
+					{
+						var cellIndex = row + x;
+						if (Blockers.IsSet(cellIndex))
+						{
+							blocked = true;
+							signature ^= (ulong)cellIndex;
+							signature *= 1099511628211UL;
+						}
+					}
+				}
+				Signatures[index] = signature;
+
+				if (!blocked)
+				{
+					FillRadial(ref light, Pool[light.localGlowPoolIndex].colors);
+					light.dirty = false;
+					Lights[index] = light;
+					return;
+				}
+
+				if (Cache.TryGetValue(light.id, out var cached) && cached.Matches(in light, signature))
+				{
+					CopyColors(cached, Pool[light.localGlowPoolIndex].colors,
+						light.diameter * light.diameter);
+					light.dirty = false;
+					Lights[index] = light;
+					return;
+				}
+
+				LeftDirty[index] = true;
+			}
+		}
+
+		/// <summary>
+		/// Exact distance field for a light with no blockers in its rect: the octile distance on an
+		/// 8-connected grid with 100/141 costs equals the Dijkstra result, offset by the start cost.
+		/// </summary>
+		private static unsafe void FillRadial(ref GlowLight light, UnsafeList<Color32> colors)
+		{
+			NativeArrayUtility.MemClear(colors);
+			var dst = colors.Ptr;
+			if (dst == null)
+			{
+				return;
+			}
+
+			var radius = light.radius;
+			var diameter = light.diameter;
+			var glowRadius = light.glowRadius;
+			var negInv = -1f / glowRadius;
+			var cutoff = Mathf.RoundToInt(glowRadius * 100f);
+
+			for (var lz = 0; lz < diameter; lz++)
+			{
+				var dz = lz - radius;
+				var az = dz < 0 ? -dz : dz;
+				var rowBase = lz * diameter;
+				for (var lx = 0; lx < diameter; lx++)
+				{
+					var dx = lx - radius;
+					var ax = dx < 0 ? -dx : dx;
+					var min = ax < az ? ax : az;
+					var max = ax < az ? az : ax;
+					var intDist = 100 + 100 * max + 41 * min;
+					if (intDist > cutoff)
+					{
+						continue;
+					}
+
+					var dist = intDist / 100f;
+					var colorInt = default(ColorInt);
+					if (dist <= glowRadius)
+					{
+						var b = 1f / (dist * dist);
+						var factor = Mathf.Lerp(1f + negInv * dist, b, 0.4f);
+						colorInt = light.glowColor * factor;
+						colorInt.a = 0;
+					}
+					if (colorInt.r > 0 || colorInt.g > 0 || colorInt.b > 0)
+					{
+						colorInt.ClampToNonNegative();
+						colorInt.a = (int)dist;
+						colorInt.ProjectToColor32Fast(out var outColor);
+						dst[rowBase + lx] = outColor;
+					}
+				}
+			}
+		}
+
+		private static unsafe void CopyColors(CachedGlow cached, UnsafeList<Color32> colors, int count)
+		{
+			var dst = colors.Ptr;
+			if (dst == null || colors.Length < count)
+			{
+				return;
+			}
+
+			var src = cached.Colors;
+			for (var i = 0; i < count; i++)
+			{
+				dst[i] = src[i];
+			}
 		}
 
 		private static void FillAllCells(GlowGrid grid, State state)
