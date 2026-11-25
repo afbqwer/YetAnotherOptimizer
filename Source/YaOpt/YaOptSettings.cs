@@ -770,6 +770,84 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Reuses the deterministic result of <see cref="ThingSetMaker_MarketValue"/>'s sampling for the
+		/// same merged parameters and seed.
+		/// </summary>
+		/// <remarks>
+		/// Reward and trader item generation runs the same sample repeatedly: once per option to build
+		/// the weighted option table and again to generate the chosen option. The sample is already wrapped
+		/// in <c>Rand.PushState(seed)</c>/<c>PopState</c>, so identical parameters and seed always produce
+		/// identical results and skipping the call does not advance the ambient random stream.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_ThingSetMaker_MarketValue_GeneratePossibleDefs"/>
+		/// <seealso cref="Helpers.ThingSetMakerSampleCache"/>
+		public OptimizationOption OptThingSetMakerSampleCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ThingSetMakerSampleCache",
+			Desc = "YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Answers <see cref="ThingSetMaker_MarketValue"/>'s CanGenerate check from the first sampling
+		/// iteration instead of running the full sample.
+		/// </summary>
+		/// <remarks>
+		/// Option tables ask every option whether it can generate before picking one, so the full sample
+		/// runs several times while only one option is actually generated. The first iteration already
+		/// decides whether the result is non-empty. Automatically disabled when another mod patches the
+		/// sampling members this check mirrors.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_ThingSetMaker_MarketValue_CanGenerateSub"/>
+		/// <seealso cref="Helpers.ThingSetMakerCanGenerate"/>
+		/// <seealso cref="Helpers.GenerationOptimizationCompat"/>
+		public OptimizationOption OptThingSetMakerCanGenerateFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath",
+			Desc = "YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Memoises the min/max/single-value callbacks of
+		/// <see cref="ThingSetMakerByTotalStatUtility.GenerateDefsWithPossibleTotalValue"/> for the
+		/// duration of one call.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla evaluates the same stat up to three times per candidate (median threshold, minimum
+		/// value and single-item value). Only callbacks declared in the vanilla assembly are wrapped; the
+		/// cache is per call and discarded afterwards, so no values are shared between generations.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_ThingSetMakerByTotalStatUtility_GenerateDefsWithPossibleTotalValue"/>
+		/// <seealso cref="Helpers.GenerationStatMemo"/>
+		public OptimizationOption OptThingSetMakerStatCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ThingSetMakerStatCache",
+			Desc = "YaOpt.Setting.Option.ThingSetMakerStatCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Caches pure def-derived results used while generating items: whether a weapon material is a
+		/// derp choice, the allowed stuff list of each def, and the recipe used to price a def.
+		/// </summary>
+		/// <remarks>
+		/// All three only depend on def data and are rebuilt when a save loads. Any foreign patch on the
+		/// cached methods disables that part instead of bypassing it.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_PawnWeaponGenerator_IsDerpWeapon"/>
+		/// <seealso cref="Patches.RimWorld_GenStuff_AllowedStuffsFor"/>
+		/// <seealso cref="Patches.RimWorld_StatWorker_MarketValue_CalculableRecipe"/>
+		/// <seealso cref="Helpers.GenerationDefCaches"/>
+		public OptimizationOption OptGenerationDefCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.GenerationDefCache",
+			Desc = "YaOpt.Setting.Option.GenerationDefCache.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Replaces the two-pass quest lodger lookup with one allocation-free scan.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_QuestUtility_IsQuestLodger"/>

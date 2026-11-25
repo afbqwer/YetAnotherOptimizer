@@ -55,6 +55,7 @@ namespace YaOpt.Patches
 		{
 			PrepatcherState.Refresh();
 			GridOptimizationCompat.Refresh();
+			GenerationOptimizationCompat.Refresh();
 			if (!force && !YaOptGlobal.AnyOptionChanged())
 				return;
 
