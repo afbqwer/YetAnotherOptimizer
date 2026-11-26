@@ -26,6 +26,7 @@ namespace YaOpt.Helpers
 		{
 			Any,
 			Required,
+			FullBody,
 			TorsoOnSkin,
 			Torso,
 			Legs
@@ -88,8 +89,10 @@ namespace YaOpt.Helpers
 			}
 
 			var set = PawnApparelGenerator.workingSet;
+			var nakedOverride = false;
 			if (!pawn.IsColonist && Rand.Chance(pawn.kindDef.nakedChance))
 			{
+				nakedOverride = true;
 				set.Reset(pawn);
 				PawnApparelGenerator.GenerateSpecificRequiredApparel(pawn, money, onlyGenerateIgnoreNaked: true);
 			}
@@ -102,11 +105,8 @@ namespace YaOpt.Helpers
 				FillApparelSet(pawn, money, pool, ApparelCandidates);
 			}
 
-			if ((!pawn.kindDef.apparelIgnoreSeasons || request.ForceAddFreeWarmLayerIfNeeded)
-				&& !set.SatisfiesNeededWarmth(warmth, mustBeSafe: true, mapTemperature))
-			{
-				set.AddFreeWarmthAsNeeded(warmth, mapTemperature, pawn);
-			}
+			if (!pawn.kindDef.apparelIgnoreSeasons || request.ForceAddFreeWarmLayerIfNeeded)
+				EnsureTemperatureSafety(pawn, set, warmth, mapTemperature, nakedOverride);
 
 			if (ModsConfig.BiotechActive && !pawn.kindDef.apparelIgnorePollution && pollution > 0.05f
 				&& !set.SatisfiesNeededToxicEnvironmentResistance(pollution))
@@ -155,11 +155,13 @@ namespace YaOpt.Helpers
 					if (!requiredDef.apparel.CorrectAgeForWearing(pawn))
 						continue;
 
-					TryAddWeighted(pawn, pool, set, ref moneyLeft, ApparelKind.Required, requiredDef);
+					// Vanilla adds required apparel even when it exceeds the remaining budget.
+					TryAddWeighted(pawn, pool, set, ref moneyLeft, ApparelKind.Required, requiredDef,
+						float.PositiveInfinity);
 				}
 			}
 
-			if (!AllowsClothing(pawn, money))
+			if (PrefersNoClothing(pawn))
 				return;
 
 			UsableApparel.Clear();
@@ -169,42 +171,69 @@ namespace YaOpt.Helpers
 					UsableApparel.Add(candidates[i]);
 			}
 
-			if (!set.Covers(BodyPartGroupDefOf.Torso))
+			if (!set.Covers(BodyPartGroupDefOf.Torso) && !set.Covers(BodyPartGroupDefOf.Legs)
+				&& TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.FullBody, null, moneyLeft))
 			{
-				if (!TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.TorsoOnSkin, null)
-					&& !set.Covers(BodyPartGroupDefOf.Torso))
-				{
-					TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.Torso, null);
-				}
-
 				PruneUsableApparel(set, moneyLeft);
 			}
 
-			while (TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.Any, null))
+			if (pawn.gender == Gender.Female
+				&& !set.Covers(BodyPartGroupDefOf.Legs)
+				&& !set.Covers(BodyPartGroupDefOf.Torso))
+			{
+				// Torso first, but reserve enough for legs. A torso item that does not cover
+				// the legs cannot overlap with them, and a full-body item covers both.
+				var cheapestLegs = CheapestKindPrice(pawn, set, ApparelKind.Legs);
+				var torsoBudget = moneyLeft;
+				if (cheapestLegs < moneyLeft)
+				{
+					var reserved = moneyLeft - cheapestLegs;
+					if (reserved > 0f && HasAffordableKind(pawn, set, ApparelKind.Torso, reserved))
+						torsoBudget = reserved;
+				}
+
+				TryAddTorso(pawn, set, ref moneyLeft, torsoBudget);
+
+				if (!set.Covers(BodyPartGroupDefOf.Legs))
+				{
+					TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.Legs, null, moneyLeft);
+					PruneUsableApparel(set, moneyLeft);
+				}
+			}
+			else
+			{
+				if (!set.Covers(BodyPartGroupDefOf.Legs))
+				{
+					TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.Legs, null, moneyLeft);
+					PruneUsableApparel(set, moneyLeft);
+				}
+
+				if (!set.Covers(BodyPartGroupDefOf.Torso))
+					TryAddTorso(pawn, set, ref moneyLeft, moneyLeft);
+			}
+
+			while (TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.Any, null, moneyLeft))
 				PruneUsableApparel(set, moneyLeft);
 
 			for (var i = 0; i < 2 && set.IsNaked(pawn.gender); i++)
 			{
 				var kind = !set.Covers(BodyPartGroupDefOf.Legs) ? ApparelKind.Legs : ApparelKind.Torso;
-				if (!TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, kind, null))
+				if (!TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, kind, null, moneyLeft))
 					break;
 
 				PruneUsableApparel(set, moneyLeft);
 			}
 		}
 
-		private static bool AllowsClothing(Pawn pawn, float money)
+		private static bool PrefersNoClothing(Pawn pawn)
 		{
 			if (pawn.Ideo != null && pawn.Ideo.IdeoPrefersNudityForGender(pawn.gender)
 				&& (pawn.Faction == null || !pawn.Faction.IsPlayer))
 			{
-				return false;
+				return true;
 			}
 
-			if (!pawn.IsColonist && pawn.story?.traits != null && pawn.story.traits.HasTrait(TraitDefOf.Nudist))
-				return false;
-
-			return !(Rand.Value < 0.1f) || !(money < 9999999f);
+			return !pawn.IsColonist && pawn.story?.traits != null && pawn.story.traits.HasTrait(TraitDefOf.Nudist);
 		}
 
 		private static void PruneUsableApparel(PawnApparelGenerator.PossibleApparelSet set, float moneyLeft)
@@ -217,15 +246,57 @@ namespace YaOpt.Helpers
 			}
 		}
 
+		private static float CheapestKindPrice(Pawn pawn,
+			PawnApparelGenerator.PossibleApparelSet set, ApparelKind kind)
+		{
+			var best = float.PositiveInfinity;
+			for (var i = 0; i < UsableApparel.Count; i++)
+			{
+				var pair = UsableApparel[i];
+				if (pair.Commonality > 0f && pair.Price < best
+					&& Matches(pair, pawn, set, kind, null))
+				{
+					best = pair.Price;
+				}
+			}
+
+			return best;
+		}
+
+		private static bool HasAffordableKind(Pawn pawn,
+			PawnApparelGenerator.PossibleApparelSet set, ApparelKind kind, float priceCap)
+		{
+			for (var i = 0; i < UsableApparel.Count; i++)
+			{
+				var pair = UsableApparel[i];
+				if (pair.Price <= priceCap && pair.Commonality > 0f
+					&& Matches(pair, pawn, set, kind, null))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		private static void TryAddTorso(Pawn pawn,
+			PawnApparelGenerator.PossibleApparelSet set, ref float moneyLeft, float priceCap)
+		{
+			if (!TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.TorsoOnSkin, null, priceCap))
+				TryAddWeighted(pawn, UsableApparel, set, ref moneyLeft, ApparelKind.Torso, null, priceCap);
+
+			PruneUsableApparel(set, moneyLeft);
+		}
+
 		private static bool TryAddWeighted(Pawn pawn, List<ThingStuffPair> source,
 			PawnApparelGenerator.PossibleApparelSet set, ref float moneyLeft, ApparelKind kind,
-			ThingDef requiredDef)
+			ThingDef requiredDef, float priceCap)
 		{
 			var total = 0f;
 			for (var i = 0; i < source.Count; i++)
 			{
 				var pair = source[i];
-				if (pair.Price > moneyLeft)
+				if (pair.Price > priceCap)
 					continue;
 
 				var weight = pair.Commonality;
@@ -242,7 +313,7 @@ namespace YaOpt.Helpers
 			for (var i = 0; i < source.Count; i++)
 			{
 				var pair = source[i];
-				if (pair.Price > moneyLeft)
+				if (pair.Price > priceCap)
 					continue;
 
 				var weight = pair.Commonality;
@@ -275,6 +346,12 @@ namespace YaOpt.Helpers
 					&& !pair.thing.apparel.layers.Contains(ApparelLayerDefOf.OnSkin))
 					return false;
 			}
+			else if (kind == ApparelKind.FullBody
+				&& (!pair.thing.apparel.bodyPartGroups.Contains(BodyPartGroupDefOf.Torso)
+					|| !CoversGroup(pair, BodyPartGroupDefOf.Legs)))
+			{
+				return false;
+			}
 			else if (kind == ApparelKind.Legs && !CoversGroup(pair, BodyPartGroupDefOf.Legs))
 			{
 				return false;
@@ -288,6 +365,159 @@ namespace YaOpt.Helpers
 			return pair.thing.apparel.bodyPartGroups.Contains(group)
 				&& (group != BodyPartGroupDefOf.Legs
 					|| !pair.thing.apparel.legsNakedUnlessCoveredBySomethingElse);
+		}
+
+		private static void EnsureTemperatureSafety(Pawn pawn,
+			PawnApparelGenerator.PossibleApparelSet set, NeededWarmth warmth, float mapTemperature,
+			bool nakedOverride)
+		{
+			if (warmth == NeededWarmth.Any)
+				return;
+
+			var baseMin = pawn.GetStatValue(StatDefOf.ComfyTemperatureMin,
+				applyPostProcess: true, cacheStaleAfterTicks: 1);
+			var baseMax = pawn.GetStatValue(StatDefOf.ComfyTemperatureMax,
+				applyPostProcess: true, cacheStaleAfterTicks: 1);
+
+			ComputeInsulation(set, out var cold, out var heat);
+			if (IsTemperatureSafe(baseMin, baseMax, cold, heat, mapTemperature)
+				&& SatisfiesWarmth(warmth, cold, heat))
+			{
+				return;
+			}
+
+			if (warmth == NeededWarmth.Warm)
+			{
+				set.AddFreeWarmthAsNeeded(warmth, mapTemperature, pawn);
+				ComputeInsulation(set, out cold, out heat);
+				if (IsTemperatureSafe(baseMin, baseMax, cold, heat, mapTemperature)
+					&& SatisfiesWarmth(warmth, cold, heat))
+				{
+					return;
+				}
+			}
+
+			if (nakedOverride || PrefersNoClothing(pawn))
+				return;
+
+			var needsCold = warmth == NeededWarmth.Warm;
+			for (var i = 0; i < 3; i++)
+			{
+				if (!TryFindTemperatureCandidate(pawn, set, needsCold, baseMin, baseMax, cold, heat,
+					mapTemperature, out var candidate))
+				{
+					break;
+				}
+
+				var aps = set.ApparelsForReading;
+				for (var j = aps.Count - 1; j >= 0; j--)
+				{
+					if (!ApparelUtility.CanWearTogether(aps[j].thing, candidate.thing, pawn.RaceProps.body))
+						aps.RemoveAt(j);
+				}
+
+				aps.Add(candidate);
+				ComputeInsulation(set, out cold, out heat);
+				if (IsTemperatureSafe(baseMin, baseMax, cold, heat, mapTemperature)
+					&& SatisfiesWarmth(warmth, cold, heat))
+				{
+					break;
+				}
+			}
+		}
+
+		private static bool TryFindTemperatureCandidate(Pawn pawn,
+			PawnApparelGenerator.PossibleApparelSet set, bool needsCold,
+			float baseMin, float baseMax, float currentCold, float currentHeat, float mapTemperature,
+			out ThingStuffPair best)
+		{
+			best = default;
+			var found = false;
+			var bestSafe = false;
+			var bestImprovement = float.NegativeInfinity;
+			var aps = set.ApparelsForReading;
+			var maxPrice = PawnApparelGenerator.freeWarmParkaMaxPrice;
+			for (var i = 0; i < ApparelCandidates.Count; i++)
+			{
+				var pair = ApparelCandidates[i];
+				if (pair.Commonality <= 0f
+					|| pair.Price > maxPrice
+					|| (needsCold ? pair.InsulationCold <= 0f : pair.InsulationHeat <= 0f)
+					|| !PawnApparelGenerator.CanUseStuff(pawn, pair)
+					|| !pair.thing.apparel.CorrectAgeForWearing(pawn))
+				{
+					continue;
+				}
+
+				var alreadyWorn = false;
+				var replacedCold = 0f;
+				var replacedHeat = 0f;
+				for (var j = 0; j < aps.Count; j++)
+				{
+					var existing = aps[j];
+					if (existing.thing == pair.thing && existing.stuff == pair.stuff)
+					{
+						alreadyWorn = true;
+						break;
+					}
+
+					if (!ApparelUtility.CanWearTogether(existing.thing, pair.thing, pawn.RaceProps.body))
+					{
+						replacedCold += existing.InsulationCold;
+						replacedHeat += existing.InsulationHeat;
+					}
+				}
+
+				if (alreadyWorn)
+					continue;
+
+				var newCold = currentCold - replacedCold + pair.InsulationCold;
+				var newHeat = currentHeat - replacedHeat + pair.InsulationHeat;
+				var improvement = needsCold ? newCold - currentCold : newHeat - currentHeat;
+				if (improvement <= 0f)
+					continue;
+
+				var safe = IsTemperatureSafe(baseMin, baseMax, newCold, newHeat, mapTemperature);
+				if (!found
+					|| (safe && !bestSafe)
+					|| (safe == bestSafe && improvement > bestImprovement))
+				{
+					found = true;
+					bestSafe = safe;
+					bestImprovement = improvement;
+					best = pair;
+				}
+			}
+
+			return found;
+		}
+
+		private static void ComputeInsulation(PawnApparelGenerator.PossibleApparelSet set,
+			out float cold, out float heat)
+		{
+			cold = 0f;
+			heat = 0f;
+			var aps = set.ApparelsForReading;
+			for (var i = 0; i < aps.Count; i++)
+			{
+				cold += aps[i].InsulationCold;
+				heat += aps[i].InsulationHeat;
+			}
+		}
+
+		private static bool IsTemperatureSafe(float baseMin, float baseMax, float cold, float heat,
+			float mapTemperature)
+		{
+			return mapTemperature >= baseMin - cold - 10f && mapTemperature <= baseMax + heat + 10f;
+		}
+
+		private static bool SatisfiesWarmth(NeededWarmth warmth, float cold, float heat)
+		{
+			if (warmth == NeededWarmth.Warm)
+				return cold >= 52f;
+			if (warmth == NeededWarmth.Cool)
+				return heat >= -2f;
+			return true;
 		}
 
 		private static void RebuildWeaponCore(Pawn pawn, PawnGenerationRequest request)
