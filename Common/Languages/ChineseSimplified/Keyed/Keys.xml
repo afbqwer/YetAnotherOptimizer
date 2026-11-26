@@ -252,6 +252,8 @@
 	<YaOpt.Setting.Option.PawnGearRebuild>Pawn 装备生成重写</YaOpt.Setting.Option.PawnGearRebuild>
 	<YaOpt.Setting.Option.PawnGearRebuild.Desc>用构造式选取替代服装与武器的“整套随机重试”。服装生成不再把整个候选集重建并验收最多 80 次：候选只过滤一次，先保证躯干与腿部覆盖，再按权重在预算内填充，且不会互斥叠穿或超预算。武器选择对每个候选权重只求值一次。互斥、预算、必选项、种族限制与裸体规则都会保留，但随机序列不再与原版逐位一致。默认关闭。</YaOpt.Setting.Option.PawnGearRebuild.Desc>
 	<YaOpt.Setting.Option.PawnGearRebuild.Compatibility>安装 HAR 时会中和其池补丁并按种族过滤候选；若探测不到 HAR 的装备补丁，或其它模组 patch 了装备生成方法，本项会自动停用并回退到原版 + HAR 原行为。</YaOpt.Setting.Option.PawnGearRebuild.Compatibility>
+	<YaOpt.Setting.Option.PawnGearEnvironment>Pawn 装备环境精确计算</YaOpt.Setting.Option.PawnGearEnvironment>
+	<YaOpt.Setting.Option.PawnGearEnvironment.Desc>在可用时使用 Pawn 目标地图的实时环境，而不是地块季节平均温度：温度取当前室外温度，污染取地图当前污染并识别毒尘，真空取目标地图的生物群系。每名 Pawn 只解析一次地图并读取常数时间字段，不产生新增分配；无法解析地图时完全回退原版判定。仅在 Pawn 装备生成重写启用时生效，默认关闭。</YaOpt.Setting.Option.PawnGearEnvironment.Desc>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>物品生成可生成判定加速</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>用第一次采样迭代的结果回答物品集合选项的“能否生成”，不再为判定而跑完整采样。选项表在挑选前会询问每个选项能否生成，以前这会让完整采样跑好几遍而最终只生成其中一个。第一次迭代已经决定结果是否非空；材料池和数值仍按原版方式构建，随机数序列不变。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>若其它模组改动了此判定所复刻的采样方法，本项会自动停用。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>

@@ -1025,6 +1025,26 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Uses the destination map's live weather, pollution and vacuum state instead of world-tile
+		/// season averages when the gear rewrite generates apparel.
+		/// </summary>
+		/// <remarks>
+		/// The map is resolved once per Pawn from <see cref="Pawn.MapHeld"/> or the generation tile.
+		/// All checks are constant-time field reads with no new allocations; when no map can be
+		/// resolved the rewrite falls back to the exact vanilla calculations. Only effective while
+		/// <see cref="OptPawnGearRebuild"/> is enabled.
+		/// </remarks>
+		/// <seealso cref="Helpers.PawnGearEnvironment"/>
+		public OptimizationOption OptPawnGearEnvironment { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnGearEnvironment",
+			Desc = "YaOpt.Setting.Option.PawnGearEnvironment.Desc",
+			Category = OptimizationCategory.Tps,
+			Default = false,
+			FuncShow = settings => settings.OptPawnGearRebuild.Enabled
+		};
+
+		/// <summary>
 		/// Replaces the two-pass quest lodger lookup with one allocation-free scan.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_QuestUtility_IsQuestLodger"/>

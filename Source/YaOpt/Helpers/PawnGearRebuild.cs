@@ -93,11 +93,13 @@ namespace YaOpt.Helpers
 			pawn.apparel.DestroyAll();
 			pawn.outfits?.forcedHandler?.Reset();
 
+			var environment = PawnGearEnvironment.Resolve(pawn, request,
+				YaOptGlobal.Settings?.OptPawnGearEnvironment.Enabled == true);
 			var money = pawn.kindDef.apparelMoney.RandomInRange;
-			var warmth = PawnApparelGenerator.ApparelWarmthNeededNow(pawn, request, out var mapTemperature);
-			var needVacuum = PawnApparelGenerator.NeedVacuumResistance(pawn, request);
+			var warmth = environment.Warmth;
+			var needVacuum = environment.NeedVacuum;
 			var allowHeadgear = Rand.Value < pawn.kindDef.apparelAllowHeadgearChance;
-			var pollution = PawnApparelGenerator.ApparelToxicEnvironmentToAddress(pawn, request);
+			var pollution = environment.Pollution;
 			var fixedSeed = Rand.Int;
 
 			var pool = PawnApparelGenerator.allApparelPairs;
@@ -130,7 +132,7 @@ namespace YaOpt.Helpers
 			}
 
 			if (!pawn.kindDef.apparelIgnoreSeasons || request.ForceAddFreeWarmLayerIfNeeded)
-				EnsureTemperatureSafety(pawn, set, warmth, mapTemperature, nakedOverride);
+				EnsureTemperatureSafety(pawn, set, environment, nakedOverride);
 
 			if (ModsConfig.BiotechActive && !pawn.kindDef.apparelIgnorePollution && pollution > 0.05f
 				&& !set.SatisfiesNeededToxicEnvironmentResistance(pollution))
@@ -614,17 +616,29 @@ namespace YaOpt.Helpers
 		}
 
 		private static void EnsureTemperatureSafety(Pawn pawn,
-			PawnApparelGenerator.PossibleApparelSet set, NeededWarmth warmth, float mapTemperature,
+			PawnApparelGenerator.PossibleApparelSet set, in PawnGearEnvironment environment,
 			bool nakedOverride)
 		{
+			var warmth = environment.Warmth;
 			if (warmth == NeededWarmth.Any)
 				return;
 
-			var baseMin = pawn.GetStatValue(StatDefOf.ComfyTemperatureMin,
-				applyPostProcess: true, cacheStaleAfterTicks: 1);
-			var baseMax = pawn.GetStatValue(StatDefOf.ComfyTemperatureMax,
-				applyPostProcess: true, cacheStaleAfterTicks: 1);
+			float baseMin;
+			float baseMax;
+			if (environment.HasBaseComfyRange)
+			{
+				baseMin = environment.BaseComfyMin;
+				baseMax = environment.BaseComfyMax;
+			}
+			else
+			{
+				baseMin = pawn.GetStatValue(StatDefOf.ComfyTemperatureMin,
+					applyPostProcess: true, cacheStaleAfterTicks: 1);
+				baseMax = pawn.GetStatValue(StatDefOf.ComfyTemperatureMax,
+					applyPostProcess: true, cacheStaleAfterTicks: 1);
+			}
 
+			var mapTemperature = environment.MapTemperature;
 			ComputeInsulation(set, out var cold, out var heat);
 			if (IsTemperatureSafe(baseMin, baseMax, cold, heat, mapTemperature)
 				&& SatisfiesWarmth(warmth, cold, heat))
