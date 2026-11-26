@@ -256,6 +256,18 @@
 	<YaOpt.Setting.Option.PawnGearRebuild.Compatibility>安裝 HAR 時會中和其池補丁並按種族過濾候選；Passer Race 的服裝限制上下文會先於重構執行，已知裝備後處理補丁仍會執行。HAR 補丁不完整或遇到未知裝備生成補丁時，本項預設關閉。</YaOpt.Setting.Option.PawnGearRebuild.Compatibility>
 	<YaOpt.Setting.Option.PawnGearEnvironment>Pawn 裝備環境精確計算</YaOpt.Setting.Option.PawnGearEnvironment>
 	<YaOpt.Setting.Option.PawnGearEnvironment.Desc>在可用時使用 Pawn 目標地圖的即時環境，而不是地塊季節平均溫度：溫度取目前室外溫度，污染取地圖目前污染並識別毒塵，真空取目標地圖的生物群系。每名 Pawn 只解析一次地圖並讀取常數時間欄位，不產生新增分配；無法解析地圖時完全回退原版判定。僅在 Pawn 裝備生成重寫啟用時生效，預設關閉。</YaOpt.Setting.Option.PawnGearEnvironment.Desc>
+	<YaOpt.Setting.Option.PawnGearHarFastPath>HAR 裝備限制快速路徑</YaOpt.Setting.Option.PawnGearHarFastPath>
+	<YaOpt.Setting.Option.PawnGearHarFastPath.Desc>直接回答 HAR 的裝備限制查詢。HAR 的裝備屬性反查即使字典命中也會為每次呼叫分配閉包；其可穿戴著裝後處理在原版已判定 false 時仍會查詢種族限制。裝備生成會對每個候選 pair 呼叫這兩處。替換用的映射復現 HAR 的首次匹配語意，並在 def 變化時重建。</YaOpt.Setting.Option.PawnGearHarFastPath.Desc>
+	<YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility>僅在安裝 HAR 時生效。HAR 方法缺失或變更時跳過補丁，保留 HAR 原有行為。</YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility>
+	<YaOpt.Setting.Option.PawnApparelPairCache>裝備候選判定快取</YaOpt.Setting.Option.PawnApparelPairCache>
+	<YaOpt.Setting.Option.PawnApparelPairCache.Desc>在一名 Pawn、預算、頭飾開關與固定種子都相同時，按裝備 def 復用頭飾判定、可穿戴判定、kindDef 標籤和按種子生成的允許機率；這在整個候選掃描期間成立。價格仍逐 pair 檢查。Pawn 或參數變化時清空快取，結果與原版判定一致。</YaOpt.Setting.Option.PawnApparelPairCache.Desc>
+	<YaOpt.Setting.Option.PawnApparelPairCache.Compatibility>若其它模組改動了此判定所替換的方法，本項會自動停用。</YaOpt.Setting.Option.PawnApparelPairCache.Compatibility>
+	<YaOpt.Setting.Option.PawnBackstoryMatchCache>背景匹配快取</YaOpt.Setting.Option.PawnBackstoryMatchCache>
+	<YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc>用零分配實作替換會分配委派的背景類別匹配，並按過濾器把匹配結果快取為位圖。每次打亂背景槽都會用同一個過濾器掃描全部背景，而結果只取決於過濾器和 def 資料。def 數量變化或讀檔時重建快取。</YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc>
+	<YaOpt.Setting.Option.PawnBackstoryMatchCache.Compatibility>若其它模組改動了此匹配所替換的方法，本項會自動停用。</YaOpt.Setting.Option.PawnBackstoryMatchCache.Compatibility>
+	<YaOpt.Setting.Option.PawnTraitsHarFastPath>HAR 特質候選項快取</YaOpt.Setting.Option.PawnTraitsHarFastPath>
+	<YaOpt.Setting.Option.PawnTraitsHarFastPath.Desc>在單次特質生成內，對每個特質 def 只做一次 HAR 種族限制校驗，而不是在加權取樣的每一遍和每次抽取時重複。HAR 的校驗每次都會構建 Pawn 的背景限制清單並抽取機率；物化候選清單可消除大部分開銷。特質數量、衝突、工作標籤與黑白名單仍由原版邏輯保證。</YaOpt.Setting.Option.PawnTraitsHarFastPath.Desc>
+	<YaOpt.Setting.Option.PawnTraitsHarFastPath.Compatibility>僅在安裝 HAR 時生效。HAR 的機率抽取由「每次取樣巡覽一次」變為「每個候選一次」，因此不保證隨機序列一致。</YaOpt.Setting.Option.PawnTraitsHarFastPath.Compatibility>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>物品生成可生成判定加速</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>用第一次取樣迭代的結果回答物品集合選項的「能否生成」，不再為判定而跑完整取樣。選項表在挑選前會詢問每個選項能否生成，以前這會讓完整取樣跑好幾遍而最終只生成其中一個。第一次迭代已經決定結果是否非空；材料池和數值仍按原版方式構建，隨機數序列不變。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>若其它模組改動了此判定所復刻的取樣方法，本項會自動停用。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>

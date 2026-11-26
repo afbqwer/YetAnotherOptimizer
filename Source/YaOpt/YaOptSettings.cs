@@ -1046,6 +1046,86 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Answers Humanoid Alien Races' apparel restriction lookups without their per-call closure and
+		/// skips the race check when vanilla already rejected the apparel.
+		/// </summary>
+		/// <remarks>
+		/// HAR's <c>GetApparelFromApparelProps</c> allocates a capturing closure before consulting its
+		/// cache, and its <c>PawnCanWear</c> postfix always queries race restrictions even when the vanilla
+		/// result is already false. Apparel generation calls both once per candidate pair. The replacement
+		/// map reproduces HAR's first-match def lookup and is rebuilt when defs change.
+		/// </remarks>
+		/// <seealso cref="Patches.Compatibility.HumanoidAlienRaces.AlienRace_CachedData_GetApparelFromApparelProps"/>
+		/// <seealso cref="Patches.Compatibility.HumanoidAlienRaces.AlienRace_HarmonyPatches_PawnCanWearPostfix"/>
+		/// <seealso cref="Helpers.HarGearCaches"/>
+		public OptimizationOption OptPawnGearHarFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnGearHarFastPath",
+			Desc = "YaOpt.Setting.Option.PawnGearHarFastPath.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility",
+			RequiredMod = "erdelf.HumanoidAlienRaces",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Memoises the per-definition apparel candidate checks for one generation parameter set.
+		/// </summary>
+		/// <remarks>
+		/// The headgear test, <c>PawnCanWear</c>, the kind's apparel tags and the seeded generate chance
+		/// only depend on the pair's <see cref="ThingDef"/> while the pawn, headgear flag and fixed seed stay
+		/// the same, which holds for the whole candidate scan. Prices remain per pair. A different pawn or
+		/// parameter set clears the cache.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_PawnApparelGenerator_CanUsePair"/>
+		/// <seealso cref="Helpers.PawnApparelPairCache"/>
+		public OptimizationOption OptPawnApparelPairCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnApparelPairCache",
+			Desc = "YaOpt.Setting.Option.PawnApparelPairCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnApparelPairCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Replaces the allocating backstory category match with an allocation-free, bitmap-cached check.
+		/// </summary>
+		/// <remarks>
+		/// Every shuffled backstory slot evaluates one filter against all loaded backstories. The result is
+		/// a pure function of the filter and the def data, so it is cached as a bitmap until the def count
+		/// changes or a save loads.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_BackstoryCategoryFilter_Matches"/>
+		/// <seealso cref="Helpers.BackstoryMatchCache"/>
+		public OptimizationOption OptPawnBackstoryMatchCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnBackstoryMatchCache",
+			Desc = "YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnBackstoryMatchCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Materialises Humanoid Alien Races' permitted trait list once per trait generation.
+		/// </summary>
+		/// <remarks>
+		/// HAR wraps the trait def list in a lazy filter that runs its race check on every sampler pass and
+		/// every draw, allocating the pawn's backstory restriction list each time. The permitted defs only
+		/// depend on the pawn, so they are validated once and reused for the call. HAR chance rolls therefore
+		/// run once per candidate instead of repeatedly.
+		/// </remarks>
+		/// <seealso cref="Patches.Compatibility.HumanoidAlienRaces.AlienRace_GenerateTraitsValidator"/>
+		/// <seealso cref="Patches.Verse_PawnGenerator_GenerateTraitsFor"/>
+		/// <seealso cref="Helpers.HarTraitCandidates"/>
+		public OptimizationOption OptPawnTraitsHarFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnTraitsHarFastPath",
+			Desc = "YaOpt.Setting.Option.PawnTraitsHarFastPath.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnTraitsHarFastPath.Compatibility",
+			RequiredMod = "erdelf.HumanoidAlienRaces",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Replaces the two-pass quest lodger lookup with one allocation-free scan.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_QuestUtility_IsQuestLodger"/>

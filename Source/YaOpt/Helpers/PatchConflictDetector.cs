@@ -21,10 +21,17 @@ namespace YaOpt.Helpers
 	/// </remarks>
 	internal static class PatchConflictDetector
 	{
+		private const string HarModId = "erdelf.HumanoidAlienRaces";
+
 		internal static void Refresh()
 		{
+			HarTraitCandidates.Configure();
 			CheckPawnGearSessionCache();
 			CheckGenerationDefCache();
+			CheckPawnGearHarFastPath();
+			CheckPawnApparelPairCache();
+			CheckPawnBackstoryMatchCache();
+			CheckPawnTraitsHarFastPath();
 			CheckSoundOneShotManager();
 			CheckFleckCreateInPlace();
 			CheckFleckTickLoop();
@@ -54,6 +61,47 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(GenStuff), nameof(GenStuff.AllowedStuffsFor)),
 				AccessTools.Method(typeof(StatWorker_MarketValue), nameof(StatWorker_MarketValue.CalculableRecipe)),
 				AccessTools.Method(typeof(PawnWeaponGenerator), nameof(PawnWeaponGenerator.IsDerpWeapon)));
+		}
+
+		private static void CheckPawnGearHarFastPath()
+		{
+			if (!YaOptGlobal.HasMod(HarModId))
+				return;
+
+			var cachedData = AccessTools.TypeByName("AlienRace.CachedData");
+			var har = AccessTools.TypeByName("AlienRace.HarmonyPatches");
+			Check(nameof(YaOptSettings.OptPawnGearHarFastPath), includeAll: false,
+				cachedData == null
+					? null
+					: AccessTools.Method(cachedData, "GetApparelFromApparelProps",
+						new[] { typeof(ApparelProperties) }),
+				har == null ? null : AccessTools.Method(har, "PawnCanWearPostfix"));
+		}
+
+		private static void CheckPawnApparelPairCache()
+		{
+			Check(nameof(YaOptSettings.OptPawnApparelPairCache), includeAll: false,
+				AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"));
+		}
+
+		private static void CheckPawnBackstoryMatchCache()
+		{
+			Check(nameof(YaOptSettings.OptPawnBackstoryMatchCache), includeAll: false,
+				AccessTools.Method(typeof(BackstoryCategoryFilter), nameof(BackstoryCategoryFilter.Matches),
+					new[] { typeof(BackstoryDef) }));
+		}
+
+		private static void CheckPawnTraitsHarFastPath()
+		{
+			if (!YaOptGlobal.HasMod(HarModId))
+				return;
+
+			var har = AccessTools.TypeByName("AlienRace.HarmonyPatches");
+			Check(nameof(YaOptSettings.OptPawnTraitsHarFastPath), includeAll: false,
+				har == null
+					? null
+					: AccessTools.Method(har, "GenerateTraitsValidator",
+						new[] { typeof(List<TraitDef>), typeof(Pawn) }));
 		}
 
 		private static void CheckSoundOneShotManager()
