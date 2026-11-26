@@ -70,7 +70,8 @@ namespace YaOpt.Helpers
 		/// <paramref name="target"/>. A replacement prefix that returns false skips every prefix ordered
 		/// after it, including plain void instrumentation, so those methods cannot safely be replaced.
 		/// </summary>
-		internal static void CollectForeignPrefixOrTranspilers(MethodBase target, List<string> results)
+		internal static void CollectForeignPrefixOrTranspilers(MethodBase target, List<string> results,
+			Func<MethodBase, Patch, bool> compatiblePatch = null)
 		{
 			if (target == null || YaOptMod.Instance == null)
 				return;
@@ -85,7 +86,9 @@ namespace YaOpt.Helpers
 
 			foreach (var patch in info.Transpilers)
 			{
-				if (patch.owner != harmonyId && patch.owner != earlyId)
+				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (compatiblePatch == null || !compatiblePatch(target, patch))
 					results.Add(Describe(patch.owner, "transpiler", target));
 			}
 
@@ -93,8 +96,11 @@ namespace YaOpt.Helpers
 			{
 				if (patch.owner == harmonyId || patch.owner == earlyId)
 					continue;
-				if (patch.priority <= Priority.Normal)
+				if (patch.priority <= Priority.Normal &&
+					(compatiblePatch == null || !compatiblePatch(target, patch)))
+				{
 					results.Add(Describe(patch.owner, "prefix", target));
+				}
 			}
 		}
 

@@ -59,6 +59,7 @@ namespace YaOpt.Patches
 			var gridCompatibilityChanged = GridOptimizationCompat.Refresh();
 			GenerationOptimizationCompat.Refresh();
 			QuestGenerationOptimizationCompat.Refresh();
+			PawnGenerationIndexCompat.Refresh();
 			PawnGearRebuildCompat.Refresh();
 			PatchConflictDetector.Refresh();
 			if (!force && !gridCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())

@@ -248,6 +248,9 @@
 	<YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>在一次物品集合采样内，记住每个候选的最小值、最大值和单件价值，不再反复向属性系统求值最多三次。只包装原版的取值回调，采样结束即丢弃缓存。</YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>
 	<YaOpt.Setting.Option.GenerationDefCache>生成 Def 缓存</YaOpt.Setting.Option.GenerationDefCache>
 	<YaOpt.Setting.Option.GenerationDefCache.Desc>缓存生成物品时三个只依赖 Def 的查询：近战武器材料是否为“废柴”组合、每个 Def 的可用材料列表、以及没有显式市场价值时用于定价的配方。读档时刷新；若某个方法被其它模组 patch，则仅停用对应部分而不是绕过它。</YaOpt.Setting.Option.GenerationDefCache.Desc>
+	<YaOpt.Setting.Option.PawnGenerationIndex>Pawn 生成索引化</YaOpt.Setting.Option.PawnGenerationIndex>
+	<YaOpt.Setting.Option.PawnGenerationIndex.Desc>在 pawn 生成期间使用单线程索引与缓存：必选装备查找、服装筛选权重单遍、关系样本权重单遍、Rosaline 出生父母查询和基因通知批处理。装备索引需要开启装备重写。任一子路径遇到不兼容补丁或方法缺失时独立回退，不会把生成工作移到其它线程。</YaOpt.Setting.Option.PawnGenerationIndex.Desc>
+	<YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>已知 HAR 关系补丁仍负责其种族；未知关系概率补丁、被其它模组 patch 的 Rosaline 查询或批处理通知方法只停用对应子路径。</YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>
 	<YaOpt.Setting.Option.PawnGearSessionCache>Pawn 装备生成会话缓存</YaOpt.Setting.Option.PawnGearSessionCache>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Desc>在一次服装或武器生成调用内复用不会变化的结果。服装生成最多会重试 80 次候选组合，每次重试都重新检查相同的材料限制与温度属性；武器选择则会对每个候选权重求值两次。缓存只存活一次调用，随机数序列与最终产物都与原版一致。</YaOpt.Setting.Option.PawnGearSessionCache.Desc>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>与 HAR 等种族模组共存；仅当其它模组直接 patch 被缓存的方法时，对应部分自动停用。</YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>

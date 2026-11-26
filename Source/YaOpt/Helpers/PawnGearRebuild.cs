@@ -47,6 +47,13 @@ namespace YaOpt.Helpers
 
 		private static float[] _weaponWeights = new float[0];
 
+		private static readonly Dictionary<List<ThingStuffPair>, Dictionary<ThingDef, List<int>>>
+			RequiredIndexes = new Dictionary<List<ThingStuffPair>, Dictionary<ThingDef, List<int>>>();
+
+		private static readonly List<int> NoRequiredIndices = new List<int>();
+
+		private static int _requiredIndexDefCount = -1;
+
 		private static readonly List<ThingStuffPair> WarmTorsoCandidates = new List<ThingStuffPair>();
 
 		private static readonly List<ThingStuffPair> WarmHatCandidates = new List<ThingStuffPair>();
@@ -58,6 +65,17 @@ namespace YaOpt.Helpers
 		private static readonly HashSet<BodyPartGroupDef> UnprotectedVacuumGroups = new HashSet<BodyPartGroupDef>();
 
 		private static readonly List<BodyPartRecord> UnprotectedVacuumParts = new List<BodyPartRecord>();
+
+		static PawnGearRebuild()
+		{
+			UpdateCallbackHelper.RegisterClearCacheCallback(InvalidateIndexes);
+		}
+
+		internal static void InvalidateIndexes()
+		{
+			RequiredIndexes.Clear();
+			_requiredIndexDefCount = -1;
+		}
 
 		internal static void RebuildApparel(Pawn pawn, PawnGenerationRequest request)
 		{
@@ -111,6 +129,7 @@ namespace YaOpt.Helpers
 			var fixedSeed = Rand.Int;
 
 			var pool = PawnApparelGenerator.allApparelPairs;
+			var useIndex = YaOptGlobal.Settings?.OptPawnGenerationIndex.Enabled == true;
 			ApparelCandidates.Clear();
 			for (var i = 0; i < pool.Count; i++)
 			{
@@ -136,7 +155,7 @@ namespace YaOpt.Helpers
 			}
 			else
 			{
-				FillApparelSet(pawn, money, pool, ApparelCandidates);
+				FillApparelSet(pawn, money, pool, ApparelCandidates, useIndex);
 			}
 
 			if (!pawn.kindDef.apparelIgnoreSeasons || request.ForceAddFreeWarmLayerIfNeeded)
@@ -166,13 +185,14 @@ namespace YaOpt.Helpers
 		}
 
 		private static void FillApparelSet(Pawn pawn, float money, List<ThingStuffPair> pool,
-			List<ThingStuffPair> candidates)
+			List<ThingStuffPair> candidates, bool useIndex)
 		{
 			var set = PawnApparelGenerator.workingSet;
 			set.Reset(pawn);
 			var moneyLeft = PawnApparelGenerator.GenerateSpecificRequiredApparel(pawn, money,
 				onlyGenerateIgnoreNaked: false);
 
+			var requiredIndex = useIndex ? EnsureRequiredIndex(pool) : null;
 			var required = pawn.kindDef.apparelRequired;
 			if (required != null)
 			{
@@ -182,10 +202,18 @@ namespace YaOpt.Helpers
 					if (!requiredDef.apparel.CorrectAgeForWearing(pawn))
 						continue;
 
-					// Vanilla adds required apparel even when it exceeds the remaining budget.
-					// This is the only source that is not pre-filtered by CanUseStuff.
-					TryAddWeighted(pawn, pool, set, ref moneyLeft, ApparelKind.Required, requiredDef,
-						float.PositiveInfinity, checkStuff: true);
+					if (requiredIndex == null)
+					{
+						// Vanilla adds required apparel even when it exceeds the remaining budget.
+						// This is the only source that is not pre-filtered by CanUseStuff.
+						TryAddWeighted(pawn, pool, set, ref moneyLeft, ApparelKind.Required, requiredDef,
+							float.PositiveInfinity, checkStuff: true);
+						continue;
+					}
+
+					if (!requiredIndex.TryGetValue(requiredDef, out var indices))
+						indices = NoRequiredIndices;
+					TryAddRequired(pawn, pool, indices, set, ref moneyLeft, requiredDef);
 				}
 			}
 
@@ -255,6 +283,38 @@ namespace YaOpt.Helpers
 
 				PruneUsableApparel(set, moneyLeft);
 			}
+		}
+
+		private static Dictionary<ThingDef, List<int>> EnsureRequiredIndex(List<ThingStuffPair> pool)
+		{
+			var defCount = DefDatabase<ThingDef>.DefCount;
+			if (defCount != _requiredIndexDefCount)
+			{
+				RequiredIndexes.Clear();
+				_requiredIndexDefCount = defCount;
+			}
+
+			if (RequiredIndexes.TryGetValue(pool, out var index))
+				return index;
+
+			index = new Dictionary<ThingDef, List<int>>();
+			for (var i = 0; i < pool.Count; i++)
+			{
+				var thing = pool[i].thing;
+				if (thing?.apparel == null)
+					continue;
+
+				if (!index.TryGetValue(thing, out var indices))
+				{
+					indices = new List<int>();
+					index[thing] = indices;
+				}
+
+				indices.Add(i);
+			}
+
+			RequiredIndexes[pool] = index;
+			return index;
 		}
 
 		[ThreadStatic]
@@ -494,6 +554,53 @@ namespace YaOpt.Helpers
 			return false;
 		}
 
+		private static bool TryAddRequired(Pawn pawn, List<ThingStuffPair> pool, List<int> indices,
+			PawnApparelGenerator.PossibleApparelSet set, ref float moneyLeft, ThingDef requiredDef)
+		{
+			EnsureApparelWeights(indices.Count);
+			var total = 0f;
+			for (var i = 0; i < indices.Count; i++)
+			{
+				var poolIndex = indices[i];
+				if ((uint)poolIndex >= (uint)pool.Count)
+				{
+					_apparelWeights[i] = 0f;
+					continue;
+				}
+
+				var pair = pool[poolIndex];
+				var weight = pair.Commonality;
+				if (weight <= 0f || !Matches(pair, pawn, set, ApparelKind.Required, requiredDef,
+					checkStuff: true))
+				{
+					weight = 0f;
+				}
+
+				_apparelWeights[i] = weight;
+				total += weight;
+			}
+
+			if (total <= 0f)
+				return false;
+
+			var roll = Rand.Value * total;
+			for (var i = 0; i < indices.Count; i++)
+			{
+				var weight = _apparelWeights[i];
+				if (weight <= 0f)
+					continue;
+
+				roll -= weight;
+				if (roll > 0f)
+					continue;
+
+				AddToSet(set, ref moneyLeft, pool[indices[i]]);
+				return true;
+			}
+
+			return false;
+		}
+
 		private static void EnsureApparelWeights(int count)
 		{
 			if (_apparelWeights != null && _apparelWeights.Length >= count)
@@ -545,6 +652,7 @@ namespace YaOpt.Helpers
 				return false;
 			}
 
+			EnsureApparelWeights(UsableApparel.Count);
 			var total = 0f;
 			for (var i = 0; i < UsableApparel.Count; i++)
 			{
@@ -552,9 +660,11 @@ namespace YaOpt.Helpers
 				if (weight <= 0f || UsableApparel[i].Price > priceCap
 					|| !Matches(UsableApparel[i], pawn, set, kind, requiredDef, checkStuff: false))
 				{
+					_apparelWeights[i] = 0f;
 					continue;
 				}
 
+				_apparelWeights[i] = weight;
 				total += weight;
 			}
 
@@ -564,12 +674,9 @@ namespace YaOpt.Helpers
 			var filteredRoll = Rand.Value * total;
 			for (var i = 0; i < UsableApparel.Count; i++)
 			{
-				var weight = _usableWeights[i];
-				if (weight <= 0f || UsableApparel[i].Price > priceCap
-					|| !Matches(UsableApparel[i], pawn, set, kind, requiredDef, checkStuff: false))
-				{
+				var weight = _apparelWeights[i];
+				if (weight <= 0f)
 					continue;
-				}
 
 				filteredRoll -= weight;
 				if (filteredRoll <= 0f)

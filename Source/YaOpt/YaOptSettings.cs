@@ -997,6 +997,27 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Enables single-threaded indexes and batching for the pawn generation pipeline.
+		/// </summary>
+		/// <remarks>
+		/// The index path covers the required apparel index, one-pass filtered apparel weights, one-pass
+		/// relation sample weights, Rosaline's birth-parent lookup and gene notification batching. Each
+		/// part keeps its own fallback: unknown patches, missing methods or foreign relation chance
+		/// patches disable only that part. The apparel parts additionally require
+		/// <see cref="OptPawnGearRebuild"/>. No pawn generation work is moved to another thread.
+		/// </remarks>
+		/// <seealso cref="Helpers.PawnGenerationIndexCompat"/>
+		/// <seealso cref="Helpers.PawnRelationIndex"/>
+		/// <seealso cref="Helpers.GeneNotificationBatch"/>
+		public OptimizationOption OptPawnGenerationIndex { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnGenerationIndex",
+			Desc = "YaOpt.Setting.Option.PawnGenerationIndex.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnGenerationIndex.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Replaces apparel and weapon generation with constructive selection instead of retrying a full
 		/// random candidate set.
 		/// </summary>

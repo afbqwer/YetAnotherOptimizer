@@ -61,6 +61,7 @@ namespace YaOpt.Helpers
 			_apparelSource = null;
 			_weaponSource = null;
 			_defCount = -1;
+			PawnGearRebuild.InvalidateIndexes();
 		}
 
 		/// <summary>
@@ -78,6 +79,7 @@ namespace YaOpt.Helpers
 			{
 				ApparelPools.Clear();
 				_apparelSource = source;
+				PawnGearRebuild.InvalidateIndexes();
 			}
 
 			if (!ApparelPools.TryGetValue(pawn.def, out var pool))
