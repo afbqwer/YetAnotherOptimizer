@@ -41,6 +41,12 @@ namespace YaOpt.Helpers
 			if (_applied)
 				return;
 
+			// Materializing a Graphic loads textures and shaders, so it is main-thread only.
+			// Callers on the loading thread defer through LongEventHandler; never mark the
+			// optimization applied from there.
+			if (!UnityData.IsInMainThread)
+				return;
+
 			Apply();
 		}
 
