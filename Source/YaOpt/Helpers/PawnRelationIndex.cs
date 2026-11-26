@@ -33,6 +33,12 @@ namespace YaOpt.Helpers
 
 		private static Type _harAlienRaceDefType;
 
+		[ThreadStatic]
+		private static Sample[] _sampleBuffer;
+
+		[ThreadStatic]
+		private static bool _sampleBufferInUse;
+
 		/// <summary>
 		/// Returns false when vanilla or Humanoid Alien Races must keep ownership of the call.
 		/// </summary>
@@ -57,8 +63,10 @@ namespace YaOpt.Helpers
 		/// <summary>
 		/// Mirrors <c>PawnGenerator.GeneratePawnRelations</c> with cached sample weights.
 		/// </summary>
-		internal static void Generate(Pawn pawn, ref PawnGenerationRequest request)
+		internal static void Generate(Pawn pawn, ref PawnGenerationRequest request,
+			out bool samplingFailed)
 		{
+			samplingFailed = false;
 			if (!pawn.RaceProps.Humanlike)
 				return;
 
@@ -99,31 +107,73 @@ namespace YaOpt.Helpers
 			var defaultWeight = 45f + playerPawns * 2.7f;
 			var localRequest = request;
 			GenerateSampleSet(pawn, pawns, PawnGenerator.relationsGeneratableBlood, localRequest,
-				defaultWeight, ref request);
+				defaultWeight, ref request, out samplingFailed);
 			if (pawn.kindDef.generateInitialNonFamilyRelations)
 			{
 				GenerateSampleSet(pawn, pawns, PawnGenerator.relationsGeneratableNonblood, localRequest,
-					defaultWeight, ref request);
+					defaultWeight, ref request, out samplingFailed);
 			}
 		}
 
 		private static void GenerateSampleSet(Pawn pawn, Pawn[] pawns, PawnRelationDef[] relations,
 			in PawnGenerationRequest localRequest, float defaultWeight,
-			ref PawnGenerationRequest request)
+			ref PawnGenerationRequest request, out bool samplingFailed)
 		{
+			samplingFailed = false;
 			if (relations.NullOrEmpty())
 				return;
 
-			var samples = GenerateSamples(pawns, relations, SampleCount);
-			var selected = Select(pawn, samples, localRequest,
-				defaultWeight * SampleCount / (pawns.Length * relations.Length));
+			Sample[] samples = null;
+			var sharedBuffer = false;
+			Sample selected;
+			try
+			{
+				samples = AcquireSampleBuffer(out sharedBuffer);
+				FillSamples(samples, pawns, relations, SampleCount);
+				selected = Select(pawn, samples, localRequest,
+					defaultWeight * SampleCount / (pawns.Length * relations.Length));
+			}
+			catch
+			{
+				samplingFailed = true;
+				throw;
+			}
+			finally
+			{
+				if (samples != null)
+					ReleaseSampleBuffer(samples, sharedBuffer);
+			}
+
 			if (selected.Pawn != null)
 				selected.Def.Worker.CreateRelation(pawn, selected.Pawn, ref request);
 		}
 
-		private static Sample[] GenerateSamples(Pawn[] pawns, PawnRelationDef[] relations, int count)
+		private static Sample[] AcquireSampleBuffer(out bool sharedBuffer)
 		{
-			var samples = new Sample[count];
+			if (_sampleBuffer == null)
+				_sampleBuffer = new Sample[SampleCount];
+
+			if (!_sampleBufferInUse)
+			{
+				_sampleBufferInUse = true;
+				sharedBuffer = true;
+				return _sampleBuffer;
+			}
+
+			sharedBuffer = false;
+			return new Sample[SampleCount];
+		}
+
+		private static void ReleaseSampleBuffer(Sample[] samples, bool sharedBuffer)
+		{
+			Array.Clear(samples, 0, samples.Length);
+			if (sharedBuffer)
+				_sampleBufferInUse = false;
+		}
+
+		private static void FillSamples(Sample[] samples, Pawn[] pawns,
+			PawnRelationDef[] relations, int count)
+		{
 			for (var i = 0; i < count; i++)
 			{
 				samples[i] = new Sample
@@ -132,8 +182,6 @@ namespace YaOpt.Helpers
 					Def = relations[Rand.Range(0, relations.Length)]
 				};
 			}
-
-			return samples;
 		}
 
 		private static Sample Select(Pawn pawn, Sample[] samples,
@@ -145,7 +193,7 @@ namespace YaOpt.Helpers
 				defaultWeight = 0f;
 			}
 
-			var weights = new float[samples.Length];
+			Span<float> weights = stackalloc float[samples.Length];
 			var total = 0f;
 			for (var i = 0; i < samples.Length; i++)
 			{

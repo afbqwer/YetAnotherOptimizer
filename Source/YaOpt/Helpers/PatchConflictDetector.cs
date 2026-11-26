@@ -74,7 +74,7 @@ namespace YaOpt.Helpers
 
 			var cachedData = AccessTools.TypeByName("AlienRace.CachedData");
 			var har = AccessTools.TypeByName("AlienRace.HarmonyPatches");
-			Check(nameof(YaOptSettings.OptPawnGearHarFastPath), includeAll: false,
+			CheckReplacement(nameof(YaOptSettings.OptPawnGearHarFastPath),
 				cachedData == null
 					? null
 					: AccessTools.Method(cachedData, "GetApparelFromApparelProps",
@@ -84,13 +84,13 @@ namespace YaOpt.Helpers
 
 		private static void CheckPawnApparelPairCache()
 		{
-			Check(nameof(YaOptSettings.OptPawnApparelPairCache), includeAll: false,
+			CheckReplacement(nameof(YaOptSettings.OptPawnApparelPairCache),
 				AccessTools.Method(typeof(PawnApparelGenerator), "CanUsePair"));
 		}
 
 		private static void CheckPawnBackstoryMatchCache()
 		{
-			Check(nameof(YaOptSettings.OptPawnBackstoryMatchCache), includeAll: false,
+			CheckReplacement(nameof(YaOptSettings.OptPawnBackstoryMatchCache),
 				AccessTools.Method(typeof(BackstoryCategoryFilter), nameof(BackstoryCategoryFilter.Matches),
 					new[] { typeof(BackstoryDef) }));
 		}
@@ -101,7 +101,7 @@ namespace YaOpt.Helpers
 				return;
 
 			var har = AccessTools.TypeByName("AlienRace.HarmonyPatches");
-			Check(nameof(YaOptSettings.OptPawnTraitsHarFastPath), includeAll: false,
+			CheckReplacement(nameof(YaOptSettings.OptPawnTraitsHarFastPath),
 				har == null
 					? null
 					: AccessTools.Method(har, "GenerateTraitsValidator",
@@ -168,6 +168,24 @@ namespace YaOpt.Helpers
 			Check(nameof(YaOptSettings.OptPrioritySorterSnapshot), includeAll: false,
 				AccessTools.Method(typeof(ThinkNode_PrioritySorter),
 					nameof(ThinkNode_PrioritySorter.TryIssueJobPackage)));
+		}
+
+		private static void CheckReplacement(string settingId, params MethodBase[] targets)
+		{
+			var reasons = new List<string>();
+			foreach (var target in targets)
+			{
+				if (target == null)
+				{
+					reasons.Add("目标方法缺失：" + settingId);
+					continue;
+				}
+
+				PatchConflictGuard.CollectForeignReplacementConflicts(target, reasons);
+			}
+
+			if (reasons.Count > 0)
+				CompatibilityDefines.PatchConflict(settingId, reasons);
 		}
 
 		private static void Check(string settingId, bool includeAll, params MethodBase[] targets)

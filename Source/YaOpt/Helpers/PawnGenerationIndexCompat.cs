@@ -114,8 +114,10 @@ namespace YaOpt.Helpers
 				return false;
 
 			var reasons = new List<string>();
-			PatchConflictGuard.CollectForeignConflicts(target, includeAll: true, reasons,
+			PatchConflictGuard.CollectForeignReplacementConflicts(target, reasons,
 				compatiblePatch: IsKnownRelationPatch);
+			PatchConflictGuard.CollectForeignPostfixConflicts(target, reasons,
+				compatiblePatch: IsKnownRelationPostfix);
 			CollectForeignFinalizers(target, reasons);
 			var samples = AccessTools.Method(typeof(PawnGenerator), "GenerateSamples");
 			PatchConflictGuard.CollectForeignConflicts(samples, includeAll: true, reasons);
@@ -201,20 +203,45 @@ namespace YaOpt.Helpers
 		private static bool IsKnownRelationPatch(MethodBase target, Patch patch)
 		{
 			var method = patch.PatchMethod;
-			var assembly = method.DeclaringType?.Assembly.GetName().Name;
-			if (assembly == "AlienRace")
+			var type = method.DeclaringType;
+			if (type?.FullName == "AlienRace.HarmonyPatches")
 			{
-				if (method.Name.Contains("GenerationChance"))
-					return true;
-				return method.Name.Contains("GeneratePawnRelations")
-					&& !method.Name.Contains("Transpiler");
+				if (method.Name == "GeneratePawnRelationsPrefix")
+					return target.Name == "GeneratePawnRelations";
+
+				return method.Name switch
+				{
+					"PawnRelationWorker_GenerationChance_Postfix" or
+					"GenerationChanceChildPostfix" or
+					"GenerationChanceExLoverPostfix" or
+					"GenerationChanceExSpousePostfix" or
+					"GenerationChanceFiancePostfix" or
+					"GenerationChanceLoverPostfix" or
+					"GenerationChanceParentPostfix" or
+					"GenerationChanceSiblingPostfix" or
+					"GenerationChanceSpousePostfix" => true,
+					_ => false
+				};
 			}
 
-			if (!method.Name.Contains("GenerationChance"))
-				return false;
+			if (patch.owner == "rimworld.gguake.rpef"
+				&& type?.FullName == "RPEF.HarmonyPatches"
+				&& method.Name == "PawnRelationWorker_GenerationChance_Postfix")
+			{
+				return true;
+			}
 
-			return ContainsAny(assembly, "Rosaline", "LoveyDovey", "Euterpe")
-				|| ContainsAny(patch.owner, "Rosaline", "LoveyDovey", "Euterpe");
+			return patch.owner == "SexWithEuterpe.LoveyDoveySexWithRosaline"
+				&& type?.FullName == "LoveyDoveySexWithRosaline.PawnRelationWorker_Parent_Patch"
+				&& method.Name == "GenerationChance_Prefix";
+		}
+
+		private static bool IsKnownRelationPostfix(MethodBase target, Patch patch)
+		{
+			return target.Name == "GeneratePawnRelations"
+				&& patch.owner == "RER.FamilyNameFix"
+				&& patch.PatchMethod.DeclaringType?.FullName == "FamilyNameFix.FamilyNameFix"
+				&& patch.PatchMethod.Name == "Postfix";
 		}
 
 		private static bool ContainsAny(string value, params string[] parts)

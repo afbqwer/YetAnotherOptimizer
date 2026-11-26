@@ -999,7 +999,7 @@ namespace YaOpt.Helpers
 			if (VacuumCandidates.Count == 0)
 				return;
 
-			for (var i = 0; i < 5; i++)
+			for (var i = 0; i < 10; i++)
 			{
 				BuildUnprotectedVacuumParts(pawn, set);
 				if (desired >= 0.9f && UnprotectedVacuumParts.Count == 0)

@@ -31,15 +31,18 @@ namespace YaOpt.Patches
 			if (!PawnRelationIndex.CanReplace(pawn))
 				return true;
 
+			var samplingFailed = false;
 			try
 			{
-				PawnRelationIndex.Generate(pawn, ref request);
+				PawnRelationIndex.Generate(pawn, ref request, out samplingFailed);
 				return false;
 			}
 			catch (Exception ex)
 			{
 				PawnGenerationIndexCompat.DisableRelations(ex);
-				return false;
+				if (samplingFailed)
+					return true;
+				throw;
 			}
 		}
 	}

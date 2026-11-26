@@ -32,32 +32,71 @@ namespace YaOpt.Helpers
 		/// <summary>
 		/// Pawns that died while thoughts were being given, so their death memories may still exist.
 		/// </summary>
-		/// <remarks>
-		/// <see cref="RemoveDiedThoughts"/> is called for every freshly spawned pawn. A pawn that never
-		/// died cannot have death memories about itself, so the whole map scan is wasted work. This set
-		/// records the few pawns that actually produced death thoughts; a save load marks everything dirty
-		/// because the set does not survive serialization.
-		/// </remarks>
-		private static readonly HashSet<Pawn> DeathMemoryOwners = new HashSet<Pawn>();
+		private static readonly HashSet<int> DeathMemoryOwners = new HashSet<int>();
 
 		/// <summary>
-		/// Pawns already cleaned once since the last cache clear. Used while the state is dirty
-		/// after a save load so each pawn is scanned at most once per load.
+		/// Pawns loaded from a save whose in-memory death-memory markers were not serialized.
 		/// </summary>
-		private static readonly HashSet<Pawn> DeathMemoryCleaned = new HashSet<Pawn>();
+		private static readonly HashSet<int> UnknownDeathMemoryOwners = new HashSet<int>();
 
-		private static bool _deathMemoryStateDirty = true;
+		private static bool _loadingGame;
+
+		private static bool _unknownAll;
 
 		static DeathThoughtsHelper()
 		{
-			UpdateCallbackHelper.RegisterClearCacheCallback(MarkDeathMemoryStateDirty);
+			UpdateCallbackHelper.RegisterClearCacheCallback(ClearCaches);
 		}
 
-		private static void MarkDeathMemoryStateDirty()
+		internal static void BeginLoadGame()
 		{
+			_loadingGame = true;
+			_unknownAll = true;
 			DeathMemoryOwners.Clear();
-			DeathMemoryCleaned.Clear();
-			_deathMemoryStateDirty = true;
+			UnknownDeathMemoryOwners.Clear();
+		}
+
+		internal static void CompleteLoadGame()
+		{
+			_unknownAll = true;
+			DeathMemoryOwners.Clear();
+			RebuildUnknownOwners();
+			_loadingGame = false;
+			_unknownAll = false;
+		}
+
+		internal static void AbortLoadGame()
+		{
+			if (!_loadingGame)
+				return;
+
+			_loadingGame = false;
+			_unknownAll = true;
+			DeathMemoryOwners.Clear();
+			UnknownDeathMemoryOwners.Clear();
+		}
+
+		private static void ClearCaches()
+		{
+			if (_loadingGame)
+				return;
+
+			_unknownAll = true;
+			DeathMemoryOwners.Clear();
+			RebuildUnknownOwners();
+			_unknownAll = false;
+		}
+
+		private static void RebuildUnknownOwners()
+		{
+			UnknownDeathMemoryOwners.Clear();
+			var pawns = PawnsFinder.All_AliveOrDead;
+			for (var i = 0; i < pawns.Count; i++)
+			{
+				var pawn = pawns[i];
+				if (!pawn.Discarded)
+					UnknownDeathMemoryOwners.Add(pawn.thingIDNumber);
+			}
 		}
 
 		/// <summary>
@@ -65,24 +104,25 @@ namespace YaOpt.Helpers
 		/// </summary>
 		internal static bool MayHaveDeathMemories(Pawn pawn)
 		{
-			if (DeathMemoryOwners.Contains(pawn))
-				return true;
-			return _deathMemoryStateDirty && !DeathMemoryCleaned.Contains(pawn);
+			if (pawn == null)
+				return false;
+
+			var id = pawn.thingIDNumber;
+			return _unknownAll || DeathMemoryOwners.Contains(id) ||
+				UnknownDeathMemoryOwners.Contains(id);
 		}
 
 		/// <summary>
 		/// Records that this pawn's death memories were cleared.
 		/// </summary>
-		/// <remarks>
-		/// The global dirty flag is intentionally kept until the next cache clear. After a save load
-		/// every pawn may carry restored death memories, so relaxing the flag on the first cleanup
-		/// could skip a later revived pawn in the same batch.
-		/// </remarks>
 		internal static void ClearDeathMemoryOwner(Pawn pawn)
 		{
-			DeathMemoryOwners.Remove(pawn);
-			if (_deathMemoryStateDirty)
-				DeathMemoryCleaned.Add(pawn);
+			if (pawn == null)
+				return;
+
+			var id = pawn.thingIDNumber;
+			DeathMemoryOwners.Remove(id);
+			UnknownDeathMemoryOwners.Remove(id);
 		}
 
 		public static void TryGiveDiedThoughts(Pawn victim, DamageInfo? dinfo)
@@ -94,7 +134,7 @@ namespace YaOpt.Helpers
 					victim.wasLeftBehindStartingPawn)
 					return;
 
-				DeathMemoryOwners.Add(victim);
+				DeathMemoryOwners.Add(victim.thingIDNumber);
 				WitnessedPawns.Clear();
 				if (victim.RaceProps.Humanlike)
 					AddHumanlikeDiedThoughts(victim, dinfo);

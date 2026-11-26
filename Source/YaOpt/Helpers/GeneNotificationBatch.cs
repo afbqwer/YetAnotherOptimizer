@@ -108,6 +108,8 @@ namespace YaOpt.Helpers
 			hediffSet.cachedRemoveRoamMtb = null;
 			hediffSet.cachedPreventVacuumBurns = null;
 			hediffSet.cachedDamageFactors.Clear();
+			hediffSet.pawn.health.capacities.Notify_CapacityLevelsDirty();
+			hediffSet.pawn.health.summaryHealth.Notify_HealthChanged();
 		}
 
 		/// <summary>

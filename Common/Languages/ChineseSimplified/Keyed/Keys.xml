@@ -273,7 +273,7 @@
 	<YaOpt.Setting.Option.GenerationDefCache.Desc>缓存生成物品时三个只依赖 Def 的查询：近战武器材料是否为“废柴”组合、每个 Def 的可用材料列表、以及没有显式市场价值时用于定价的配方。读档时刷新；若某个方法被其它模组 patch，则仅停用对应部分而不是绕过它。</YaOpt.Setting.Option.GenerationDefCache.Desc>
 	<YaOpt.Setting.Option.PawnGenerationIndex>Pawn 生成索引化</YaOpt.Setting.Option.PawnGenerationIndex>
 	<YaOpt.Setting.Option.PawnGenerationIndex.Desc>在 pawn 生成期间使用单线程索引与缓存：必选装备查找、服装筛选权重单遍、关系样本权重单遍、Rosaline 出生父母查询和基因通知批处理。装备索引需要开启装备重写。任一子路径遇到不兼容补丁或方法缺失时独立回退，不会把生成工作移到其它线程。</YaOpt.Setting.Option.PawnGenerationIndex.Desc>
-	<YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>已知 HAR 关系补丁仍负责其种族；未知关系概率补丁、被其它模组 patch 的 Rosaline 查询或批处理通知方法只停用对应子路径。</YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>
+	<YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>已知 HAR、Rosaline 与 RPEF 关系补丁已明确识别；未知关系概率补丁、被其它模组 patch 的 Rosaline 查询或批处理通知方法只停用对应子路径。</YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>
 	<YaOpt.Setting.Option.PawnGearSessionCache>Pawn 装备生成会话缓存</YaOpt.Setting.Option.PawnGearSessionCache>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Desc>在一次服装或武器生成调用内复用不会变化的结果。服装生成最多会重试 80 次候选组合，每次重试都重新检查相同的材料限制与温度属性；武器选择则会对每个候选权重求值两次。缓存只存活一次调用，随机数序列与最终产物都与原版一致。</YaOpt.Setting.Option.PawnGearSessionCache.Desc>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>与 HAR 等种族模组共存；仅当其它模组直接 patch 被缓存的方法时，对应部分自动停用。</YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>
@@ -286,7 +286,7 @@
 	<YaOpt.Setting.Option.PawnGearHarFastPath.Desc>直接回答 HAR 的装备限制查询。HAR 的装备属性反查即使字典命中也会为每次调用分配闭包；其可穿戴着装后处理在原版已判定 false 时仍会查询种族限制。装备生成会对每个候选 pair 调用这两处。替换用的映射复现 HAR 的首次匹配语义，并在 def 变化时重建。</YaOpt.Setting.Option.PawnGearHarFastPath.Desc>
 	<YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility>仅在安装 HAR 时生效。HAR 方法缺失或变更时跳过补丁，保留 HAR 原有行为。</YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility>
 	<YaOpt.Setting.Option.PawnApparelPairCache>装备候选判定缓存</YaOpt.Setting.Option.PawnApparelPairCache>
-	<YaOpt.Setting.Option.PawnApparelPairCache.Desc>在一名 Pawn、预算、头饰开关与固定种子都相同时，按装备 def 复用头饰判定、可穿戴判定、kindDef 标签和按种子生成的允许概率；这在整个候选扫描期间成立。价格仍逐 pair 检查。Pawn 或参数变化时清空缓存，结果与原版判定一致。</YaOpt.Setting.Option.PawnApparelPairCache.Desc>
+	<YaOpt.Setting.Option.PawnApparelPairCache.Desc>在一名 Pawn、头饰开关与固定种子都相同时，按装备 def 复用头饰判定、可穿戴判定、kindDef 标签和按种子生成的允许概率；这在整个候选扫描期间成立。预算不入缓存，价格仍逐 pair 检查。Pawn 或缓存参数变化时清空缓存，结果与原版判定一致。</YaOpt.Setting.Option.PawnApparelPairCache.Desc>
 	<YaOpt.Setting.Option.PawnApparelPairCache.Compatibility>若其它模组改动了此判定所替换的方法，本项会自动停用。</YaOpt.Setting.Option.PawnApparelPairCache.Compatibility>
 	<YaOpt.Setting.Option.PawnBackstoryMatchCache>背景匹配缓存</YaOpt.Setting.Option.PawnBackstoryMatchCache>
 	<YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc>用零分配实现替换会分配委托的背景类别匹配，并按过滤器把匹配结果缓存为位图。每次打乱背景槽都会用同一个过滤器扫描全部背景，而结果只取决于过滤器和 def 数据。def 数量变化或读档时重建缓存。</YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc>

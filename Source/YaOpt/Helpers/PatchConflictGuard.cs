@@ -65,6 +65,65 @@ namespace YaOpt.Helpers
 			}
 		}
 
+		internal static void CollectForeignReplacementConflicts(MethodBase target, List<string> results,
+			Func<MethodBase, Patch, bool> compatiblePatch = null)
+		{
+			if (target == null || YaOptMod.Instance == null)
+				return;
+
+			var info = Harmony.GetPatchInfo(target);
+			if (info == null)
+				return;
+
+			var mod = YaOptMod.Instance;
+			var harmonyId = mod.Harmony.Id;
+			var earlyId = mod.EarlyHarmony.Id;
+
+			foreach (var patch in info.Transpilers)
+			{
+				if (patch.owner != harmonyId && patch.owner != earlyId &&
+					(compatiblePatch == null || !compatiblePatch(target, patch)))
+				{
+					results.Add(Describe(patch.owner, "transpiler", target));
+				}
+			}
+
+			foreach (var patch in info.Prefixes)
+			{
+				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (compatiblePatch != null && compatiblePatch(target, patch))
+					continue;
+
+				results.Add(Describe(patch.owner, "prefix", target));
+			}
+		}
+
+		internal static void CollectForeignPostfixConflicts(MethodBase target, List<string> results,
+			Func<MethodBase, Patch, bool> compatiblePatch = null)
+		{
+			if (target == null || YaOptMod.Instance == null)
+				return;
+
+			var info = Harmony.GetPatchInfo(target);
+			if (info == null)
+				return;
+
+			var mod = YaOptMod.Instance;
+			var harmonyId = mod.Harmony.Id;
+			var earlyId = mod.EarlyHarmony.Id;
+
+			foreach (var patch in info.Postfixes)
+			{
+				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (compatiblePatch != null && compatiblePatch(target, patch))
+					continue;
+
+				results.Add(Describe(patch.owner, "postfix", target));
+			}
+		}
+
 		/// <summary>
 		/// Appends every foreign prefix at or below normal priority and every transpiler that touches
 		/// <paramref name="target"/>. A replacement prefix that returns false skips every prefix ordered

@@ -126,12 +126,14 @@ namespace YaOpt.Helpers
 
 		private static Map FindMap(Pawn pawn, PawnGenerationRequest request)
 		{
-			var map = pawn.MapHeld;
-			if (map != null)
-				return map;
-
+			var pawnMap = pawn.MapHeld;
 			var tile = request.Tile;
-			if (!tile.Valid || Find.Maps == null)
+			if (!tile.Valid)
+				return pawnMap;
+
+			if (pawnMap != null && pawnMap.Tile == tile)
+				return pawnMap;
+			if (Find.Maps == null)
 				return null;
 
 			var maps = Find.Maps;
