@@ -1538,6 +1538,24 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Skips stack-trace capture and formatting for Info-level log messages.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla WaylithLogFormatter captures a full stack with file info for every log level,
+		/// which costs several microseconds and several KB per Info line. Warning and Error stacks
+		/// are unchanged. Enabling this also turns off console stack-frame printing.
+		/// </remarks>
+		/// <seealso cref="Patches.MultiTargets_LogInfoStack"/>
+		/// <seealso cref="Helpers.LogInfoStackSuppressor"/>
+		public OptimizationOption OptInfoLogNoStack { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.InfoLogNoStack",
+			Desc = "YaOpt.Setting.Option.InfoLogNoStack.Desc",
+			Category = OptimizationCategory.Tps,
+			Default = false,
+		};
+
+		/// <summary>
 		/// Optimizes <see cref="ConnectivitySource.UpdateIncrementally"/>.
 		/// Vanilla re-clears a massive 160k-capacity HashSet within a loop when updating connectivity,
 		/// causing significant overhead. This optimization replaces it with a smaller HashSet
