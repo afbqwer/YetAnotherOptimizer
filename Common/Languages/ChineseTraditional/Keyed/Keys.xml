@@ -232,6 +232,9 @@
 	<YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>在一次物品集合取樣內，記住每個候選的最小值、最大值和單件價值，不再反覆向屬性系統求值最多三次。只包裝原版的取值回調，取樣結束即丟棄快取。</YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>
 	<YaOpt.Setting.Option.GenerationDefCache>生成 Def 快取</YaOpt.Setting.Option.GenerationDefCache>
 	<YaOpt.Setting.Option.GenerationDefCache.Desc>快取生成物品時三個只依賴 Def 的查詢：近戰武器材料是否為「廢柴」組合、每個 Def 的可用材料清單、以及沒有顯式市場價值時用於定價的配方。讀檔時刷新；若某個方法被其它模組 patch，則僅停用對應部分而不是繞過它。</YaOpt.Setting.Option.GenerationDefCache.Desc>
+	<YaOpt.Setting.Option.PawnGearSessionCache>Pawn 裝備生成會話快取</YaOpt.Setting.Option.PawnGearSessionCache>
+	<YaOpt.Setting.Option.PawnGearSessionCache.Desc>在一次服裝或武器生成呼叫內復用不會變化的結果。服裝生成最多會重試 80 次候選組合，每次重試都重新檢查相同的材料限制與溫度屬性；武器選擇則會對每個候選權重求值兩次。快取只存活一次呼叫，隨機數序列與最終產物都與原版一致。</YaOpt.Setting.Option.PawnGearSessionCache.Desc>
+	<YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>與 HAR 等種族模組共存；僅當其它模組直接 patch 被快取的方法時，對應部分自動停用。</YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>物品生成可生成判定加速</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>用第一次取樣迭代的結果回答物品集合選項的「能否生成」，不再為判定而跑完整取樣。選項表在挑選前會詢問每個選項能否生成，以前這會讓完整取樣跑好幾遍而最終只生成其中一個。第一次迭代已經決定結果是否非空；材料池和數值仍按原版方式構建，隨機數序列不變。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>若其它模組改動了此判定所復刻的取樣方法，本項會自動停用。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>

@@ -877,6 +877,30 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Reuses values that stay constant for the duration of one apparel or weapon generation call.
+		/// </summary>
+		/// <remarks>
+		/// Apparel generation retries the same candidate set up to 80 times and re-runs the same
+		/// material restrictions and pawn temperature stats on every attempt. Weapon selection
+		/// evaluates every candidate weight twice because the IList sampler makes two passes. The memo
+		/// is opened and closed by the generation methods themselves and only skips pure lookups, so
+		/// the random stream and the produced gear are unchanged.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_PawnWeaponGenerator_TryGenerateWeaponFor"/>
+		/// <seealso cref="Patches.RimWorld_PawnWeaponGenerator_GetCommonality"/>
+		/// <seealso cref="Patches.RimWorld_PawnApparelGenerator_GenerateStartingApparelFor"/>
+		/// <seealso cref="Patches.RimWorld_PawnApparelGenerator_CanUseStuff"/>
+		/// <seealso cref="Patches.Verse_GenTemperature_SafeTemperatureRange"/>
+		/// <seealso cref="Helpers.PawnGearSessionCaches"/>
+		public OptimizationOption OptPawnGearSessionCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnGearSessionCache",
+			Desc = "YaOpt.Setting.Option.PawnGearSessionCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnGearSessionCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Replaces the two-pass quest lodger lookup with one allocation-free scan.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_QuestUtility_IsQuestLodger"/>
