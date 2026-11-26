@@ -257,6 +257,15 @@
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>若其它模组改动了此判定所复刻的采样方法，本项会自动停用。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>
 	<YaOpt.Setting.Option.QuestLodgerFastPath>任务访客快速路径</YaOpt.Setting.Option.QuestLodgerFastPath>
 	<YaOpt.Setting.Option.QuestLodgerFastPath.Desc>只扫描一次额外阵营任务部件，直接判断是否存在本地阵营或迷你阵营，不再收集、去重完整列表两次。不缓存结果，并保留原版的任务、难民和受影响 pawn 条件。多个额外阵营任务部件活跃时收益最明显。</YaOpt.Setting.Option.QuestLodgerFastPath.Desc>
+	<YaOpt.Setting.Option.QuestSelectionFastPath>任务选择快速路径</YaOpt.Setting.Option.QuestSelectionFastPath>
+	<YaOpt.Setting.Option.QuestSelectionFastPath.Desc>先用低成本的自然任务根权重生成加权随机顺序，再按该顺序执行 CanRun，遇到第一个可运行任务即停止。选择概率仍与自然权重成正比，但首个有效任务之后的根不再执行昂贵的 CanRun。优先选择当前星球图层也接受的任务；若没有，则使用加权回退顺序。关闭可恢复原版选择。</YaOpt.Setting.Option.QuestSelectionFastPath.Desc>
+	<YaOpt.Setting.Option.QuestSelectionFastPath.Compatibility>若其它模组已接管 NaturalRandomQuestChooser.ChooseNaturalRandomQuest，本项会自动停用，避免覆盖对方结果。</YaOpt.Setting.Option.QuestSelectionFastPath.Compatibility>
+	<YaOpt.Setting.Option.QuestAncientComplexFallback>任务选择远古遗迹兜底</YaOpt.Setting.Option.QuestAncientComplexFallback>
+	<YaOpt.Setting.Option.QuestAncientComplexFallback.Desc>加权扫描找不到任务时，再尝试远古遗迹任务根，最后才返回无任务。仅在“任务选择快速路径”启用时生效。</YaOpt.Setting.Option.QuestAncientComplexFallback.Desc>
+	<YaOpt.Setting.Option.QuestPointsNormalize>零点任务奖励点数归一</YaOpt.Setting.Option.QuestPointsNormalize>
+	<YaOpt.Setting.Option.QuestPointsNormalize.Desc>任务以零或负点数生成时，从事件目标的当前威胁点数推导点数，或复用快速选择器刚刚计算的值。显式正数和 Slate 中的点数不会被覆盖。用于修复开发工具和边缘调用方生成零威胁价值奖励的问题。</YaOpt.Setting.Option.QuestPointsNormalize.Desc>
+	<YaOpt.Setting.Note.Conflict.QuestMethodPatch>其他 Mod 补丁了任务生成方法（{0}）</YaOpt.Setting.Note.Conflict.QuestMethodPatch>
+	<YaOpt.Setting.Note.Conflict.QuestMethodMissing>找不到 1.7 的任务生成方法</YaOpt.Setting.Note.Conflict.QuestMethodMissing>
 	<YaOpt.Setting.Option.TeetotalerFastPath>禁酒者快速路径</YaOpt.Setting.Option.TeetotalerFastPath>
 	<YaOpt.Setting.Option.TeetotalerFastPath.Desc>对没有意识形态的 pawn，直接检查 DrugDesire 特质，不再分配两个必然被接受的历史事件。有意识形态的 pawn 完全走原版路径，包括随机检查，因此行为和随机流不变。</YaOpt.Setting.Option.TeetotalerFastPath.Desc>
 	<YaOpt.Setting.Option.ConstructDeliverResources>建造资源搬运检查优化</YaOpt.Setting.Option.ConstructDeliverResources>

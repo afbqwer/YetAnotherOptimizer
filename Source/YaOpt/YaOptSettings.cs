@@ -1036,6 +1036,55 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Selects a natural random quest root by weighted random order with early CanRun exit.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla runs CanRun on every root, then samples the weighted valid set. This path first builds a
+		/// weighted random order from the cheap natural weights, then runs CanRun in that order until the
+		/// first valid root. Selection probability stays proportional to the natural weight, while roots
+		/// after the first valid one are never tested. Disabled automatically when another mod owns the
+		/// chooser.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_NaturalRandomQuestChooser_ChooseNaturalRandomQuest"/>
+		/// <seealso cref="Helpers.QuestSelectionUtility"/>
+		/// <seealso cref="Helpers.QuestGenerationOptimizationCompat"/>
+		public OptimizationOption OptQuestSelectionFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.QuestSelectionFastPath",
+			Desc = "YaOpt.Setting.Option.QuestSelectionFastPath.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.QuestSelectionFastPath.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Tries the Ancient Complex quest roots when normal selection returns no quest.
+		/// </summary>
+		/// <seealso cref="Helpers.QuestSelectionUtility.TryGetAncientComplexFallback"/>
+		public OptimizationOption OptQuestAncientComplexFallback { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.QuestAncientComplexFallback",
+			Desc = "YaOpt.Setting.Option.QuestAncientComplexFallback.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Replaces zero quest-generation points with the target's current threat points.
+		/// </summary>
+		/// <remarks>
+		/// The fast selector may compute points to build weights while the caller still passes zero. The
+		/// recent value is reused only for the same target and tick window, and explicit positive points
+		/// are left untouched.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_QuestUtility_GenerateQuestAndMakeAvailable"/>
+		/// <seealso cref="Helpers.QuestPointsUtility"/>
+		public OptimizationOption OptQuestPointsNormalize { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.QuestPointsNormalize",
+			Desc = "YaOpt.Setting.Option.QuestPointsNormalize.Desc",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Skips history event allocation when checking pawns without an ideo for teetotalism.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_PawnUtility_IsTeetotaler"/>

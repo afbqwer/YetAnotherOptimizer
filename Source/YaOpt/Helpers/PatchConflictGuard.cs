@@ -87,5 +87,43 @@ namespace YaOpt.Helpers
 
 			return null;
 		}
+
+		/// <summary>
+		/// Finds any foreign prefix that runs at or below normal priority, or a transpiler.
+		/// </summary>
+		/// <remarks>
+		/// A replacement prefix that returns false skips every prefix ordered after it, including plain
+		/// void instrumentation, so those methods cannot safely be replaced. Higher-priority prefixes run
+		/// before the replacement and are not skipped. Postfixes still run and are not a conflict.
+		/// </remarks>
+		internal static string FindForeignPrefixOrTranspiler(MethodBase target)
+		{
+			if (target == null || YaOptMod.Instance == null)
+				return null;
+
+			var info = Harmony.GetPatchInfo(target);
+			if (info == null)
+				return null;
+
+			var mod = YaOptMod.Instance;
+			var harmonyId = mod.Harmony.Id;
+			var earlyId = mod.EarlyHarmony.Id;
+
+			foreach (var patch in info.Transpilers)
+			{
+				if (patch.owner != harmonyId && patch.owner != earlyId)
+					return patch.owner + " (transpiler)";
+			}
+
+			foreach (var patch in info.Prefixes)
+			{
+				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (patch.priority <= Priority.Normal)
+					return patch.owner + " (prefix)";
+			}
+
+			return null;
+		}
 	}
 }
