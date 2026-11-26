@@ -26,6 +26,65 @@ namespace YaOpt.Helpers
 		private static readonly List<ThoughtDef> LostRelationThoughtDefs =
 			new List<ThoughtDef>(16);
 
+		private static readonly List<ThoughtDef> DiedRelationThoughtDefs =
+			new List<ThoughtDef>(16);
+
+		/// <summary>
+		/// Pawns that died while thoughts were being given, so their death memories may still exist.
+		/// </summary>
+		/// <remarks>
+		/// <see cref="RemoveDiedThoughts"/> is called for every freshly spawned pawn. A pawn that never
+		/// died cannot have death memories about itself, so the whole map scan is wasted work. This set
+		/// records the few pawns that actually produced death thoughts; a save load marks everything dirty
+		/// because the set does not survive serialization.
+		/// </remarks>
+		private static readonly HashSet<Pawn> DeathMemoryOwners = new HashSet<Pawn>();
+
+		/// <summary>
+		/// Pawns already cleaned once since the last cache clear. Used while the state is dirty
+		/// after a save load so each pawn is scanned at most once per load.
+		/// </summary>
+		private static readonly HashSet<Pawn> DeathMemoryCleaned = new HashSet<Pawn>();
+
+		private static bool _deathMemoryStateDirty = true;
+
+		static DeathThoughtsHelper()
+		{
+			UpdateCallbackHelper.RegisterClearCacheCallback(MarkDeathMemoryStateDirty);
+		}
+
+		private static void MarkDeathMemoryStateDirty()
+		{
+			DeathMemoryOwners.Clear();
+			DeathMemoryCleaned.Clear();
+			_deathMemoryStateDirty = true;
+		}
+
+		/// <summary>
+		/// Returns true when <paramref name="pawn"/> may still have death memories about it.
+		/// </summary>
+		internal static bool MayHaveDeathMemories(Pawn pawn)
+		{
+			if (DeathMemoryOwners.Contains(pawn))
+				return true;
+			return _deathMemoryStateDirty && !DeathMemoryCleaned.Contains(pawn);
+		}
+
+		/// <summary>
+		/// Records that this pawn's death memories were cleared.
+		/// </summary>
+		/// <remarks>
+		/// The global dirty flag is intentionally kept until the next cache clear. After a save load
+		/// every pawn may carry restored death memories, so relaxing the flag on the first cleanup
+		/// could skip a later revived pawn in the same batch.
+		/// </remarks>
+		internal static void ClearDeathMemoryOwner(Pawn pawn)
+		{
+			DeathMemoryOwners.Remove(pawn);
+			if (_deathMemoryStateDirty)
+				DeathMemoryCleaned.Add(pawn);
+		}
+
 		public static void TryGiveDiedThoughts(Pawn victim, DamageInfo? dinfo)
 		{
 			try
@@ -35,6 +94,7 @@ namespace YaOpt.Helpers
 					victim.wasLeftBehindStartingPawn)
 					return;
 
+				DeathMemoryOwners.Add(victim);
 				WitnessedPawns.Clear();
 				if (victim.RaceProps.Humanlike)
 					AddHumanlikeDiedThoughts(victim, dinfo);
@@ -69,6 +129,56 @@ namespace YaOpt.Helpers
 			{
 				WitnessedPawns.Clear();
 				RelatedPawns.Clear();
+			}
+		}
+
+		/// <summary>
+		/// Clears every living pawn's memories that record <paramref name="pawn"/>'s death.
+		/// </summary>
+		/// <remarks>
+		/// Mirrors vanilla but materialises the gender-specific died thought defs once per call
+		/// instead of recomputing them for every observer. The caller has already checked that this
+		/// pawn may own death memories.
+		/// </remarks>
+		public static void RemoveDiedThoughts(Pawn pawn)
+		{
+			try
+			{
+				FillDiedRelationThoughtDefs(pawn);
+				var alivePawns = PawnsFinder.AllMapsWorldAndTemporary_Alive;
+				for (var i = 0; i < alivePawns.Count; i++)
+				{
+					var otherPawn = alivePawns[i];
+					if (otherPawn == pawn || otherPawn.needs == null || otherPawn.needs.mood == null)
+						continue;
+
+					var memories = otherPawn.needs.mood.thoughts.memories;
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowColonistDied, pawn);
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.KnowPrisonerDiedInnocent, pawn);
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithGoodOpinionDied, pawn);
+					memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.PawnWithBadOpinionDied, pawn);
+					if (ModsConfig.BiotechActive)
+						memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.Stillbirth, pawn);
+
+					for (var j = 0; j < DiedRelationThoughtDefs.Count; j++)
+						memories.RemoveMemoriesOfDefWhereOtherPawnIs(DiedRelationThoughtDefs[j], pawn);
+				}
+			}
+			finally
+			{
+				DiedRelationThoughtDefs.Clear();
+			}
+		}
+
+		private static void FillDiedRelationThoughtDefs(Pawn pawn)
+		{
+			DiedRelationThoughtDefs.Clear();
+			var relationDefs = DefDatabase<PawnRelationDef>.AllDefsListForReading;
+			for (var i = 0; i < relationDefs.Count; i++)
+			{
+				var thoughtDef = relationDefs[i].GetGenderSpecificDiedThought(pawn);
+				if (thoughtDef != null)
+					DiedRelationThoughtDefs.Add(thoughtDef);
 			}
 		}
 
