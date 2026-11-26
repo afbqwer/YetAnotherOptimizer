@@ -3,6 +3,7 @@ using System.Reflection;
 using HarmonyLib;
 using RimWorld;
 using Verse;
+using Verse.AI;
 using Verse.Sound;
 using YaOpt.Defines;
 using YaOpt.Settings;
@@ -35,6 +36,9 @@ namespace YaOpt.Helpers
 			CheckSoundOneShotManager();
 			CheckFleckCreateInPlace();
 			CheckFleckTickLoop();
+			CheckDrugPolicyCache();
+			CheckDrugScheduleCache();
+			CheckPrioritySorterSnapshot();
 		}
 
 		/// <summary>
@@ -128,6 +132,42 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(FleckSystemStatic), nameof(FleckSystem.Tick)),
 				AccessTools.Method(typeof(FleckSystemThrown), nameof(FleckSystem.Tick)),
 				AccessTools.Method(typeof(FleckSystemSplash), nameof(FleckSystem.Tick)));
+		}
+
+		/// <summary>
+		/// The drug policy index and the priority memo both short-circuit the original on a hit, so a
+		/// foreign transpiler or short-circuiting prefix would be skipped. Plain instrumentation
+		/// prefixes and postfixes coexist and are not treated as conflicts.
+		/// </summary>
+		private static void CheckDrugPolicyCache()
+		{
+			Check(nameof(YaOptSettings.OptDrugPolicyCache), includeAll: false,
+				AccessTools.Method(typeof(DrugPolicy), "get_Item", new[] { typeof(ThingDef) }),
+				AccessTools.Method(typeof(JobGiver_TakeDrugsForDrugPolicy),
+					nameof(JobGiver_TakeDrugsForDrugPolicy.GetPriority)),
+				AccessTools.Method(typeof(JobGiver_MoveDrugsToInventory),
+					nameof(JobGiver_MoveDrugsToInventory.GetPriority)));
+		}
+
+		/// <summary>
+		/// The scheduled-drug result cache short-circuits the tracker method on a hit, so a foreign
+		/// transpiler or short-circuiting prefix would be skipped.
+		/// </summary>
+		private static void CheckDrugScheduleCache()
+		{
+			Check(nameof(YaOptSettings.OptDrugScheduleCache), includeAll: false,
+				AccessTools.Method(typeof(Pawn_DrugPolicyTracker),
+					nameof(Pawn_DrugPolicyTracker.ShouldTryToTakeScheduledNow)));
+		}
+
+		/// <summary>
+		/// The priority snapshot replaces the sorter body, so any transpiler on it would be bypassed.
+		/// </summary>
+		private static void CheckPrioritySorterSnapshot()
+		{
+			Check(nameof(YaOptSettings.OptPrioritySorterSnapshot), includeAll: false,
+				AccessTools.Method(typeof(ThinkNode_PrioritySorter),
+					nameof(ThinkNode_PrioritySorter.TryIssueJobPackage)));
 		}
 
 		private static void Check(string settingId, bool includeAll, params MethodBase[] targets)

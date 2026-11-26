@@ -239,6 +239,15 @@
 	<YaOpt.Setting.Option.ImmunityStatCache>免疫获取速度属性缓存</YaOpt.Setting.Option.ImmunityStatCache>
 	<YaOpt.Setting.Option.ImmunityStatCache.Desc>将 ImmunityGainSpeed 缓存20 tick。每条免疫记录在每个健康间隔都会重新求值一次该属性，尽管它很少变化。食物、休息、床、休息状态或年龄变化最多需要20 tick（约三分之一秒）才会反映到免疫获取速度上。</YaOpt.Setting.Option.ImmunityStatCache.Desc>
 	<YaOpt.Setting.Option.ImmunityStatCache.Compatibility>如果某个模组要求食物、休息、床、休息状态或年龄变化后免疫获取速度立即更新，请关闭此项。</YaOpt.Setting.Option.ImmunityStatCache.Compatibility>
+	<YaOpt.Setting.Option.DrugPolicyCache>药物策略缓存</YaOpt.Setting.Option.DrugPolicyCache>
+	<YaOpt.Setting.Option.DrugPolicyCache.Desc>将药物策略条目的线性查找改为索引查找，并在同一 tick 内复用计划用药 JobGiver 的优先级结果。药物定义较多时，原版每次选 job 都会让这两个 JobGiver 反复扫描整张策略表。命中时会校验策略是否被修改，因此药物策略界面的改动立即生效。</YaOpt.Setting.Option.DrugPolicyCache.Desc>
+	<YaOpt.Setting.Option.DrugPolicyCache.Compatibility>如果有模组改写药物策略条目查找或这两个 JobGiver 的优先级逻辑，请关闭此项。</YaOpt.Setting.Option.DrugPolicyCache.Compatibility>
+	<YaOpt.Setting.Option.DrugScheduleCache>药物计划判定缓存</YaOpt.Setting.Option.DrugScheduleCache>
+	<YaOpt.Setting.Option.DrugScheduleCache.Desc>在同一 tick 内复用计划用药判定。用药 JobGiver 会为优先级求值一遍整张策略表，生成 job 时再求值一遍。服用药物或结束休眠后会立即失效；暂停时不做缓存，以免策略修改被缓存吞掉。</YaOpt.Setting.Option.DrugScheduleCache.Desc>
+	<YaOpt.Setting.Option.DrugScheduleCache.Compatibility>如果有模组会在同一 tick 内修改用药记录、基因、情绪或意识形态状态并期望计划用药立即随之变化，请关闭此项。</YaOpt.Setting.Option.DrugScheduleCache.Compatibility>
+	<YaOpt.Setting.Option.PrioritySorterSnapshot>工作优先级快照</YaOpt.Setting.Option.PrioritySorterSnapshot>
+	<YaOpt.Setting.Option.PrioritySorterSnapshot.Desc>每次选择只计算一次各候选工作的优先级。原版在每个候选失败后都会重算剩余全部候选的优先级，空闲角色一次选 job 大约要做上百次优先级求值。选择顺序与平局规则保持不变。</YaOpt.Setting.Option.PrioritySorterSnapshot.Desc>
+	<YaOpt.Setting.Option.PrioritySorterSnapshot.Compatibility>如果有其他模组补丁了优先级排序器，此项会默认关闭（替换实现会绕过其 transpiler），但仍可手动开启。</YaOpt.Setting.Option.PrioritySorterSnapshot.Compatibility>
 	<YaOpt.Setting.Option.MoodThoughtDedup>情绪想法更新去重</YaOpt.Setting.Option.MoodThoughtDedup>
 	<YaOpt.Setting.Option.MoodThoughtDedup.Desc>同一 tick 内若第一次重建已经得到新鲜数据，则跳过第二次 situational 想法重建。只移除重复的同 tick 计算，不改变结果。</YaOpt.Setting.Option.MoodThoughtDedup.Desc>
 	<YaOpt.Setting.Option.MoveSpeedStatCache>移动速度属性缓存</YaOpt.Setting.Option.MoveSpeedStatCache>

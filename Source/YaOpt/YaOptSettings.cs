@@ -694,6 +694,73 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Indexes <see cref="DrugPolicy"/> entry lookups and reuses the scheduled-drug job givers'
+		/// priorities within one tick.
+		/// </summary>
+		/// <remarks>
+		/// <see cref="DrugPolicy"/>'s <see cref="ThingDef"/> indexer is a linear scan. The two
+		/// scheduled-drug job givers ask it for every policy entry, and
+		/// <c>ShouldTryToTakeScheduledNow</c> asks again inside <c>AllowedToTakeScheduledEver</c>, so
+		/// a policy with many drug defs is quadratic in its entry count. The index is validated
+		/// against the policy on every hit, so policy edits take effect immediately; only the
+		/// priority result is held for a tick.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_DrugPolicy_Item"/>
+		/// <seealso cref="Patches.RimWorld_JobGiver_TakeDrugsForDrugPolicy_GetPriority"/>
+		/// <seealso cref="Patches.RimWorld_JobGiver_MoveDrugsToInventory_GetPriority"/>
+		/// <seealso cref="Helpers.DrugPolicyIndexCache"/>
+		/// <seealso cref="Helpers.DrugJobGiverPriorityCache"/>
+		public OptimizationOption OptDrugPolicyCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.DrugPolicyCache",
+			Desc = "YaOpt.Setting.Option.DrugPolicyCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.DrugPolicyCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
+		/// Reuses <c>Pawn_DrugPolicyTracker.ShouldTryToTakeScheduledNow</c> within one tick.
+		/// </summary>
+		/// <remarks>
+		/// The scheduled-drug job giver evaluates every policy entry once for its priority and again
+		/// when it builds the job, and each evaluation allocates a closure for <c>List.Find</c>. The
+		/// cached result is dropped when a drug is ingested or a suspension ends, and is not cached
+		/// while paused so a drug policy edit cannot be outlived.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_Pawn_DrugPolicyTracker_ShouldTryToTakeScheduledNow"/>
+		/// <seealso cref="Patches.MultiTargets_DrugTakeRecordNotifications"/>
+		/// <seealso cref="Helpers.DrugScheduledEvalCache"/>
+		public OptimizationOption OptDrugScheduleCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.DrugScheduleCache",
+			Desc = "YaOpt.Setting.Option.DrugScheduleCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.DrugScheduleCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
+		/// Computes each <see cref="Verse.AI.ThinkNode_PrioritySorter"/> child's priority once per selection
+		/// pass instead of recomputing the remaining children after every failure.
+		/// </summary>
+		/// <remarks>
+		/// An idle pawn with fourteen children performs about a hundred <c>GetPriority</c> calls per
+		/// job search in vanilla. The snapshot preserves the randomised insertion order, the
+		/// first-strict-maximum tie break and the per-child exception handling. A foreign transpiler
+		/// on the method is detected as a conflict, because a replacement prefix bypasses it.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_AI_ThinkNode_PrioritySorter_TryIssueJobPackage"/>
+		public OptimizationOption OptPrioritySorterSnapshot { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PrioritySorterSnapshot",
+			Desc = "YaOpt.Setting.Option.PrioritySorterSnapshot.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PrioritySorterSnapshot.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Skips a second situational thought rebuild in the same tick.
 		/// </summary>
 		/// <remarks>
