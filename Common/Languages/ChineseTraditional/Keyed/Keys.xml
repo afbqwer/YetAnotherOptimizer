@@ -234,6 +234,10 @@
 	<YaOpt.Setting.Option.MeditationTick.Compatibility>兼容Vanilla Psycasts Expanded；與其他大幅修改冥想機制的Mod可能衝突。與Performance Esmolas的「Meditation Throttle」重複，同時安裝時優先使用它的實作。</YaOpt.Setting.Option.MeditationTick.Compatibility>
 	<YaOpt.Setting.Option.StatCache>更多屬性快取</YaOpt.Setting.Option.StatCache>
 	<YaOpt.Setting.Option.StatCache.Desc>將角色的舒適溫度和污垢率加入原版的屬性快取系統。舒適溫度改為每20幀更新一次（裝備變動時強制重新整理），污垢率每60幀更新一次。這能減少頻繁存取這些高開銷屬性時的效能損耗。</YaOpt.Setting.Option.StatCache.Desc>
+	<YaOpt.Setting.Option.LearningStatCache>學習係數屬性快取</YaOpt.Setting.Option.LearningStatCache>
+	<YaOpt.Setting.Option.LearningStatCache.Desc>將 GlobalLearningFactor 快取120 tick，使每次 Learn 不再重複執行完整屬性管線。基因、Hediff、特質、服裝、裝備或 Ideo 變化最多需要120 tick（約兩秒）才會影響學習速度。</YaOpt.Setting.Option.LearningStatCache.Desc>
+	<YaOpt.Setting.Option.MoodThoughtDedup>情緒想法更新去重</YaOpt.Setting.Option.MoodThoughtDedup>
+	<YaOpt.Setting.Option.MoodThoughtDedup.Desc>同一 tick 內若第一次重建已經取得新鮮資料，則跳過第二次 situational 想法重建。只移除重複的同 tick 計算，不改變結果。</YaOpt.Setting.Option.MoodThoughtDedup.Desc>
 	<YaOpt.Setting.Option.MoveSpeedStatCache>移動速度屬性快取</YaOpt.Setting.Option.MoveSpeedStatCache>
 	<YaOpt.Setting.Option.MoveSpeedStatCache.Desc>在移動呼叫點為移動速度屬性快取20 tick。原版每走一格都會重新求值一次移動速度，而它極少變化。啟用後同一數值最多沿用20 tick（約三分之一秒）。亡靈被排除，因為其速度隨可見時間曲線變化。剛發生的裝備、健康或光照變化最多需20 tick 才會反映到移動速度上。</YaOpt.Setting.Option.MoveSpeedStatCache.Desc>
 	<YaOpt.Setting.Option.PsychicEntropyCache>Entropy屬性快取</YaOpt.Setting.Option.PsychicEntropyCache>
@@ -313,6 +317,9 @@
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基礎屬性快取</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在遊戲開始後記住每個物品 Def 的基礎質量、基礎易燃性和基礎耐久。原版每次讀取都要走完整屬性系統重算一遍。主要幫助在批次讀取這些值的模組，原版自身很少用到。讀檔時會重新計算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>如果某個模組會在遊戲過程中改寫屬性基礎值而改動沒有生效，請關閉此項。</YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>
+	<YaOpt.Setting.Option.TerrainBeautyCache>地板美觀屬性快取</YaOpt.Setting.Option.TerrainBeautyCache>
+	<YaOpt.Setting.Option.TerrainBeautyCache.Desc>在遊戲開始後記住每個地形 Def 的 Beauty 和 BeautyOutdoors。BeautyUtility 會為每個取樣格讀取一次地形美觀值，而抽象屬性請求沒有 Thing 可供原版屬性快取使用。讀檔時會重新計算。</YaOpt.Setting.Option.TerrainBeautyCache.Desc>
+	<YaOpt.Setting.Option.TerrainBeautyCache.Compatibility>如果某個模組會在遊戲過程中改寫地形屬性的基礎值而改動沒有生效，請關閉此項。</YaOpt.Setting.Option.TerrainBeautyCache.Compatibility>
 	<YaOpt.Setting.Option.WorldPawnsListCache>世界 pawn 清單快取</YaOpt.Setting.Option.WorldPawnsListCache>
 	<YaOpt.Setting.Option.WorldPawnsListCache.Desc>重用世界 pawn 清單，不再每次存取都重建。原版每次都會清空並從存活、封存、死亡三個集合重新填充，即使內容沒有變化。只要有 pawn 增刪清單就會正常重建，呼叫方拿到的內容與原版一致。</YaOpt.Setting.Option.WorldPawnsListCache.Desc>
 	<YaOpt.Setting.Option.StorableDefsCache>可儲存物品清單快取</YaOpt.Setting.Option.StorableDefsCache>

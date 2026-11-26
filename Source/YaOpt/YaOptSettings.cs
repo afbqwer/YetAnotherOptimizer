@@ -654,6 +654,46 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches <see cref="StatDefOf.GlobalLearningFactor"/> through the vanilla temporary stat cache
+		/// for 120 ticks.
+		/// </summary>
+		/// <remarks>
+		/// Every <see cref="SkillRecord.LearnRateFactor"/> call evaluates the full stat pipeline, even
+		/// though the value changes only with genes, hediffs, traits, apparel, equipment or ideo state.
+		/// An XML patch marks the stat cacheable and the patch supplies the 120-tick interval. Recent
+		/// changes may take up to 120 ticks (about two seconds) to affect learning speed.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_StatWorker_GetValue_LearningStatCache"/>
+		/// <seealso cref="Patches.Xml.PatchOperationSettingGate"/>
+		public OptimizationOption OptLearningStatCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.LearningStatCache",
+			Desc = "YaOpt.Setting.Option.LearningStatCache.Desc",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
+		/// Skips a second situational thought rebuild in the same tick.
+		/// </summary>
+		/// <remarks>
+		/// <see cref="Need_Mood.NeedInterval"/> can rebuild thoughts once through
+		/// <c>CurInstantLevel</c> and immediately again through <c>SituationalThoughtInterval</c>.
+		/// The second rebuild sees the same data unless something set <c>thoughtsDirty</c> in between,
+		/// so it is skipped. Sleeping pawns and pawns whose instant mood was already evaluated this
+		/// tick only take the second path and are unaffected.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_SituationalThoughtHandler_UpdateAllMoodThoughts"/>
+		/// <seealso cref="Helpers.ThoughtUpdateCache"/>
+		public OptimizationOption OptMoodThoughtDedup { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.MoodThoughtDedup",
+			Desc = "YaOpt.Setting.Option.MoodThoughtDedup.Desc",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Caches <see cref="GenLocalDate"/> lookups for the remainder of the current tick, per map.
 		/// </summary>
 		/// <remarks>
@@ -764,6 +804,26 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ThingDefBaseStatCache",
 			Desc = "YaOpt.Setting.Option.ThingDefBaseStatCache.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Memoises terrain <see cref="StatDefOf.Beauty"/> and <see cref="StatDefOf.BeautyOutdoors"/>.
+		/// </summary>
+		/// <remarks>
+		/// <see cref="BeautyUtility.CellBeauty"/> evaluates the terrain's abstract Beauty value for
+		/// every sampled cell, and abstract requests have no <see cref="Thing"/> for the vanilla
+		/// <c>StatWorker</c> caches to key on. Terrain defs are immutable during play, so the values
+		/// are cached per <see cref="TerrainDef"/>. A mod that rewrites terrain stat bases at runtime
+		/// needs a reload or this option disabled.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_StatWorker_GetValueAbstract_TerrainBeautyCache"/>
+		/// <seealso cref="Helpers.TerrainBeautyCache"/>
+		public OptimizationOption OptTerrainBeautyCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.TerrainBeautyCache",
+			Desc = "YaOpt.Setting.Option.TerrainBeautyCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.TerrainBeautyCache.Compatibility",
 			Category = OptimizationCategory.Tps,
 		};
 
