@@ -6,6 +6,7 @@
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
+		<Optimize>true</Optimize>
 		<DebugType>embedded</DebugType>
 		<LangVersion>latest</LangVersion>
 		<Nullable>disable</Nullable>
