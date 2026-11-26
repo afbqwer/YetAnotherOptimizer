@@ -47,6 +47,8 @@ namespace YaOpt.Helpers
 
 		private static bool _ready;
 
+		private static bool _canSkipWear;
+
 		private static MethodInfo[] _harPatchMethods;
 
 		/// <summary>
@@ -59,11 +61,18 @@ namespace YaOpt.Helpers
 		/// </summary>
 		internal static bool Active => _ready && YaOptGlobal.Settings?.OptPawnGearRebuild.Enabled == true;
 
+		/// <summary>
+		/// True when the rewrite may wear the constructed set directly instead of calling the vanilla
+		/// wear path.
+		/// </summary>
+		internal static bool CanSkipWear => _canSkipWear;
+
 		internal static MethodInfo[] HarPatchMethods => _harPatchMethods;
 
 		internal static void Refresh()
 		{
 			_ready = false;
+			_canSkipWear = false;
 			_harPatchMethods = null;
 
 			var option = YaOptGlobal.Settings?.OptPawnGearRebuild;
@@ -133,6 +142,9 @@ namespace YaOpt.Helpers
 			}
 
 			_ready = true;
+			_canSkipWear = CanReplaceWear();
+			if (!_canSkipWear)
+				YaOptMod.Debug("OptPawnGearRebuild: vanilla wear path kept, a foreign patch touches it or HasPartsToWear");
 		}
 
 		/// <summary>
@@ -144,7 +156,28 @@ namespace YaOpt.Helpers
 				return;
 
 			_ready = false;
+			_canSkipWear = false;
 			YaOptMod.Error("OptPawnGearRebuild disabled after runtime failure: " + exception);
+		}
+
+		/// <summary>
+		/// The rewrite wears generated apparel through <c>ThingOwner&lt;Apparel&gt;.TryAdd</c> and answers
+		/// body part checks itself. Any foreign patch on the skipped members would be silently bypassed,
+		/// so the vanilla path is kept in that case instead of banning the whole option.
+		/// </summary>
+		private static bool CanReplaceWear()
+		{
+			if (PatchConflictGuard.HasForeignPatch(
+					AccessTools.Method(typeof(Pawn_ApparelTracker), nameof(Pawn_ApparelTracker.Wear)))
+				|| PatchConflictGuard.HasForeignPatch(
+					AccessTools.Method(typeof(ApparelUtility), nameof(ApparelUtility.HasPartsToWear))))
+			{
+				return false;
+			}
+
+			var giveToPawn = AccessTools.Method(typeof(PawnApparelGenerator.PossibleApparelSet),
+				nameof(PawnApparelGenerator.PossibleApparelSet.GiveToPawn));
+			return !PatchConflictGuard.HasForeignPatch(giveToPawn);
 		}
 
 		private static MethodInfo[] FindHarGearPatches(MethodBase apparelMethod, MethodBase weaponMethod)

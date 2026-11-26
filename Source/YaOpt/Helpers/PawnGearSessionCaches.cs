@@ -49,6 +49,12 @@ namespace YaOpt.Helpers
 		[ThreadStatic]
 		private static float _apparelComfyTemperatureMax;
 
+		[ThreadStatic]
+		private static HashSet<BodyPartGroupDef> _apparelWearableGroups;
+
+		[ThreadStatic]
+		private static bool _apparelWearableGroupsValid;
+
 		/// <summary>
 		/// Opens a weapon session for <paramref name="pawn"/> unless one is already open.
 		/// </summary>
@@ -108,6 +114,7 @@ namespace YaOpt.Helpers
 
 			_apparelPawn = pawn;
 			_apparelBaseTemperatureValid = false;
+			_apparelWearableGroupsValid = false;
 			_apparelSessionActive = true;
 			return true;
 		}
@@ -117,7 +124,9 @@ namespace YaOpt.Helpers
 			_apparelSessionActive = false;
 			_apparelPawn = null;
 			_apparelBaseTemperatureValid = false;
+			_apparelWearableGroupsValid = false;
 			_apparelStuffUsable?.Clear();
+			_apparelWearableGroups?.Clear();
 		}
 
 		/// <summary>
@@ -187,6 +196,42 @@ namespace YaOpt.Helpers
 
 			min = _apparelComfyTemperatureMin;
 			max = _apparelComfyTemperatureMax;
+			return true;
+		}
+
+		/// <summary>
+		/// Returns the body part groups the pawn currently has when an apparel session for the same pawn
+		/// is open.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla rebuilds the not-missing part enumeration for every group of every body part check.
+		/// Body parts cannot change while a pawn's starting apparel is generated, so the union is
+		/// computed once and answers every check in the call.
+		/// </remarks>
+		internal static bool TryGetWearableGroups(Pawn pawn, out HashSet<BodyPartGroupDef> groups)
+		{
+			groups = null;
+			if (!_apparelSessionActive || pawn != _apparelPawn || pawn.health?.hediffSet == null)
+				return false;
+
+			if (!_apparelWearableGroupsValid)
+			{
+				if (_apparelWearableGroups == null)
+					_apparelWearableGroups = new HashSet<BodyPartGroupDef>();
+				else
+					_apparelWearableGroups.Clear();
+
+				foreach (var part in pawn.health.hediffSet.GetNotMissingParts())
+				{
+					var partGroups = part.groups;
+					for (var i = 0; i < partGroups.Count; i++)
+						_apparelWearableGroups.Add(partGroups[i]);
+				}
+
+				_apparelWearableGroupsValid = true;
+			}
+
+			groups = _apparelWearableGroups;
 			return true;
 		}
 	}
