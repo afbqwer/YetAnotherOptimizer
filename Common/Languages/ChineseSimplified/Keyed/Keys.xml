@@ -200,7 +200,7 @@
 	<YaOpt.Setting.Option.GenTypesLockFree>直接密封类型检查</YaOpt.Setting.Option.GenTypesLockFree>
 	<YaOpt.Setting.Option.GenTypesLockFree.Desc>直接读取 Type.IsSealed，移除原版的全局锁和缓存查询。ThingWithComps.GetComp 在组件类型未命中时使用该结果，若 T 为密封类型便跳过扫描。</YaOpt.Setting.Option.GenTypesLockFree.Desc>
 	<YaOpt.Setting.Option.InfoLogNoStack>信息日志不抓取堆栈</YaOpt.Setting.Option.InfoLogNoStack>
-	<YaOpt.Setting.Option.InfoLogNoStack.Desc>Info 级日志不再抓取和格式化堆栈。原版会为每条日志抓取带文件信息的完整堆栈，单条耗时数微秒并分配数 KB 内存；因此 Info 条目在 Player.log 和游戏日志窗口中将不再包含堆栈。Warning 和 Error 的堆栈保持不变。启用期间开发者控制台不再打印堆栈帧。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.InfoLogNoStack.Desc>
+	<YaOpt.Setting.Option.InfoLogNoStack.Desc>Info 级日志不再抓取和格式化堆栈。原版会为每条日志抓取带文件信息的完整堆栈，单条耗时数微秒并分配数 KB 内存；因此 Info 条目在 Player.log 和游戏日志窗口中将不再包含堆栈。Warning、Error 及其控制台堆栈帧保持不变。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.InfoLogNoStack.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache>角色标签缓存</YaOpt.Setting.Option.PawnLabelCache>
 	<YaOpt.Setting.Option.PawnLabelCache.Desc>短时间缓存角色的名字标签及其测量宽度。原版对每个正在渲染的角色每帧至少构造两次标签字符串并重新量宽；缓存每 60 帧刷新一次，改名最多只会有很小的延迟。</YaOpt.Setting.Option.PawnLabelCache.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache.Compatibility>有其他Mod改写角色标签（文字或宽度）时可能出现显示异常，此时关闭本项。</YaOpt.Setting.Option.PawnLabelCache.Compatibility>

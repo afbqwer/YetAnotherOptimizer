@@ -1543,10 +1543,9 @@ namespace YaOpt
 		/// <remarks>
 		/// Vanilla WaylithLogFormatter captures a full stack with file info for every log level,
 		/// which costs several microseconds and several KB per Info line. Warning and Error stacks
-		/// are unchanged. Enabling this also turns off console stack-frame printing.
+		/// are unchanged, including their console stack frames.
 		/// </remarks>
-		/// <seealso cref="Patches.MultiTargets_LogInfoStack"/>
-		/// <seealso cref="Helpers.LogInfoStackSuppressor"/>
+		/// <seealso cref="Patches.Waylith_Logging_WaylithLogFormatter_Write"/>
 		public OptimizationOption OptInfoLogNoStack { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.InfoLogNoStack",

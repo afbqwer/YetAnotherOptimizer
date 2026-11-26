@@ -200,7 +200,7 @@
 	<YaOpt.Setting.Option.GenTypesLockFree>直接密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>
 	<YaOpt.Setting.Option.GenTypesLockFree.Desc>直接讀取 Type.IsSealed，移除原版的全域鎖和快取查詢。ThingWithComps.GetComp 在組件類型未命中時使用該結果，若 T 為密封類型便跳過掃描。</YaOpt.Setting.Option.GenTypesLockFree.Desc>
 	<YaOpt.Setting.Option.InfoLogNoStack>資訊日誌不抓取堆疊</YaOpt.Setting.Option.InfoLogNoStack>
-	<YaOpt.Setting.Option.InfoLogNoStack.Desc>Info 級日誌不再抓取和格式化堆疊。原版會為每條日誌抓取帶檔案資訊的完整堆疊，單條耗時數微秒並配置數 KB 記憶體；因此 Info 條目在 Player.log 和遊戲日誌視窗中將不再包含堆疊。Warning 和 Error 的堆疊保持不變。啟用期間開發者主控台不再列印堆疊幀。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.InfoLogNoStack.Desc>
+	<YaOpt.Setting.Option.InfoLogNoStack.Desc>Info 級日誌不再抓取和格式化堆疊。原版會為每條日誌抓取帶檔案資訊的完整堆疊，單條耗時數微秒並配置數 KB 記憶體；因此 Info 條目在 Player.log 和遊戲日誌視窗中將不再包含堆疊。Warning、Error 及其主控台堆疊幀保持不變。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.InfoLogNoStack.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache>角色標籤快取</YaOpt.Setting.Option.PawnLabelCache>
 	<YaOpt.Setting.Option.PawnLabelCache.Desc>短時間快取角色的名字標籤及其測量寬度。原版對每個正在渲染的角色每幀至少構造兩次標籤字串並重新量寬；快取每 60 幀刷新一次，改名最多只會有很小的延遲。</YaOpt.Setting.Option.PawnLabelCache.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache.Compatibility>有其他Mod改寫角色標籤（文字或寬度）時可能出現顯示異常，此時關閉本項。</YaOpt.Setting.Option.PawnLabelCache.Compatibility>
