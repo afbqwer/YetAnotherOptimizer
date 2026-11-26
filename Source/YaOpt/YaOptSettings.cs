@@ -1511,7 +1511,7 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Short-circuits turret target searches when no candidate can possibly be in range.
+		/// Short-circuits player turret target searches when the map holds no candidate that can be hostile.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_Building_TurretGun_TryFindNewTarget"/>
 		public OptimizationOption OptTurretTargetPrune { get; } = new OptimizationOption
@@ -1520,6 +1520,24 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.TurretTargetPrune.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.TurretTargetPrune.Compatibility",
 			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
+		/// Skips water freezing on cells whose terrain cannot freeze.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla <c>FreezeManager.DoWaterFreezing</c> reads cell temperature and room before
+		/// checking <c>TerrainDef.canFreeze</c>. Terrain is the cheaper and decisive check, so
+		/// non-freezable cells can skip the rest of the freezing pass. Melting is not pruned
+		/// because its center cell does not need to be ice; melting is driven by the radial scan.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_FreezeManager_DoWaterFreezing"/>
+		public OptimizationOption OptTempTerrainPrune { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.TempTerrainPrune",
+			Desc = "YaOpt.Setting.Option.TempTerrainPrune.Desc",
+			Category = OptimizationCategory.Tps,
+			FuncShow = (_) => ModsConfig.OdysseyActive,
 		};
 
 		/// <seealso cref="Patches.RimWorld_ChildcareUtility_FindAutofeedBaby"/>

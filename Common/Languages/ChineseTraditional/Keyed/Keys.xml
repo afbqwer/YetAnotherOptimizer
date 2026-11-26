@@ -203,8 +203,10 @@
 	<YaOpt.Setting.Option.PawnLabelCache.Desc>短時間快取角色的名字標籤及其測量寬度。原版對每個正在渲染的角色每幀至少構造兩次標籤字串並重新量寬；快取每 60 幀刷新一次，改名最多只會有很小的延遲。</YaOpt.Setting.Option.PawnLabelCache.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache.Compatibility>有其他Mod改寫角色標籤（文字或寬度）時可能出現顯示異常，此時關閉本項。</YaOpt.Setting.Option.PawnLabelCache.Compatibility>
 	<YaOpt.Setting.Option.TurretTargetPrune>砲塔索敵剪枝</YaOpt.Setting.Option.TurretTargetPrune>
-	<YaOpt.Setting.Option.TurretTargetPrune.Desc>當沒有敵對、狂暴或無派系候選目標，或所有候選目標都超出砲塔有效射程時，跳過完整的砲塔索敵流程。有人操作的砲塔以及候選目標較多的情況仍交還原版處理。</YaOpt.Setting.Option.TurretTargetPrune.Desc>
+	<YaOpt.Setting.Option.TurretTargetPrune.Desc>玩家陣營的砲塔在沒有敵對、狂暴或無派系候選目標時，跳過完整的索敵流程。有人操作的砲塔及其他陣營的砲塔仍交還原版處理。此提前退出只跳過空候選集的搜索，存在目標時不會增加額外掃描。</YaOpt.Setting.Option.TurretTargetPrune.Desc>
 	<YaOpt.Setting.Option.TurretTargetPrune.Compatibility>替換了炮塔索敵邏輯的Mod可能衝突；炮塔不再尋找目標時關閉本項。</YaOpt.Setting.Option.TurretTargetPrune.Compatibility>
+	<YaOpt.Setting.Option.TempTerrainPrune>臨時地形剪枝</YaOpt.Setting.Option.TempTerrainPrune>
+	<YaOpt.Setting.Option.TempTerrainPrune.Desc>當地形不可結冰時，跳過該格的水面結冰處理。原版會先讀取溫度和房間，再檢查地形是否可結冰；對大多數陸地格來說，此檢查避免了這部分工作，可結冰的格子仍走原版邏輯。</YaOpt.Setting.Option.TempTerrainPrune.Desc>
 	<YaOpt.Setting.Option.CameraUpdateRate>更新速率計算最佳化</YaOpt.Setting.Option.CameraUpdateRate>
 	<YaOpt.Setting.Option.CameraUpdateRate.Desc>遊戲會在每一幀計算物體在螢幕上的可見性，並調低螢幕外物體的更新速率，然而這個計算過於精細了，以至於它本身就有一定的開銷。此最佳化微調了可見性判斷，稍微放寬了判定標準，減少了更新速率計算的開銷，代價是在一些特定條件下可能有少量接近螢幕邊緣但不可見的物體也被誤判為可見，讓系統增加它們的更新速率導致執行開銷。但在大部分情況下，這個最佳化是值得的。</YaOpt.Setting.Option.CameraUpdateRate.Desc>
 	<YaOpt.Setting.Option.GetMapPawns>地圖角色檢索最佳化</YaOpt.Setting.Option.GetMapPawns>
