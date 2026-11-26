@@ -236,6 +236,9 @@
 	<YaOpt.Setting.Option.StatCache.Desc>将角色的舒适温度和污垢率加入原版的属性缓存系统。舒适温度改为每20帧更新一次（装备变动时强制刷新），污垢率每60帧更新一次。这能减少频繁访问这些高开销属性时的性能损耗。</YaOpt.Setting.Option.StatCache.Desc>
 	<YaOpt.Setting.Option.LearningStatCache>学习系数属性缓存</YaOpt.Setting.Option.LearningStatCache>
 	<YaOpt.Setting.Option.LearningStatCache.Desc>将 GlobalLearningFactor 缓存120 tick，使每次 Learn 不再重复执行完整属性管线。基因、Hediff、特质、服装、装备或 Ideo 变化最多需要120 tick（约两秒）才会影响学习速度。</YaOpt.Setting.Option.LearningStatCache.Desc>
+	<YaOpt.Setting.Option.ImmunityStatCache>免疫获取速度属性缓存</YaOpt.Setting.Option.ImmunityStatCache>
+	<YaOpt.Setting.Option.ImmunityStatCache.Desc>将 ImmunityGainSpeed 缓存20 tick。每条免疫记录在每个健康间隔都会重新求值一次该属性，尽管它很少变化。食物、休息、床、休息状态或年龄变化最多需要20 tick（约三分之一秒）才会反映到免疫获取速度上。</YaOpt.Setting.Option.ImmunityStatCache.Desc>
+	<YaOpt.Setting.Option.ImmunityStatCache.Compatibility>如果某个模组要求食物、休息、床、休息状态或年龄变化后免疫获取速度立即更新，请关闭此项。</YaOpt.Setting.Option.ImmunityStatCache.Compatibility>
 	<YaOpt.Setting.Option.MoodThoughtDedup>情绪想法更新去重</YaOpt.Setting.Option.MoodThoughtDedup>
 	<YaOpt.Setting.Option.MoodThoughtDedup.Desc>同一 tick 内若第一次重建已经得到新鲜数据，则跳过第二次 situational 想法重建。只移除重复的同 tick 计算，不改变结果。</YaOpt.Setting.Option.MoodThoughtDedup.Desc>
 	<YaOpt.Setting.Option.MoveSpeedStatCache>移动速度属性缓存</YaOpt.Setting.Option.MoveSpeedStatCache>

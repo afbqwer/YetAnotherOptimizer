@@ -674,6 +674,26 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches <see cref="StatDefOf.ImmunityGainSpeed"/> through the vanilla temporary stat cache
+		/// for 20 ticks.
+		/// </summary>
+		/// <remarks>
+		/// <see cref="ImmunityRecord.ImmunityChangePerTick"/> evaluates the full stat pipeline for
+		/// every immunity record on every health interval. Food, rest, bed, resting and age changes
+		/// may take up to 20 ticks to affect immunity gain. An XML patch marks the stat cacheable.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_StatWorker_GetValue_ImmunityStatCache"/>
+		/// <seealso cref="Patches.Xml.PatchOperationSettingGate"/>
+		public OptimizationOption OptImmunityStatCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ImmunityStatCache",
+			Desc = "YaOpt.Setting.Option.ImmunityStatCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.ImmunityStatCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Skips a second situational thought rebuild in the same tick.
 		/// </summary>
 		/// <remarks>
