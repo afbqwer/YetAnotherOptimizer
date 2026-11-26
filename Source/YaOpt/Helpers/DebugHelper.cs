@@ -56,8 +56,8 @@ namespace YaOpt.Helpers
 		/// check when entered from a thread inside managed code, and a stack overflow is always
 		/// exactly that. Everything the shim reports is beyond the reach of managed code: the CLR
 		/// never surfaces access violations, illegal instructions or stack overflows to
-		/// AppDomain.UnhandledException. It writes the fault site to a log file in the save data
-		/// folder, then lets the CLR fail-fast proceed. CLR fail-fast itself (0xC0000409) is not
+		/// AppDomain.UnhandledException. It writes the fault site to YaOpt_Crash_&lt;pid&gt;.log in the
+		/// Logs subfolder of the save data folder, then lets the CLR fail-fast proceed. CLR fail-fast itself (0xC0000409) is not
 		/// reachable from user mode and still needs a dump.
 		/// Source: Source/NativeVEH/YaOptVeh.c.
 		/// </remarks>
@@ -77,8 +77,7 @@ namespace YaOpt.Helpers
 			// Load explicitly: mod assembly directories are not on the native loader search path.
 			NativeLibrary.Load(dllPath);
 
-			var logPath = Path.Combine(GenFilePaths.SaveDataFolderPath,
-									   $"YaOpt_Crash_{Environment.ProcessId}.log");
+			var logPath = CrashLogEnhancer.SessionLogPath;
 			var rc = YaOptVehInstall(logPath);
 			switch (rc)
 			{

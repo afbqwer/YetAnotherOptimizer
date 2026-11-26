@@ -19,15 +19,18 @@ namespace YaOpt.Helpers
 	/// Everything lands in the same YaOpt_Crash_&lt;pid&gt;.log as the native VEH records. The native
 	/// side opens it with FILE_APPEND_DATA and FILE_SHARE_WRITE, so the CRT stderr stream and this
 	/// managed writer can append without a sharing violation and without overwriting each other.
+	/// Reports live in the Logs subfolder of the save data folder, next to Player.log, and retention
+	/// mirrors the game's own Player.log / Player-prev.log scheme: only the current session's
+	/// report and the newest previous report survive a launch.
 	/// </remarks>
 	public static class CrashLogEnhancer
 	{
 		private const string FilePrefix = "YaOpt_Crash_";
 		private const string LogSuffix = ".log";
 		private const string PrevName = "YaOpt_Crash-prev.log";
+		private const string LogFolderName = "Logs";
 		private const string GppPackageId = "wowgag.guiperformancepatch";
 		private const int PreviewChars = 6000;
-		private const int PrevFileChars = 20000;
 		private const int Unbuffered = 4;
 		private const uint FileTypeDisk = 1u;
 		private const uint FileTypeChar = 2u;
@@ -39,16 +42,53 @@ namespace YaOpt.Helpers
 		private static string _sharedLogPath;
 
 		/// <summary>
-		/// Archives the previous run before the native reporter installs its log with
-		/// CREATE_ALWAYS, which would otherwise truncate a reused-PID report first.
+		/// Directory that holds this session's report and the archived previous report. Falls back
+		/// to the save data folder root when the subfolder cannot be created, so the reporter never
+		/// silently stops working.
+		/// </summary>
+		internal static string LogFolder
+		{
+			get
+			{
+				var root = GenFilePaths.SaveDataFolderPath;
+				try
+				{
+					var dir = Path.Combine(root, LogFolderName);
+					Directory.CreateDirectory(dir);
+					return dir;
+				}
+				catch (Exception e)
+				{
+					YaOptMod.Warning("Could not create the crash log folder under " + root + ": " +
+									 e.GetType().Name);
+					return root;
+				}
+			}
+		}
+
+		internal static string SessionLogPath =>
+			Path.Combine(LogFolder, $"{FilePrefix}{Environment.ProcessId}{LogSuffix}");
+
+		/// <summary>
+		/// True when at least one feature writes the crash log. With all of them off the folder is
+		/// left untouched, including any reports an earlier configuration produced.
+		/// </summary>
+		private static bool CrashLoggingActive =>
+			YaOptGlobal.Settings.VectoredExceptionHandler.Enabled ||
+			YaOptGlobal.Settings.EnhancedCrashLog.Enabled ||
+			YaOptGlobal.Settings.FatalStderrCapture.Enabled;
+
+		/// <summary>
+		/// Archives the newest previous run and prunes the rest before the native reporter installs
+		/// its log with CREATE_ALWAYS, which would otherwise truncate a reused-PID report first.
 		/// </summary>
 		public static void Prepare()
 		{
 			try
 			{
-				var dir = GenFilePaths.SaveDataFolderPath;
+				var dir = LogFolder;
 				_sharedLogPath = Path.Combine(dir, $"{FilePrefix}{Environment.ProcessId}{LogSuffix}");
-				if (YaOptGlobal.Settings.EnhancedCrashLog.Enabled)
+				if (CrashLoggingActive)
 					SummarizePrevious(dir);
 			}
 			catch (Exception e)
@@ -67,8 +107,7 @@ namespace YaOpt.Helpers
 			try
 			{
 				if (string.IsNullOrEmpty(_sharedLogPath))
-					_sharedLogPath = Path.Combine(GenFilePaths.SaveDataFolderPath,
-						$"{FilePrefix}{Environment.ProcessId}{LogSuffix}");
+					_sharedLogPath = SessionLogPath;
 
 				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
 					YaOptGlobal.Settings.FatalStderrCapture.Enabled)
@@ -138,23 +177,35 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
-		/// Copies the newest previous crash report to YaOpt_Crash-prev.log and prints a preview.
-		/// Old reports are deliberately left in place: deleting other sessions' diagnostics during
-		/// startup would be a surprising side effect, and a stack overflow can leave several files.
+		/// Copies the newest previous crash report to YaOpt_Crash-prev.log and deletes every other
+		/// report, so the folder only ever holds this session's log plus that one archive. The copy
+		/// is written before anything is deleted; if it cannot be written, its source files are kept.
 		/// </summary>
 		private static void SummarizePrevious(string dir)
 		{
-			var currentPid = Environment.ProcessId.ToString();
 			var groups = new Dictionary<string, List<string>>(StringComparer.Ordinal);
 
-			foreach (var file in Directory.GetFiles(dir, FilePrefix + "*.log"))
+			foreach (var file in Directory.GetFiles(dir, FilePrefix + "*"))
 			{
 				var name = Path.GetFileName(file);
-				if (!TryGetPid(name, out var pid) || pid == currentPid)
+				if (!TryGetPid(name, out var pid))
 					continue;
-				var info = new FileInfo(file);
-				if (info.Length == 0)
+
+				if (!name.EndsWith(LogSuffix, StringComparison.Ordinal))
+				{
+					// "....log.seen[.ticks]" renamed by older builds. The archive is rebuilt from
+					// the plain ".log" files, so these leftovers are prune-only.
+					if (name.IndexOf(".log.seen", StringComparison.Ordinal) >= 0)
+						TryDeleteFile(file);
 					continue;
+				}
+
+				if (new FileInfo(file).Length == 0)
+				{
+					TryDeleteFile(file);
+					continue;
+				}
+
 				if (!groups.TryGetValue(pid, out var list))
 					groups[pid] = list = new List<string>();
 				list.Add(file);
@@ -167,58 +218,88 @@ namespace YaOpt.Helpers
 				.OrderByDescending(pid => groups[pid].Max(file => new FileInfo(file).LastWriteTime))
 				.First();
 
-			var sb = new StringBuilder()
-				.AppendLine("=== YaOpt previous crash report ===")
-				.AppendLine("pid: " + newestPid);
-			foreach (var file in groups[newestPid].OrderBy(file => file, StringComparer.Ordinal))
-			{
-				sb.AppendLine("--- " + Path.GetFileName(file) + " ---");
-				try
-				{
-					var text = File.ReadAllText(file);
-					sb.Append(text.Length > PrevFileChars
-						? text.Substring(0, PrevFileChars) + "\n... (truncated; see original file)"
-						: text);
-					sb.AppendLine();
-				}
-				catch (Exception e)
-				{
-					sb.AppendLine("[unreadable: " + e.GetType().Name + "]");
-				}
-			}
-
 			var prevPath = Path.Combine(dir, PrevName);
+			var archived = false;
 			try
 			{
-				File.WriteAllText(prevPath, sb.ToString(), Encoding.UTF8);
+				// Streamed rather than buffered whole: a stack overflow's stderr tail can be large,
+				// and the full text is kept so deleting the originals loses nothing.
+				using (var writer = new StreamWriter(prevPath, false, new UTF8Encoding(false)))
+				{
+					writer.WriteLine("=== YaOpt previous crash report ===");
+					writer.WriteLine("pid: " + newestPid);
+					foreach (var file in groups[newestPid].OrderBy(f => f, StringComparer.Ordinal))
+					{
+						writer.WriteLine("--- " + Path.GetFileName(file) + " ---");
+						try
+						{
+							using (var reader = new StreamReader(file))
+							{
+								var buffer = new char[16384];
+								int n;
+								while ((n = reader.Read(buffer, 0, buffer.Length)) > 0)
+									writer.Write(buffer, 0, n);
+							}
+							writer.WriteLine();
+						}
+						catch (Exception e)
+						{
+							writer.WriteLine("[unreadable: " + e.GetType().Name + "]");
+						}
+					}
+				}
+				archived = true;
 			}
 			catch (Exception e)
 			{
 				YaOptMod.Warning("Could not write " + prevPath + ": " + e.GetType().Name);
 			}
 
-			var report = sb.ToString();
-			var preview = report.Length > PreviewChars
-				? report.Substring(0, PreviewChars) +
-				  $"\n... ({report.Length - PreviewChars:N0} more chars; full copy: {prevPath})"
-				: report;
-			YaOptMod.Log("[Crash log] Previous run's report:\n" + preview);
+			if (archived && YaOptGlobal.Settings.EnhancedCrashLog.Enabled)
+				LogPreview(prevPath);
 
-			// Mark this group as consumed so the next launch does not print the same report
-			// again. Renaming keeps the evidence without deleting another session's diagnostics.
-			foreach (var file in groups[newestPid])
+			// Retention: only the archive and this session's report (recreated by the native
+			// install) survive the launch.
+			foreach (var pair in groups)
 			{
-				try
+				if (!archived && pair.Key == newestPid)
+					continue;
+				foreach (var file in pair.Value)
+					TryDeleteFile(file);
+			}
+		}
+
+		private static void LogPreview(string prevPath)
+		{
+			try
+			{
+				var preview = new StringBuilder();
+				using (var reader = new StreamReader(prevPath))
 				{
-					var seen = file + ".seen";
-					if (File.Exists(seen))
-						seen = file + ".seen." + DateTime.UtcNow.Ticks;
-					File.Move(file, seen);
+					var buffer = new char[PreviewChars];
+					var n = reader.Read(buffer, 0, buffer.Length);
+					if (n > 0)
+						preview.Append(buffer, 0, n);
+					if (!reader.EndOfStream)
+						preview.Append("\n... (preview truncated; full copy: ").Append(prevPath).Append(')');
 				}
-				catch (Exception)
-				{
-					// A file still held by another process will simply be reported again next time.
-				}
+				YaOptMod.Log("[Crash log] Previous run's report:\n" + preview);
+			}
+			catch (Exception e)
+			{
+				YaOptMod.Warning("Could not read " + prevPath + ": " + e.GetType().Name);
+			}
+		}
+
+		private static void TryDeleteFile(string path)
+		{
+			try
+			{
+				File.Delete(path);
+			}
+			catch (Exception)
+			{
+				// Locked by antivirus or a stale handle: it is pruned on the next launch.
 			}
 		}
 
