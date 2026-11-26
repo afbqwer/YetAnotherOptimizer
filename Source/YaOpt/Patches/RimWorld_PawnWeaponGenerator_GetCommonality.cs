@@ -24,7 +24,7 @@ namespace YaOpt.Patches
 
 		static bool Prepare()
 		{
-			if (YaOptGlobal.Settings?.OptPawnGearSessionCache.Enabled != true)
+			if (YaOptGlobal.Settings?.OptPawnGearSessionCache.Enabled != true || PawnGearRebuildCompat.Ready)
 				return false;
 
 			var target = AccessTools.Method(typeof(PawnWeaponGenerator), MethodName);

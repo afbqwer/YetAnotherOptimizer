@@ -901,6 +901,35 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Replaces apparel and weapon generation with constructive selection instead of retrying a full
+		/// random candidate set.
+		/// </summary>
+		/// <remarks>
+		/// Apparel generation rebuilds and re-validates the whole candidate set up to 80 times; the
+		/// replacement filters once, seeds torso and leg coverage and fills the budget directly. Weapon
+		/// selection evaluates every candidate twice; the replacement draws from a single weighted
+		/// pass. Output is no longer identical to vanilla per seed, but mutual exclusivity, budget,
+		/// required items, race restrictions and naked rules are preserved. Disabled by default. With
+		/// Humanoid Alien Races loaded this neutralises its pool patches and filters per race instead;
+		/// if any HAR gear patch cannot be found, or another mod patches the generation methods, the
+		/// option disables itself and falls back to vanilla with HAR unchanged.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_PawnApparelGenerator_GenerateStartingApparelFor_Rebuild"/>
+		/// <seealso cref="Patches.RimWorld_PawnWeaponGenerator_TryGenerateWeaponFor_Rebuild"/>
+		/// <seealso cref="Patches.Compatibility.HumanoidAlienRaces.AlienRace_PawnGearNeutralizer"/>
+		/// <seealso cref="Helpers.PawnGearRebuildCompat"/>
+		/// <seealso cref="Helpers.PawnGearRebuild"/>
+		/// <seealso cref="Helpers.PawnGearPools"/>
+		public OptimizationOption OptPawnGearRebuild { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnGearRebuild",
+			Desc = "YaOpt.Setting.Option.PawnGearRebuild.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnGearRebuild.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = false
+		};
+
+		/// <summary>
 		/// Replaces the two-pass quest lodger lookup with one allocation-free scan.
 		/// </summary>
 		/// <seealso cref="Patches.RimWorld_QuestUtility_IsQuestLodger"/>

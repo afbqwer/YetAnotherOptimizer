@@ -58,6 +58,7 @@ namespace YaOpt.Patches
 			PrepatcherState.Refresh();
 			var gridCompatibilityChanged = GridOptimizationCompat.Refresh();
 			GenerationOptimizationCompat.Refresh();
+			PawnGearRebuildCompat.Refresh();
 			if (!force && !gridCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())
 				return;
 

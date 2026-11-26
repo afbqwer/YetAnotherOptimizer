@@ -21,7 +21,8 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings?.OptPawnGearSessionCache.Enabled == true;
+			return YaOptGlobal.Settings?.OptPawnGearSessionCache.Enabled == true
+				&& !PawnGearRebuildCompat.Ready;
 		}
 
 		static void Prefix(Pawn pawn, out bool __state)
