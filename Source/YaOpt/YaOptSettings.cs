@@ -119,6 +119,80 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Ticks flecks in place instead of copying each struct out of the list and writing it back.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla <c>FleckSystemBase&lt;T&gt;.Tick</c> performs a full struct copy on read and another on
+		/// write for every fleck every tick (about 160 B for <see cref="Verse.FleckStatic"/> and 270 B for
+		/// <see cref="Verse.FleckThrown"/>). The replacement iterates the same list through a span, so the
+		/// constrained <c>TimeInterval</c> call mutates the element directly. Fleck physics, lifetimes and
+		/// removal order are unchanged.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_FleckManager_FleckManagerTick"/>
+		public OptimizationOption OptFleckTickLoop { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FleckTickLoop",
+			Desc = "YaOpt.Setting.Option.FleckTickLoop.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.FleckTickLoop.Compatibility",
+			Category = OptimizationCategory.Tps
+		};
+
+		/// <summary>
+		/// Draws unrotated flecks without building a rotation quaternion.
+		/// </summary>
+		/// <remarks>
+		/// <c>Graphic_Fleck.DrawFleck</c> always calls <c>Quaternion.AngleAxis</c> (one sin/cos pair).
+		/// Static and splash flecks never rotate, and thrown flecks without a <c>rotationRate</c> stay at
+		/// zero, so most draws can use the identity quaternion and produce the same matrix.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_Graphic_Fleck_DrawFleck"/>
+		public OptimizationOption OptFleckFastDraw { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FleckFastDraw",
+			Desc = "YaOpt.Setting.Option.FleckFastDraw.Desc",
+			Category = OptimizationCategory.Fps
+		};
+
+		/// <summary>
+		/// Builds a new fleck in place inside its system's list instead of copying it in afterwards.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla constructs each fleck as a local, runs <c>Setup</c> there and then appends a full copy
+		/// of the 160-270 B struct. Growing the list first and running <c>Setup</c> on the new element
+		/// removes that copy. Fleck data and ordering are unchanged.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_FleckManager_CreateFleck"/>
+		public OptimizationOption OptFleckCreateInPlace { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FleckCreateInPlace",
+			Desc = "YaOpt.Setting.Option.FleckCreateInPlace.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.FleckCreateInPlace.Compatibility",
+			Category = OptimizationCategory.Tps
+		};
+
+		/// <summary>
+		/// Enables GPU instancing on fleck defs whose shader can consume per-instance data.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla instances only the defs that set <c>renderInstanced</c>, but whether that works depends
+		/// on the shader declaring the <c>_InstanceTransforms</c> and <c>_Color</c> storage buffers that
+		/// <c>DrawBatch.Flush</c> binds. This scans every <see cref="Verse.FleckDef"/>, keeps plain
+		/// <c>Graphic_Fleck</c> graphics only (the pulse/splash graphics use a per-fleck property block and
+		/// can never batch), and flips <c>renderInstanced</c> on where the material layout declares both
+		/// buffers. Off by default because it changes render submission for defs vanilla left on the
+		/// per-object path.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_FleckManager_Constructor"/>
+		public OptimizationOption OptFleckAutoInstancing { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FleckAutoInstancing",
+			Desc = "YaOpt.Setting.Option.FleckAutoInstancing.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.FleckAutoInstancing.Compatibility",
+			Category = OptimizationCategory.Fps,
+			Default = false
+		};
+
+		/// <summary>
 		/// Optimizes <see cref="ColoredText.Resolve(TaggedString)"/> and <see cref="ColoredText.StripTags(string)"/>.
 		/// Replaces <see cref="string.IndexOf(string)"/> (culture-sensitive) with <see cref="string.IndexOf(string, StringComparison)"/>
 		/// using <see cref="StringComparison.Ordinal"/> to avoid unnecessary overhead during text tagging.

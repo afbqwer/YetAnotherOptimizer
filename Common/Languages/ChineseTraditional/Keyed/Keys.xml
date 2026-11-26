@@ -57,6 +57,17 @@
 	<YaOpt.Setting.Option.GlowGridCombine.Desc>以分區索引取代原版的光照顏色合併流程。原版會對每個髒格走訪全部燈光，在燈附近砌一格擋光的牆就可能帶來每帧數百萬次矩形判定。此最佳化只走訪與該格所在分區重疊的燈光，同時保持累加順序不變，因此光照顏色不會改變。</YaOpt.Setting.Option.GlowGridCombine.Desc>
 	<YaOpt.Setting.Option.GasGridTick>氣體網格 Tick 最佳化</YaOpt.Setting.Option.GasGridTick>
 	<YaOpt.Setting.Option.GasGridTick.Desc>用每格一位的佔用位圖跳過氣體消散與擴散掃描中的空 64 格分組，取代原版每 tick 固定探測一批格子（無論氣體在哪裡）。每格的處理速率保持不變，因此氣體模擬結果不變。</YaOpt.Setting.Option.GasGridTick.Desc>
+	<YaOpt.Setting.Option.FleckTickLoop>Fleck Tick 迴圈最佳化</YaOpt.Setting.Option.FleckTickLoop>
+	<YaOpt.Setting.Option.FleckTickLoop.Desc>原地更新每個 fleck 的 game tick 狀態，省去把整個結構體從清單中複製出來再寫回的開銷。Fleck 的運動、生命週期與移除行為保持不變。</YaOpt.Setting.Option.FleckTickLoop.Desc>
+	<YaOpt.Setting.Option.FleckTickLoop.Compatibility>當其它 mod 修改 FleckManagerTick 時自動停用。</YaOpt.Setting.Option.FleckTickLoop.Compatibility>
+	<YaOpt.Setting.Option.FleckFastDraw>Fleck 繪製旋轉快路徑</YaOpt.Setting.Option.FleckFastDraw>
+	<YaOpt.Setting.Option.FleckFastDraw.Desc>對旋轉角為 0 的 fleck 直接使用單位旋轉，跳過四元數建構。渲染結果完全一致。</YaOpt.Setting.Option.FleckFastDraw.Desc>
+	<YaOpt.Setting.Option.FleckCreateInPlace>Fleck 原地建立</YaOpt.Setting.Option.FleckCreateInPlace>
+	<YaOpt.Setting.Option.FleckCreateInPlace.Desc>在所屬系統的清單內直接建構新 fleck，省去先建構結構體再整體複製進清單的開銷。Fleck 資料與順序不變。</YaOpt.Setting.Option.FleckCreateInPlace.Desc>
+	<YaOpt.Setting.Option.FleckCreateInPlace.Compatibility>當其它 mod 修改 FleckManager.CreateFleck 或任一 FleckSystem 的 CreateFleck 時自動停用。</YaOpt.Setting.Option.FleckCreateInPlace.Compatibility>
+	<YaOpt.Setting.Option.FleckAutoInstancing>Fleck 合批能力偵測</YaOpt.Setting.Option.FleckAutoInstancing>
+	<YaOpt.Setting.Option.FleckAutoInstancing.Desc>掃描全部 fleck def，對著色器宣告了實例變換與顏色緩衝的按 GPU 實例化合批繪製；使用逐 fleck 屬性塊的 fleck 不受影響。渲染結果不變，需讀檔或重新啟動後生效。</YaOpt.Setting.Option.FleckAutoInstancing.Desc>
+	<YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>著色器未宣告實例緩衝的 fleck 保持原版逐 fleck 提交。預設關閉；使用大量自訂 fleck 的存檔請自行目視確認。</YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>
 	<YaOpt.Setting.Option.ColoredText>富文本最佳化</YaOpt.Setting.Option.ColoredText>
 	<YaOpt.Setting.Option.ColoredText.Desc>最佳化富文本（如彩色文字）的解析效能。原版遊戲在尋找標籤位置時使用了效能較低的IndexOf多載（涉及區域性相關檢查），此最佳化將其替換為效能更高、只進行直接位元組比較的多載。</YaOpt.Setting.Option.ColoredText.Desc>
 	<YaOpt.Setting.Option.EarlyRenderPrepare>提前準備物體渲染</YaOpt.Setting.Option.EarlyRenderPrepare>
