@@ -68,6 +68,9 @@
 	<YaOpt.Setting.Option.FleckAutoInstancing>Fleck Instancing Detection</YaOpt.Setting.Option.FleckAutoInstancing>
 	<YaOpt.Setting.Option.FleckAutoInstancing.Desc>Scans every fleck def and enables GPU instancing where its shader declares the instance transform and color buffers that batching needs. Flecks rendered through per-fleck property blocks are left alone. Rendering result is unchanged; loading a save or restarting is required for the change to apply.</YaOpt.Setting.Option.FleckAutoInstancing.Desc>
 	<YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>Flecks whose shaders do not declare the instance buffers keep the vanilla per-fleck path. Off by default; verify visuals for heavily modded fleck sets.</YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>
+	<YaOpt.Setting.Option.SoundOneShotManager>One-Shot Sound Manager Optimization</YaOpt.Setting.Option.SoundOneShotManager>
+	<YaOpt.Setting.Option.SoundOneShotManager.Desc>Replaces the per-sound LINQ counts and the per-frame cleanup scan in the one-shot sound manager with direct scans and in-place removal. Which sounds play, their voice priority and their order are unchanged.</YaOpt.Setting.Option.SoundOneShotManager.Desc>
+	<YaOpt.Setting.Option.SoundOneShotManager.Compatibility>Disabled automatically when another mod patches the affected one-shot manager methods.</YaOpt.Setting.Option.SoundOneShotManager.Compatibility>
 	<YaOpt.Setting.Option.ColoredText>Rich Text Optimization</YaOpt.Setting.Option.ColoredText>
 	<YaOpt.Setting.Option.ColoredText.Desc>Optimizes the parsing performance of rich text (e.g., colored text). The vanilla game uses a slow overload of IndexOf (involving culture-sensitive checks) to locate tags. This optimization replaces it with a faster overload that performs a direct ordinal comparison.</YaOpt.Setting.Option.ColoredText.Desc>
 	<YaOpt.Setting.Option.EarlyRenderPrepare>Early Render Preparation</YaOpt.Setting.Option.EarlyRenderPrepare>

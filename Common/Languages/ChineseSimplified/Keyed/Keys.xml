@@ -68,6 +68,9 @@
 	<YaOpt.Setting.Option.FleckAutoInstancing>Fleck 合批能力检测</YaOpt.Setting.Option.FleckAutoInstancing>
 	<YaOpt.Setting.Option.FleckAutoInstancing.Desc>扫描全部 fleck def，对着色器声明了实例变换与颜色缓冲的按 GPU 实例化合批绘制；使用逐 fleck 属性块的 fleck 不受影响。渲染结果不变，需读档或重启后生效。</YaOpt.Setting.Option.FleckAutoInstancing.Desc>
 	<YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>着色器未声明实例缓冲的 fleck 保持原版逐 fleck 提交。默认关闭；使用大量自定义 fleck 的存档请自行目视确认。</YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>
+	<YaOpt.Setting.Option.SoundOneShotManager>单次音效管理器优化</YaOpt.Setting.Option.SoundOneShotManager>
+	<YaOpt.Setting.Option.SoundOneShotManager.Desc>把单次音效管理器中每次播放的 LINQ 计数与每帧的清理扫描换成直接遍历与原地压缩。播放哪些音效、声部优先级与顺序均不变。</YaOpt.Setting.Option.SoundOneShotManager.Desc>
+	<YaOpt.Setting.Option.SoundOneShotManager.Compatibility>当其它 mod 修改相关的单次音效管理器方法时自动禁用。</YaOpt.Setting.Option.SoundOneShotManager.Compatibility>
 	<YaOpt.Setting.Option.ColoredText>富文本优化</YaOpt.Setting.Option.ColoredText>
 	<YaOpt.Setting.Option.ColoredText.Desc>优化富文本（如彩色文字）的解析性能。原版游戏在查找标签位置时使用了性能较低的IndexOf重载（涉及区域性相关检查），此优化将其替换为性能更高、只进行直接字节比较的重载。</YaOpt.Setting.Option.ColoredText.Desc>
 	<YaOpt.Setting.Option.EarlyRenderPrepare>提前准备物体渲染</YaOpt.Setting.Option.EarlyRenderPrepare>

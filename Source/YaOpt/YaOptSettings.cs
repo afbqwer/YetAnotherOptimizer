@@ -193,6 +193,27 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Removes the per-sound LINQ allocations and the O(n*m) cleanup pass from the one-shot manager.
+		/// </summary>
+		/// <remarks>
+		/// <c>CanAddPlayingOneShot</c> and <c>TryAddPlayingOneShot</c> count matching samples through
+		/// <c>Where(...).Count()</c> on every one-shot the game starts, and
+		/// <c>SampleOneShotManagerUpdate</c> removes finished samples with
+		/// <c>RemoveAll(s =&gt; cleanupList.Contains(s))</c> every frame. The replacements are direct scans
+		/// and an in-place compaction with identical decisions and ordering.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_Sound_SampleOneShotManager_CanAddPlayingOneShot"/>
+		/// <seealso cref="Patches.Verse_Sound_SampleOneShotManager_TryAddPlayingOneShot"/>
+		/// <seealso cref="Patches.Verse_Sound_SampleOneShotManager_SampleOneShotManagerUpdate"/>
+		public OptimizationOption OptSoundOneShotManager { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.SoundOneShotManager",
+			Desc = "YaOpt.Setting.Option.SoundOneShotManager.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.SoundOneShotManager.Compatibility",
+			Category = OptimizationCategory.Fps
+		};
+
+		/// <summary>
 		/// Optimizes <see cref="ColoredText.Resolve(TaggedString)"/> and <see cref="ColoredText.StripTags(string)"/>.
 		/// Replaces <see cref="string.IndexOf(string)"/> (culture-sensitive) with <see cref="string.IndexOf(string, StringComparison)"/>
 		/// using <see cref="StringComparison.Ordinal"/> to avoid unnecessary overhead during text tagging.
