@@ -18,11 +18,17 @@ namespace YaOpt.Patches.Early
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache);
+			return true;
 		}
 
 		private static bool Prefix(ref Dictionary<Def, List<ResearchProjectDef>> __result)
 		{
+			if (!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache) ||
+				DefLookupIndex.PrerequisitesPatched)
+			{
+				return true;
+			}
+
 			var index = DefLookupIndex.PrerequisitesByDef;
 			if (index == null)
 				return true;

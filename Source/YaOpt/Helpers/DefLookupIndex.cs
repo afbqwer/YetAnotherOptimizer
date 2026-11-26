@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
+using HarmonyLib;
 using RimWorld;
 using Verse;
+using YaOpt.Patches;
 using UnlockedHeader = RimWorld.ResearchPrerequisitesUtility.UnlockedHeader;
 
 namespace YaOpt.Helpers
@@ -38,21 +40,34 @@ namespace YaOpt.Helpers
 		internal static Dictionary<ResearchProjectDef, List<Pair<UnlockedHeader, List<Def>>>>
 			UnlockedGroupsByProject;
 
-		private static bool built;
+		internal static bool PrerequisitesPatched;
+		internal static bool GroupsPatched;
+
+		private static bool _built;
 
 		internal static void Invalidate()
 		{
-			built = false;
+			_built = false;
 			ByDef = null;
 			UsersByRecipe = null;
 			PrerequisitesByDef = null;
 			DefsByProject = null;
 			UnlockedGroupsByProject = null;
+			PrerequisitesPatched = false;
+			GroupsPatched = false;
+			Verse_RecipeDef_AllRecipeUsers.ClearCache();
+
+			foreach (var def in DefDatabase<ThingDef>.AllDefsListForReading)
+				def.allRecipesCached = null;
+			foreach (var recipe in DefDatabase<RecipeDef>.AllDefsListForReading)
+				recipe.isSurgeryCached = null;
+			foreach (var project in DefDatabase<ResearchProjectDef>.AllDefsListForReading)
+				project.cachedUnlockedDefs = null;
 		}
 
 		internal static void Build(string source)
 		{
-			if (built)
+			if (_built)
 				return;
 
 			var thingDefs = DefDatabase<ThingDef>.AllDefsListForReading;
@@ -73,23 +88,33 @@ namespace YaOpt.Helpers
 			{
 				var stopwatch = Stopwatch.StartNew();
 				var recipeIndex = BuildRecipeIndexes(thingDefs, recipes);
-				ByDef = recipeIndex.ByDef;
-				UsersByRecipe = Wrap(recipeIndex.UsersByRecipe);
+				ByDef = PatchConflictGuard.HasForeignPatch(AccessTools.PropertyGetter(
+						typeof(ThingDef), nameof(ThingDef.AllRecipes)))
+					? ComposeRecipeResults(thingDefs, recipeIndex.ByDef)
+					: recipeIndex.ByDef;
+				UsersByRecipe = PatchConflictGuard.HasForeignPatch(AccessTools.PropertyGetter(
+						typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers)))
+					? ComposeRecipeUserResults(recipes, recipeIndex.UsersByRecipe)
+					: Wrap(recipeIndex.UsersByRecipe);
 
-				var research = BuildResearchIndexes(thingDefs, recipes, recipeIndex.UsersByRecipe);
+				var research = BuildResearchIndexes(thingDefs, recipes, UsersByRecipe);
 				PrerequisitesByDef = research.PrerequisitesByDef;
 				DefsByProject = research.DefsByProject;
 				UnlockedGroupsByProject = research.Groups;
+				PrerequisitesPatched = PatchConflictGuard.HasForeignPatch(AccessTools.Method(
+					typeof(ResearchPrerequisitesUtility), nameof(ResearchPrerequisitesUtility.ComputeResearchPrerequisites)));
+				GroupsPatched = PatchConflictGuard.HasForeignPatch(AccessTools.Method(
+					typeof(ResearchPrerequisitesUtility),
+					nameof(ResearchPrerequisitesUtility.UnlockedDefsGroupedByPrerequisites)));
 
-				built = true;
+				_built = true;
 				YaOptMod.Log($"Def lookup index: {ByDef.Count} recipe users, {recipeIndex.UsersByRecipe.Count} recipes " +
 							 $"and {DefsByProject.Count} research projects in {stopwatch.ElapsedMilliseconds} ms " +
 							 $"(triggered by {source}).");
 			}
 			catch (Exception exception)
 			{
-				// Whatever was published before the failure stays valid; the rest falls back to vanilla.
-				// built stays false, so a later hook can retry against the same defs.
+				Invalidate();
 				YaOptMod.Error($"Failed to build the def lookup index, falling back to vanilla:\n{exception}");
 			}
 		}
@@ -198,12 +223,48 @@ namespace YaOpt.Helpers
 			}
 		}
 
+		private static Dictionary<ThingDef, List<RecipeDef>> ComposeRecipeResults(
+			List<ThingDef> thingDefs, Dictionary<ThingDef, List<RecipeDef>> raw)
+		{
+			var result = new Dictionary<ThingDef, List<RecipeDef>>(raw.Count);
+			foreach (var def in thingDefs)
+			{
+				var recipes = raw.TryGetValue(def, out var cached) ? cached : null;
+				def.allRecipesCached = recipes == null ? new List<RecipeDef>() : new List<RecipeDef>(recipes);
+				var patched = def.AllRecipes;
+				var copy = patched == null ? new List<RecipeDef>() : new List<RecipeDef>(patched);
+				def.allRecipesCached = copy;
+				if (copy.Count > 0)
+					result[def] = copy;
+			}
+
+			return result;
+		}
+
+		private static Dictionary<RecipeDef, ReadOnlyCollection<ThingDef>> ComposeRecipeUserResults(
+			List<RecipeDef> recipes, Dictionary<RecipeDef, List<ThingDef>> raw)
+		{
+			UsersByRecipe = Wrap(raw);
+			var result = new Dictionary<RecipeDef, ReadOnlyCollection<ThingDef>>(recipes.Count);
+			foreach (var recipe in recipes)
+			{
+				var patched = recipe.AllRecipeUsers;
+				var users = new List<ThingDef>();
+				if (patched != null)
+					users.AddRange(patched);
+				result[recipe] = users.AsReadOnly();
+			}
+
+			UsersByRecipe = result;
+			return result;
+		}
+
 		private static (
 			Dictionary<Def, List<ResearchProjectDef>> PrerequisitesByDef,
 			Dictionary<ResearchProjectDef, List<Def>> DefsByProject,
 			Dictionary<ResearchProjectDef, List<Pair<UnlockedHeader, List<Def>>>> Groups) BuildResearchIndexes(
 				List<ThingDef> thingDefs, List<RecipeDef> recipes,
-				Dictionary<RecipeDef, List<ThingDef>> usersByRecipe)
+				Dictionary<RecipeDef, ReadOnlyCollection<ThingDef>> usersByRecipe)
 		{
 			var projects = DefDatabase<ResearchProjectDef>.AllDefsListForReading;
 			var byProject = new Dictionary<ResearchProjectDef, List<Def>>(projects.Count);
@@ -263,11 +324,27 @@ namespace YaOpt.Helpers
 			foreach (var ritual in DefDatabase<PsychicRitualDef>.AllDefsListForReading)
 				Add(ritual.researchPrerequisite, ritual);
 
-			// Vanilla sorts the concatenation by label and then deduplicates. Removing duplicates before
-			// a stable sort yields the same order, because duplicates share the same label.
+			// Seed vanilla's cache with the raw result, then run the fully patched getter once so
+			// compatible research postfixes are reflected in both directions of the index.
+			var unlockedDefsPatched = PatchConflictGuard.HasForeignPatch(AccessTools.PropertyGetter(
+				typeof(ResearchProjectDef), nameof(ResearchProjectDef.UnlockedDefs)));
 			var defsByProject = new Dictionary<ResearchProjectDef, List<Def>>(byProject.Count);
 			foreach (var pair in byProject)
-				defsByProject[pair.Key] = pair.Value.Distinct().OrderBy(def => def.label).ToList();
+			{
+				var project = pair.Key;
+				var raw = pair.Value.Distinct().OrderBy(def => def.label).ToList();
+				if (!unlockedDefsPatched)
+				{
+					defsByProject[project] = raw;
+					continue;
+				}
+
+				project.cachedUnlockedDefs = raw;
+				var patched = project.UnlockedDefs;
+				var copy = patched == null ? new List<Def>() : new List<Def>(patched);
+				project.cachedUnlockedDefs = copy;
+				defsByProject[project] = copy;
+			}
 
 			// Same structure ComputeResearchPrerequisites builds, in project database order.
 			var prerequisitesByDef = new Dictionary<Def, List<ResearchProjectDef>>();
@@ -345,7 +422,8 @@ namespace YaOpt.Helpers
 		///     Same rule as RecipeDef.IsSurgery, but based on the already-built AllRecipeUsers lists so
 		///     building the research index never falls back to the vanilla full-database scan.
 		/// </summary>
-		private static bool IsSurgery(RecipeDef recipe, Dictionary<RecipeDef, List<ThingDef>> usersByRecipe)
+		private static bool IsSurgery(RecipeDef recipe,
+			Dictionary<RecipeDef, ReadOnlyCollection<ThingDef>> usersByRecipe)
 		{
 			if (!usersByRecipe.TryGetValue(recipe, out var users))
 				return false;

@@ -17,16 +17,20 @@ namespace YaOpt.Patches.Early
 	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptDefLookupCache" />
 	[HarmonyPatch(typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers), MethodType.Getter)]
+	[HarmonyPriority(Priority.Last)]
 	[EarlyPatch]
 	internal static class Verse_RecipeDef_AllRecipeUsers_Index
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache);
+			return true;
 		}
 
 		private static bool Prefix(RecipeDef __instance, ref IEnumerable<ThingDef> __result)
 		{
+			if (!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache))
+				return true;
+
 			var index = DefLookupIndex.UsersByRecipe;
 			if (index == null || !index.TryGetValue(__instance, out ReadOnlyCollection<ThingDef> users))
 				return true;

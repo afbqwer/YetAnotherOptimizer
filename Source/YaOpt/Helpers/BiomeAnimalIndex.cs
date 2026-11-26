@@ -1,6 +1,6 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using RimWorld;
 using Verse;
@@ -21,16 +21,34 @@ namespace YaOpt.Helpers
 	internal static class BiomeAnimalIndex
 	{
 		/// <summary>Biome -> the exact list vanilla's AllWildAnimals yields, in database order.</summary>
-		internal static Dictionary<BiomeDef, ReadOnlyCollection<PawnKindDef>> AllWildAnimalsByBiome;
+		internal static Dictionary<BiomeDef, IEnumerable<PawnKindDef>> AllWildAnimalsByBiome;
+
+		private static bool _built;
+		private static Dictionary<BiomeDef, Dictionary<PawnKindDef, float>> _injectedNormal;
+		private static Dictionary<BiomeDef, Dictionary<PawnKindDef, float>> _injectedPollution;
+		private static Dictionary<BiomeDef, Dictionary<PawnKindDef, float>> _injectedCoastal;
 
 		internal static void Invalidate()
 		{
+			ClearInjected(_injectedNormal, biome => biome.cachedAnimalCommonalities,
+				biome => biome.cachedAnimalCommonalities = null);
+			ClearInjected(_injectedPollution, biome => biome.cachedPollutionAnimalCommonalities,
+				biome => biome.cachedPollutionAnimalCommonalities = null);
+			ClearInjected(_injectedCoastal, biome => biome.cachedCoastalAnimalCommonalities,
+				biome => biome.cachedCoastalAnimalCommonalities = null);
+			_injectedNormal = null;
+			_injectedPollution = null;
+			_injectedCoastal = null;
 			AllWildAnimalsByBiome = null;
+			_built = false;
 		}
 
 		internal static void Build()
 		{
-			AllWildAnimalsByBiome = null;
+			if (_built)
+				return;
+
+			Invalidate();
 
 			var biomes = DefDatabase<BiomeDef>.AllDefsListForReading;
 			var pawnKinds = DefDatabase<PawnKindDef>.AllDefsListForReading;
@@ -107,7 +125,7 @@ namespace YaOpt.Helpers
 				}
 
 				// Vanilla builds the list by filtering all PawnKindDefs in database order.
-				var byBiome = new Dictionary<BiomeDef, ReadOnlyCollection<PawnKindDef>>(biomes.Count);
+				var byBiome = new Dictionary<BiomeDef, IEnumerable<PawnKindDef>>(biomes.Count);
 				var totalAnimals = 0;
 				for (var i = 0; i < biomes.Count; i++)
 				{
@@ -127,23 +145,34 @@ namespace YaOpt.Helpers
 							list.Add(pawnKinds[j]);
 					}
 
-					byBiome[biome] = list.AsReadOnly();
+					byBiome[biome] = new AnimalEnumerable(list);
 					totalAnimals += list.Count;
 				}
 
 				// Assigning the dictionaries makes CommonalityOfAnimal skip its throwing lazy build.
+				_injectedNormal = new Dictionary<BiomeDef, Dictionary<PawnKindDef, float>>(biomes.Count);
+				_injectedPollution = new Dictionary<BiomeDef, Dictionary<PawnKindDef, float>>(biomes.Count);
+				_injectedCoastal = new Dictionary<BiomeDef, Dictionary<PawnKindDef, float>>(biomes.Count);
 				for (var i = 0; i < biomes.Count; i++)
 				{
 					var biome = biomes[i];
 					biome.cachedAnimalCommonalities = normal[biome];
+					_injectedNormal[biome] = normal[biome];
 					if (biotech)
+					{
 						biome.cachedPollutionAnimalCommonalities = pollution[biome];
+						_injectedPollution[biome] = pollution[biome];
+					}
 
 					if (odyssey)
+					{
 						biome.cachedCoastalAnimalCommonalities = coastal[biome];
+						_injectedCoastal[biome] = coastal[biome];
+					}
 				}
 
 				AllWildAnimalsByBiome = byBiome;
+				_built = true;
 				YaOptMod.Log($"Biome animal index: {byBiome.Count} biomes and {totalAnimals} wild animal " +
 							 $"entries in {stopwatch.ElapsedMilliseconds} ms.");
 
@@ -156,8 +185,41 @@ namespace YaOpt.Helpers
 			}
 			catch (Exception exception)
 			{
-				AllWildAnimalsByBiome = null;
+				Invalidate();
 				YaOptMod.Error($"Failed to build the biome animal index, falling back to vanilla:\n{exception}");
+			}
+		}
+
+		private static void ClearInjected(Dictionary<BiomeDef, Dictionary<PawnKindDef, float>> injected,
+			Func<BiomeDef, Dictionary<PawnKindDef, float>> getter, Action<BiomeDef> clear)
+		{
+			if (injected == null)
+				return;
+
+			foreach (var pair in injected)
+			{
+				if (ReferenceEquals(getter(pair.Key), pair.Value))
+					clear(pair.Key);
+			}
+		}
+
+		private sealed class AnimalEnumerable : IEnumerable<PawnKindDef>
+		{
+			private readonly List<PawnKindDef> _animals;
+
+			public AnimalEnumerable(List<PawnKindDef> animals)
+			{
+				this._animals = animals;
+			}
+
+			public IEnumerator<PawnKindDef> GetEnumerator()
+			{
+				return _animals.GetEnumerator();
+			}
+
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
 			}
 		}
 

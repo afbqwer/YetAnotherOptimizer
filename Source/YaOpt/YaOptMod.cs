@@ -127,6 +127,8 @@ namespace YaOpt
 		{
 			UpdateCallbackHelper.ClearCache();
 			Patcher.CheckAndRePatchOnLoadGame();
+			if (PlayDataLoader.Loaded)
+				DefLookupCacheHelper.BuildAll("game load");
 		}
 
 		/// <summary>

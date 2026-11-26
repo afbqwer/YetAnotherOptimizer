@@ -297,10 +297,10 @@
 	<YaOpt.Setting.SubCategory.Startup>啟動加速</YaOpt.Setting.SubCategory.Startup>
 	<YaOpt.Setting.Option.DefLookupCache>Def 查找索引</YaOpt.Setting.Option.DefLookupCache>
 	<YaOpt.Setting.Option.DefLookupCache.Desc>在所有 Def 載入完成後，為跨 Def 的配方與研究查詢建立一次索引。物品的配方清單、配方的使用者清單、研究專案的解鎖清單以及研究前置對應都從索引直接回傳，不再每次掃描整個 Def 資料庫；其他模組的啟動建構子也能受益。索引會在每次載入時重建，並在 Def 資料銷毀時丟棄。</YaOpt.Setting.Option.DefLookupCache.Desc>
-	<YaOpt.Setting.Option.DefLookupCache.Compatibility>當其他 Mod 補丁了被索引的查詢，或存在重複的 Def 索引提供者時，本項會自動停用。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
+	<YaOpt.Setting.Option.DefLookupCache.Compatibility>已確認的配方與研究結果補丁會納入索引；未知查詢補丁預設關閉本項，研究工具方法的外來補丁則逐方法回退原版；存在重複 Def 索引提供者時鎖定關閉。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
 	<YaOpt.Setting.Option.BiomeAnimalIndex>生物群系動物索引</YaOpt.Setting.Option.BiomeAnimalIndex>
 	<YaOpt.Setting.Option.BiomeAnimalIndex.Desc>在所有 Def 載入完成後一次建構每個生物群系的野生動物清單與常見度表。原版每次存取都會全量掃描全部動物種類，而且惰性建構常見度表時遇到重複項目會拋出例外並留下不完整的表；此最佳化會合併重複項目並保留較高的常見度。</YaOpt.Setting.Option.BiomeAnimalIndex.Desc>
-	<YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>當其他 Mod 補丁了 BiomeDef.AllWildAnimals 時，本項會自動停用。</YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>
+	<YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>可能改變野生動物成員資格的補丁預設關閉本項；已確認的純權重縮放保持相容；存在重複 Def 索引提供者時鎖定關閉。</YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>
 	<YaOpt.Setting.Option.GiddyUpOffsetCache>GiddyUp 繪製偏移快取</YaOpt.Setting.Option.GiddyUpOffsetCache>
 	<YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>持久化 GiddyUp 每次啟動都會重新計算的繪製偏移。GiddyUp 每次啟動都會渲染並逐像素掃描每個生命階段的貼圖；本項會從校驗過的檔案恢復其工作階段快取，只丟棄貼圖發生變化的項目。</YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>
 	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>

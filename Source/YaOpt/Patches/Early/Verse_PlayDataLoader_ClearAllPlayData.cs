@@ -16,14 +16,12 @@ namespace YaOpt.Patches.Early
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache) ||
-				   DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptBiomeAnimalIndex);
+			return true;
 		}
 
 		private static void Prefix()
 		{
-			DefLookupIndex.Invalidate();
-			BiomeAnimalIndex.Invalidate();
+			DefLookupCacheHelper.InvalidateAll();
 		}
 	}
 }

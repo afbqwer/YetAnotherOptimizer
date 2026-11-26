@@ -11,16 +11,20 @@ namespace YaOpt.Patches.Early
 	/// </summary>
 	/// <seealso cref="YaOptSettings.OptDefLookupCache" />
 	[HarmonyPatch(typeof(ResearchProjectDef), nameof(ResearchProjectDef.UnlockedDefs), MethodType.Getter)]
+	[HarmonyPriority(Priority.Last)]
 	[EarlyPatch]
 	internal static class Verse_ResearchProjectDef_UnlockedDefs
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache);
+			return true;
 		}
 
 		private static bool Prefix(ResearchProjectDef __instance)
 		{
+			if (!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache))
+				return true;
+
 			if (__instance.cachedUnlockedDefs != null)
 				return true;
 

@@ -19,7 +19,8 @@ namespace YaOpt.Helpers
 		/// Appends every foreign patch that conflicts with <paramref name="target"/>, formatted for the
 		/// settings tooltip. Uses the same rules as <see cref="FindForeignConflict"/>.
 		/// </summary>
-		internal static void CollectForeignConflicts(MethodBase target, bool includeAll, List<string> results)
+		internal static void CollectForeignConflicts(MethodBase target, bool includeAll, List<string> results,
+			Func<MethodBase, Patch, bool> compatiblePatch = null)
 		{
 			if (target == null || YaOptMod.Instance == null)
 				return;
@@ -34,13 +35,18 @@ namespace YaOpt.Helpers
 
 			foreach (var patch in info.Transpilers)
 			{
-				if (patch.owner != harmonyId && patch.owner != earlyId)
+				if (patch.owner != harmonyId && patch.owner != earlyId &&
+					(compatiblePatch == null || !compatiblePatch(target, patch)))
+				{
 					results.Add(Describe(patch.owner, "transpiler", target));
+				}
 			}
 
 			foreach (var patch in info.Prefixes)
 			{
 				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (compatiblePatch != null && compatiblePatch(target, patch))
 					continue;
 				if (includeAll || (patch.priority <= Priority.Normal && patch.PatchMethod.ReturnType == typeof(bool)))
 					results.Add(Describe(patch.owner, "prefix", target));
@@ -50,8 +56,11 @@ namespace YaOpt.Helpers
 			{
 				foreach (var patch in info.Postfixes)
 				{
-					if (patch.owner != harmonyId && patch.owner != earlyId)
+					if (patch.owner != harmonyId && patch.owner != earlyId &&
+						(compatiblePatch == null || !compatiblePatch(target, patch)))
+					{
 						results.Add(Describe(patch.owner, "postfix", target));
+					}
 				}
 			}
 		}

@@ -18,12 +18,18 @@ namespace YaOpt.Patches.Early
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache);
+			return true;
 		}
 
 		private static bool Prefix(ResearchProjectDef rd,
 			ref List<Pair<UnlockedHeader, List<Def>>> __result)
 		{
+			if (!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache) ||
+				DefLookupIndex.GroupsPatched)
+			{
+				return true;
+			}
+
 			var index = DefLookupIndex.UnlockedGroupsByProject;
 			if (index == null || !index.TryGetValue(rd, out var groups))
 			{

@@ -11,16 +11,20 @@ namespace YaOpt.Patches.Early
 	/// </summary>
 	/// <seealso cref="YaOptSettings.OptDefLookupCache" />
 	[HarmonyPatch(typeof(ThingDef), nameof(ThingDef.AllRecipes), MethodType.Getter)]
+	[HarmonyPriority(Priority.Last)]
 	[EarlyPatch]
 	internal static class Verse_ThingDef_AllRecipes
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache);
+			return true;
 		}
 
 		private static bool Prefix(ThingDef __instance)
 		{
+			if (!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache))
+				return true;
+
 			if (__instance.allRecipesCached != null)
 				return true;
 

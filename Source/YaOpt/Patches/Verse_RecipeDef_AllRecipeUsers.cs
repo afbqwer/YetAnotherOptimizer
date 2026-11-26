@@ -1,6 +1,7 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using Verse;
+using YaOpt.Helpers;
 
 namespace YaOpt.Patches
 {
@@ -26,6 +27,7 @@ namespace YaOpt.Patches
 	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptRecipeUsersCache"/>
 	[HarmonyPatch(typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers), MethodType.Getter)]
+	[HarmonyPriority(Priority.Last)]
 	internal static class Verse_RecipeDef_AllRecipeUsers
 	{
 		/// <summary>
@@ -50,13 +52,19 @@ namespace YaOpt.Patches
 		}
 
 		private static Entry[] _entries;
+		private static bool _hasForeignPatch;
 
 		static bool Prepare()
 		{
-			// Patches are torn down and reapplied on every game load, so this is also the
-			// invalidation point for a freshly loaded save.
+			ClearCache();
+			_hasForeignPatch = PatchConflictGuard.HasForeignPatch(
+				AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers)));
+			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptRecipeUsersCache);
+		}
+
+		internal static void ClearCache()
+		{
 			_entries = null;
-			return YaOptGlobal.Settings?.OptRecipeUsersCache.Enabled == true;
 		}
 
 		private static bool TryGetEntry(RecipeDef instance, out Entry entry)
@@ -74,7 +82,7 @@ namespace YaOpt.Patches
 
 		static bool Prefix(RecipeDef __instance, ref IEnumerable<ThingDef> __result)
 		{
-			if (!TryGetEntry(__instance, out var entry))
+			if (_hasForeignPatch || !TryGetEntry(__instance, out var entry))
 				return true;
 			if (entry.ThingDefListVersion != ListVersion(DefDatabase<ThingDef>.AllDefsListForReading))
 				return true;
@@ -89,7 +97,7 @@ namespace YaOpt.Patches
 
 		static void Postfix(RecipeDef __instance, ref IEnumerable<ThingDef> __result, bool __runOriginal)
 		{
-			if (!__runOriginal || __instance == null)
+			if (_hasForeignPatch || !__runOriginal || __instance == null)
 				return;
 			var thingDefList = DefDatabase<ThingDef>.AllDefsListForReading;
 			if (thingDefList == null)

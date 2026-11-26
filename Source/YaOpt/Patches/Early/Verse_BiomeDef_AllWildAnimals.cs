@@ -12,16 +12,20 @@ namespace YaOpt.Patches.Early
 	/// </summary>
 	/// <seealso cref="YaOptSettings.OptBiomeAnimalIndex" />
 	[HarmonyPatch(typeof(BiomeDef), nameof(BiomeDef.AllWildAnimals), MethodType.Getter)]
+	[HarmonyPriority(Priority.Last)]
 	[EarlyPatch]
 	internal static class Verse_BiomeDef_AllWildAnimals
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptBiomeAnimalIndex);
+			return true;
 		}
 
 		private static bool Prefix(BiomeDef __instance, ref IEnumerable<PawnKindDef> __result)
 		{
+			if (!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptBiomeAnimalIndex))
+				return true;
+
 			var index = BiomeAnimalIndex.AllWildAnimalsByBiome;
 			if (index == null || !index.TryGetValue(__instance, out var animals))
 			{

@@ -16,8 +16,7 @@ namespace YaOpt.Patches.Early
 	{
 		private static bool Prepare()
 		{
-			return DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache) ||
-				   DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptBiomeAnimalIndex);
+			return true;
 		}
 
 		private static void Prefix()
@@ -27,6 +26,12 @@ namespace YaOpt.Patches.Early
 				return;
 
 			DefLookupCacheHelper.BuildAll("CallAll");
+		}
+
+		private static void Postfix()
+		{
+			if (PlayDataLoader.Loaded)
+				DefLookupCacheHelper.QueueRebuild("static constructors completed");
 		}
 	}
 }

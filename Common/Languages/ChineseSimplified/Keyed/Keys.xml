@@ -297,10 +297,10 @@
 	<YaOpt.Setting.SubCategory.Startup>启动加速</YaOpt.Setting.SubCategory.Startup>
 	<YaOpt.Setting.Option.DefLookupCache>Def 查找索引</YaOpt.Setting.Option.DefLookupCache>
 	<YaOpt.Setting.Option.DefLookupCache.Desc>在所有 Def 加载完成后，为跨 Def 的配方与研究查询建立一次索引。物品的配方列表、配方的使用者列表、研究项目的解锁列表以及研究前置映射都从索引直接返回，不再每次扫描整个 Def 数据库；其他模组的启动构造器也能受益。索引会在每次加载时重建，并在 Def 数据销毁时丢弃。</YaOpt.Setting.Option.DefLookupCache.Desc>
-	<YaOpt.Setting.Option.DefLookupCache.Compatibility>当其他 Mod 补丁了被索引的查询，或存在重复的 Def 索引提供者时，本项会自动禁用。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
+	<YaOpt.Setting.Option.DefLookupCache.Compatibility>已确认的配方与研究结果补丁会纳入索引；未知查询补丁默认关闭本项，研究工具方法的外来补丁则逐方法回退原版；存在重复 Def 索引提供者时锁定关闭。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
 	<YaOpt.Setting.Option.BiomeAnimalIndex>生物群系动物索引</YaOpt.Setting.Option.BiomeAnimalIndex>
 	<YaOpt.Setting.Option.BiomeAnimalIndex.Desc>在所有 Def 加载完成后一次构建每个生物群系的野生动物列表与常见度表。原版每次访问都会全量扫描全部动物种类，而且惰性构建常见度表时遇到重复项会抛异常并留下不完整的表；此优化会合并重复项并保留较高的常见度。</YaOpt.Setting.Option.BiomeAnimalIndex.Desc>
-	<YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>当其他 Mod 补丁了 BiomeDef.AllWildAnimals 时，本项会自动禁用。</YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>
+	<YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>可能改变野生动物成员资格的补丁默认关闭本项；已确认的纯权重缩放保持兼容；存在重复 Def 索引提供者时锁定关闭。</YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>
 	<YaOpt.Setting.Option.GiddyUpOffsetCache>GiddyUp 绘制偏移缓存</YaOpt.Setting.Option.GiddyUpOffsetCache>
 	<YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>持久化 GiddyUp 每次启动都会重新计算的绘制偏移。GiddyUp 每次启动都会渲染并逐像素扫描每个生命阶段的贴图；本项会从校验过的文件恢复其会话缓存，只丢弃贴图发生变化的条目。</YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>
 	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>

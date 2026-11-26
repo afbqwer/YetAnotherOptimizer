@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using RimWorld;
 using Verse;
 using YaOpt.Defines;
+using YaOpt.Patches;
 using YaOpt.Settings;
 
 namespace YaOpt.Helpers
@@ -22,7 +24,7 @@ namespace YaOpt.Helpers
 
 		internal static bool CanUse(OptimizationOption option)
 		{
-			return option.Enabled && !YaOptGlobal.HasMod(DuplicateProviderModId);
+			return option != null && option.Enabled && !YaOptGlobal.HasMod(DuplicateProviderModId);
 		}
 
 		/// <summary>
@@ -33,11 +35,29 @@ namespace YaOpt.Helpers
 		{
 			CheckConflicts();
 
-			if (YaOptGlobal.Settings.OptDefLookupCache.Enabled)
+			if (CanUse(YaOptGlobal.Settings.OptDefLookupCache))
 				DefLookupIndex.Build(source);
 
-			if (YaOptGlobal.Settings.OptBiomeAnimalIndex.Enabled)
+			if (CanUse(YaOptGlobal.Settings.OptBiomeAnimalIndex))
 				BiomeAnimalIndex.Build();
+		}
+
+		internal static void InvalidateAll()
+		{
+			DefLookupIndex.Invalidate();
+			BiomeAnimalIndex.Invalidate();
+		}
+
+		internal static void QueueRebuild(string source)
+		{
+			LongEventHandler.QueueLongEvent(() =>
+			{
+				if (!PlayDataLoader.Loaded)
+					return;
+
+				InvalidateAll();
+				BuildAll(source);
+			}, "YaOpt.Loading.Patching".Translate(), false, null, false);
 		}
 
 		/// <summary>
@@ -53,26 +73,29 @@ namespace YaOpt.Helpers
 			{
 				changed |= HardBan(nameof(YaOptSettings.OptDefLookupCache), "重复的 Def 查找缓存 Mod");
 				changed |= HardBan(nameof(YaOptSettings.OptBiomeAnimalIndex), "重复的 Def 查找缓存 Mod");
+				changed |= HardBan(nameof(YaOptSettings.OptRecipeUsersCache), "重复的 Def 查找缓存 Mod");
 				changed |= HardBan(nameof(YaOptSettings.OptGiddyUpOffsetCache), "重复的 Def 查找缓存 Mod");
 				changed |= HardBan(nameof(YaOptSettings.OptExosuitXmlFast), "重复的 Def 查找缓存 Mod");
+				InvalidateAll();
 				return changed;
 			}
 
 			var reasons = new List<string>();
-			Collect(reasons,
+			CollectCompatible(reasons, IsCompatibleDefLookupPatch,
 				AccessTools.PropertyGetter(typeof(ThingDef), nameof(ThingDef.AllRecipes)),
 				AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers)),
 				AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.IsSurgery)),
-				AccessTools.PropertyGetter(typeof(ResearchProjectDef), nameof(ResearchProjectDef.UnlockedDefs)),
-				AccessTools.Method(typeof(ResearchPrerequisitesUtility),
-					nameof(ResearchPrerequisitesUtility.ComputeResearchPrerequisites)),
-				AccessTools.Method(typeof(ResearchPrerequisitesUtility),
-					nameof(ResearchPrerequisitesUtility.UnlockedDefsGroupedByPrerequisites)));
+				AccessTools.PropertyGetter(typeof(ResearchProjectDef), nameof(ResearchProjectDef.UnlockedDefs)));
 			if (reasons.Count > 0)
 				changed |= DefaultOff(nameof(YaOptSettings.OptDefLookupCache), reasons);
 
 			reasons = new List<string>();
-			Collect(reasons,
+			Collect(reasons, AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers)));
+			if (reasons.Count > 0)
+				changed |= DefaultOff(nameof(YaOptSettings.OptRecipeUsersCache), reasons);
+
+			reasons = new List<string>();
+			CollectCompatible(reasons, IsCompatibleBiomePatch,
 				AccessTools.PropertyGetter(typeof(BiomeDef), nameof(BiomeDef.AllWildAnimals)),
 				AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfAnimal)),
 				AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfPollutionAnimal)),
@@ -96,6 +119,9 @@ namespace YaOpt.Helpers
 
 			if (!YaOptGlobal.Settings.OptBiomeAnimalIndex.Enabled)
 				BiomeAnimalIndex.Invalidate();
+
+			if (!YaOptGlobal.Settings.OptRecipeUsersCache.Enabled)
+				Verse_RecipeDef_AllRecipeUsers.ClearCache();
 
 			return changed;
 		}
@@ -133,6 +159,53 @@ namespace YaOpt.Helpers
 				DefLookupIndex.Invalidate();
 			else if (settingId == nameof(YaOptSettings.OptBiomeAnimalIndex))
 				BiomeAnimalIndex.Invalidate();
+			else if (settingId == nameof(YaOptSettings.OptRecipeUsersCache))
+				Verse_RecipeDef_AllRecipeUsers.ClearCache();
+		}
+
+		private static bool IsCompatibleDefLookupPatch(MethodBase target, Patch patch)
+		{
+			var method = patch.PatchMethod;
+			if (target == null || method == null)
+				return false;
+
+			if (target == AccessTools.PropertyGetter(typeof(ThingDef), nameof(ThingDef.AllRecipes)))
+			{
+				return IsPatch(patch, "XeoNovaDan.CarpenterTable", "ThingDef_AllRecipes_Getter", "Prefix") ||
+					   IsPatch(patch, "XeoNovaDan.CarpenterTable", "ThingDef_AllRecipes_Getter", "Postfix") ||
+					   IsPatch(patch, "zal.xenobionicpatcher", "HarmonyPatches", "AllRecipes_Postfix");
+			}
+
+			if (target != AccessTools.PropertyGetter(typeof(ResearchProjectDef), nameof(ResearchProjectDef.UnlockedDefs)))
+				return false;
+
+			return IsPatch(patch, "com.Axolotl.rimworld.mod", "MoeLotlResearchProjectDefPatch", "Postfix") ||
+				   IsPatch(patch, "DMSE", "Patch_ResearchProjectDef_UnlockedDefs", "Postfix") ||
+				   IsPatch(patch, "Kikohi.PipeSystem", "ResearchProjectDef_UnlockedDefs_Patch", "Postfix") ||
+				   IsPatch(patch, "OskarPotocki.VEF",
+					   "VanillaExpandedFramework_ResearchProjectDef_UnlockedDefs_Patch", "Postfix") ||
+				   IsPatch(patch, "com.VQETheGenerator",
+					   "VanillaQuestsExpandedTheGenerator_ResearchProjectDef_UnlockedDefs_Patch", "Postfix");
+		}
+
+		private static bool IsPatch(Patch patch, string owner, string typeName, string methodName)
+		{
+			return patch.owner == owner && patch.PatchMethod?.DeclaringType?.Name == typeName &&
+				   patch.PatchMethod.Name == methodName;
+		}
+
+		private static bool IsCompatibleBiomePatch(MethodBase target, Patch patch)
+		{
+			return target == AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfAnimal)) &&
+				   IsPatch(patch, "com.alphaanimals", "AlphaAnimals_BiomeDef_CommonalityOfAnimal_Patch",
+					   "MultiplyAlphaAnimalCommonality");
+		}
+
+		private static void CollectCompatible(List<string> results, Func<MethodBase, Patch, bool> compatiblePatch,
+			params MethodBase[] targets)
+		{
+			for (var i = 0; i < targets.Length; i++)
+				PatchConflictGuard.CollectForeignConflicts(targets[i], true, results, compatiblePatch);
 		}
 
 		/// <summary>

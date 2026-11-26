@@ -24,12 +24,6 @@ namespace YaOpt.Patches.Early
 
 		internal static bool Patch(Harmony harmony)
 		{
-			if (!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptDefLookupCache) &&
-				!DefLookupCacheHelper.CanUse(YaOptGlobal.Settings.OptBiomeAnimalIndex))
-			{
-				return true;
-			}
-
 			var replacement = AccessTools.TypeByName(ReplacementType);
 			if (replacement == null)
 				return true;
@@ -41,7 +35,7 @@ namespace YaOpt.Patches.Early
 			// The iterator method is tiny and may be inlined into its caller; MoveNext is called for
 			// every constructor, long before the first one runs, and is not inlined.
 			var iterator = FindIterator(replacement);
-			patched |= TryPatch(harmony, iterator == null ? null : AccessTools.Method(iterator, "MoveNext"));
+			patched |= TryPatch(harmony, iterator == null ? null : AccessTools.Method(iterator, "MoveNext"), true);
 
 			if (!patched)
 			{
@@ -69,7 +63,7 @@ namespace YaOpt.Patches.Early
 			return null;
 		}
 
-		private static bool TryPatch(Harmony harmony, MethodInfo method)
+		private static bool TryPatch(Harmony harmony, MethodInfo method, bool withPostfix = false)
 		{
 			if (method == null)
 				return false;
@@ -77,7 +71,10 @@ namespace YaOpt.Patches.Early
 			try
 			{
 				harmony.Patch(method,
-					prefix: new HarmonyMethod(typeof(LoadingProgress_DefLookupBuild), nameof(Prefix)));
+					prefix: new HarmonyMethod(typeof(LoadingProgress_DefLookupBuild), nameof(Prefix)),
+					postfix: withPostfix
+						? new HarmonyMethod(typeof(LoadingProgress_DefLookupBuild), nameof(Postfix))
+						: null);
 				return true;
 			}
 			catch (Exception exception)
@@ -93,6 +90,12 @@ namespace YaOpt.Patches.Early
 				return;
 
 			DefLookupCacheHelper.BuildAll("Loading Progress constructor loop");
+		}
+
+		private static void Postfix(ref bool __result)
+		{
+			if (!__result && PlayDataLoader.Loaded)
+				DefLookupCacheHelper.QueueRebuild("Loading Progress constructors completed");
 		}
 	}
 }
