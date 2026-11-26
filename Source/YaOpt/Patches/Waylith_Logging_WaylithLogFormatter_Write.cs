@@ -32,7 +32,6 @@ namespace YaOpt.Patches
 		private static MethodBase _target;
 		private static FieldInfo _enableStackTracesField;
 		private static MethodInfo _logLevelGetter;
-		private static ConstructorInfo _stackTraceConstructor;
 		private static bool _warned;
 
 		private static bool Prepare()
@@ -75,11 +74,8 @@ namespace YaOpt.Patches
 				_enableStackTracesField = formatter.GetField("EnableStackTraces",
 					BindingFlags.Public | BindingFlags.Static);
 				_logLevelGetter = AccessTools.PropertyGetter(logEntryOpen.MakeGenericType(state), "LogLevel");
-				_stackTraceConstructor = AccessTools.Constructor(typeof(System.Diagnostics.StackTrace),
-					new[] { typeof(int), typeof(bool) });
 
-				if (_enableStackTracesField == null || _logLevelGetter == null ||
-					_stackTraceConstructor == null)
+				if (_enableStackTracesField == null || _logLevelGetter == null)
 				{
 					Warn("formatter stack-trace members were not found");
 					return false;
@@ -98,8 +94,7 @@ namespace YaOpt.Patches
 			IEnumerable<CodeInstruction> instructions, MethodBase original, ILGenerator generator)
 		{
 			var codes = new List<CodeInstruction>(instructions);
-			if (_enableStackTracesField == null || _logLevelGetter == null ||
-				_stackTraceConstructor == null)
+			if (_enableStackTracesField == null || _logLevelGetter == null)
 			{
 				Warn("formatter members are unresolved");
 				return codes;
@@ -108,8 +103,7 @@ namespace YaOpt.Patches
 			var anchor = -1;
 			for (var i = 0; i < codes.Count; i++)
 			{
-				if (codes[i].opcode == OpCodes.Ldsfld &&
-					Equals(codes[i].operand, _enableStackTracesField))
+				if (IsEnableStackTracesLoad(codes[i]))
 				{
 					anchor = i;
 					break;
@@ -143,8 +137,7 @@ namespace YaOpt.Patches
 			var limit = Math.Min(codes.Count, nullIndex + 9);
 			for (var i = nullIndex; i < limit; i++)
 			{
-				if (codes[i].opcode == OpCodes.Newobj &&
-					Equals(codes[i].operand, _stackTraceConstructor))
+				if (IsStackTraceConstructor(codes[i]))
 				{
 					constructorFound = true;
 					break;
@@ -180,6 +173,27 @@ namespace YaOpt.Patches
 			});
 
 			return codes;
+		}
+
+		private static bool IsEnableStackTracesLoad(CodeInstruction code)
+		{
+			if (code.opcode != OpCodes.Ldsfld || !(code.operand is FieldInfo field))
+				return false;
+
+			return field.Name == "EnableStackTraces" &&
+				field.DeclaringType?.FullName == "Waylith.Logging.WaylithLogFormatter";
+		}
+
+		private static bool IsStackTraceConstructor(CodeInstruction code)
+		{
+			if (code.opcode != OpCodes.Newobj || !(code.operand is ConstructorInfo constructor))
+				return false;
+
+			var parameters = constructor.GetParameters();
+			return constructor.DeclaringType == typeof(System.Diagnostics.StackTrace) &&
+				parameters.Length == 2 &&
+				parameters[0].ParameterType == typeof(int) &&
+				parameters[1].ParameterType == typeof(bool);
 		}
 
 		private static void Warn(string message)
