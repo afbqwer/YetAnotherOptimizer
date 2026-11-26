@@ -181,8 +181,8 @@
 	<YaOpt.Setting.Option.FastListerRemove.Compatibility>與[WG] WOWGAG's Performance Patch、GUIPerformancePatch的「加快物品清單移除」（Tick標籤頁）重複，對方生效時本項會整體停用。本項的索引查找快於對方的清單末尾掃描，建議關掉對方那項並重新啟動以啟用本項。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物體快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>為地圖的已生成物體容器建立索引，使 DeSpawn 時的移除從「線性查找 + 列表搬移」變為 O(1) 的字典查找與交換移除。索引按需構建，若檢測到索引與列表不一致會自動回退原版邏輯。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
-	<YaOpt.Setting.Option.GenTypesLockFree>無鎖密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>
-	<YaOpt.Setting.Option.GenTypesLockFree.Desc>將 GenTypes.IsSealedWithCache 中的全域鎖替換為並行字典。ThingWithComps.GetComp 在查找不存在的組件時會走到這個方法；Type.IsSealed 在執行期不會改變，因此快取無需失效。</YaOpt.Setting.Option.GenTypesLockFree.Desc>
+	<YaOpt.Setting.Option.GenTypesLockFree>直接密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>
+	<YaOpt.Setting.Option.GenTypesLockFree.Desc>直接讀取 Type.IsSealed，移除原版的全域鎖和快取查詢。ThingWithComps.GetComp 在組件類型未命中時使用該結果，若 T 為密封類型便跳過掃描。</YaOpt.Setting.Option.GenTypesLockFree.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache>角色標籤快取</YaOpt.Setting.Option.PawnLabelCache>
 	<YaOpt.Setting.Option.PawnLabelCache.Desc>短時間快取角色的名字標籤及其測量寬度。原版對每個正在渲染的角色每幀至少構造兩次標籤字串並重新量寬；快取每 60 幀刷新一次，改名最多只會有很小的延遲。</YaOpt.Setting.Option.PawnLabelCache.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache.Compatibility>有其他Mod改寫角色標籤（文字或寬度）時可能出現顯示異常，此時關閉本項。</YaOpt.Setting.Option.PawnLabelCache.Compatibility>
