@@ -694,6 +694,27 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caches <see cref="StatDefOf.Nutrition"/> for 20 ticks inside
+		/// <see cref="FoodUtility.NutritionForEater"/>.
+		/// </summary>
+		/// <remarks>
+		/// Every AI food search evaluates each candidate food's Nutrition through
+		/// <see cref="FoodUtility.NutritionForEater"/>, and vanilla re-runs the full stat pipeline
+		/// every time. Nutrition is already cacheable in vanilla, so this only supplies the interval.
+		/// The eater's <see cref="StatDefOf.RawNutritionFactor"/> lookup is left uncached. A dynamic
+		/// nutrition change may take up to 20 ticks to affect food choice.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_FoodUtility_NutritionForEater"/>
+		public OptimizationOption OptNutritionStatCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.NutritionStatCache",
+			Desc = "YaOpt.Setting.Option.NutritionStatCache.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.NutritionStatCache.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Indexes <see cref="DrugPolicy"/> entry lookups and reuses the scheduled-drug job givers'
 		/// priorities within one tick.
 		/// </summary>

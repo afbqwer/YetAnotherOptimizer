@@ -239,6 +239,9 @@
 	<YaOpt.Setting.Option.ImmunityStatCache>免疫獲取速度屬性快取</YaOpt.Setting.Option.ImmunityStatCache>
 	<YaOpt.Setting.Option.ImmunityStatCache.Desc>將 ImmunityGainSpeed 快取20 tick。每條免疫記錄在每個健康間隔都會重新求值一次該屬性，儘管它很少變化。食物、休息、床、休息狀態或年齡變化最多需要20 tick（約三分之一秒）才會反映到免疫獲取速度上。</YaOpt.Setting.Option.ImmunityStatCache.Desc>
 	<YaOpt.Setting.Option.ImmunityStatCache.Compatibility>如果某個模組要求食物、休息、床、休息狀態或年齡變化後免疫獲取速度立即更新，請關閉此項。</YaOpt.Setting.Option.ImmunityStatCache.Compatibility>
+	<YaOpt.Setting.Option.NutritionStatCache>食物營養值屬性快取</YaOpt.Setting.Option.NutritionStatCache>
+	<YaOpt.Setting.Option.NutritionStatCache.Desc>在 FoodUtility.NutritionForEater 內將 Nutrition 屬性快取20 tick，所有 AI 尋食都會經過這裡。原版會為每個殖民者的每次掃描重新求值每個候選食物的營養值。進食者的 RawNutritionFactor 仍然每次單獨求值。模組對營養值的動態修改最多需要20 tick 才會影響尋食結果。</YaOpt.Setting.Option.NutritionStatCache.Desc>
+	<YaOpt.Setting.Option.NutritionStatCache.Compatibility>如果某個模組會在遊戲過程中改變食物營養值並要求尋食立即看到變化，請關閉此項。</YaOpt.Setting.Option.NutritionStatCache.Compatibility>
 	<YaOpt.Setting.Option.DrugPolicyCache>藥物策略快取</YaOpt.Setting.Option.DrugPolicyCache>
 	<YaOpt.Setting.Option.DrugPolicyCache.Desc>將藥物策略條目的線性查找改為索引查找，並在同一 tick 內重用排程用藥 JobGiver 的優先級結果。藥物定義較多時，原版每次選 job 都會讓這兩個 JobGiver 反覆掃描整張策略表。命中時會驗證策略是否被修改，因此藥物策略介面的改動立即生效。</YaOpt.Setting.Option.DrugPolicyCache.Desc>
 	<YaOpt.Setting.Option.DrugPolicyCache.Compatibility>如果有模組改寫藥物策略條目查找或這兩個 JobGiver 的優先級邏輯，請關閉此項。</YaOpt.Setting.Option.DrugPolicyCache.Compatibility>
