@@ -93,6 +93,14 @@ namespace YaOpt.Helpers
 			pawn.apparel.DestroyAll();
 			pawn.outfits?.forcedHandler?.Reset();
 
+			if (PawnGearRebuildCompat.RequiresTopUpWearValidation)
+			{
+				if (_topUpWearable == null)
+					_topUpWearable = new Dictionary<ThingDef, bool>();
+				else
+					_topUpWearable.Clear();
+			}
+
 			var environment = PawnGearEnvironment.Resolve(pawn, request,
 				YaOptGlobal.Settings?.OptPawnGearEnvironment.Enabled == true);
 			var money = pawn.kindDef.apparelMoney.RandomInRange;
@@ -251,6 +259,9 @@ namespace YaOpt.Helpers
 
 		[ThreadStatic]
 		private static HashSet<BodyPartGroupDef> _wearableGroups;
+
+		[ThreadStatic]
+		private static Dictionary<ThingDef, bool> _topUpWearable;
 
 		/// <summary>
 		/// Wears the constructed set without running the vanilla per-item overlap scan.
@@ -728,6 +739,16 @@ namespace YaOpt.Helpers
 			}
 		}
 
+		private static bool CanWearForTopUp(ThingDef def, Pawn pawn)
+		{
+			if (_topUpWearable.TryGetValue(def, out var allowed))
+				return allowed;
+
+			allowed = def.apparel.PawnCanWear(pawn, ignoreGender: true);
+			_topUpWearable[def] = allowed;
+			return allowed;
+		}
+
 		private static void BuildWarmCandidates(Pawn pawn)
 		{
 			WarmTorsoCandidates.Clear();
@@ -744,6 +765,8 @@ namespace YaOpt.Helpers
 				if (!apparel.canBeGeneratedToSatisfyWarmth
 					|| pair.InsulationCold <= 0f
 					|| !apparel.CorrectAgeForWearing(pawn)
+					|| (PawnGearRebuildCompat.RequiresTopUpWearValidation
+						&& !CanWearForTopUp(pair.thing, pawn))
 					|| !CorrectFactionForWarmth(homeFaction, pair.thing))
 				{
 					continue;
@@ -800,7 +823,9 @@ namespace YaOpt.Helpers
 				if (!apparel.canBeGeneratedToSatisfyToxicEnvironmentResistance
 					|| pair.ToxicEnvironmentResistance <= 0.25f
 					|| pair.Price > cap
-					|| !apparel.CorrectAgeForWearing(pawn))
+					|| !apparel.CorrectAgeForWearing(pawn)
+					|| (PawnGearRebuildCompat.RequiresTopUpWearValidation
+						&& !CanWearForTopUp(pair.thing, pawn)))
 				{
 					continue;
 				}
@@ -896,7 +921,9 @@ namespace YaOpt.Helpers
 				if (!apparel.canBeGeneratedToSatisfyVacuumResistance
 					|| pair.VacuumResistance < 0.1f
 					|| pair.Price > cap
-					|| !apparel.CorrectAgeForWearing(pawn))
+					|| !apparel.CorrectAgeForWearing(pawn)
+					|| (PawnGearRebuildCompat.RequiresTopUpWearValidation
+						&& !CanWearForTopUp(pair.thing, pawn)))
 				{
 					continue;
 				}

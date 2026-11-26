@@ -1006,9 +1006,9 @@ namespace YaOpt
 		/// selection evaluates every candidate twice; the replacement draws from a single weighted
 		/// pass. Output is no longer identical to vanilla per seed, but mutual exclusivity, budget,
 		/// required items, race restrictions and naked rules are preserved. Disabled by default. With
-		/// Humanoid Alien Races loaded this neutralises its pool patches and filters per race instead;
-		/// if any HAR gear patch cannot be found, or another mod patches the generation methods, the
-		/// option disables itself and falls back to vanilla with HAR unchanged.
+		/// Humanoid Alien Races loaded this neutralises its pool patches and filters per race instead.
+		/// Passer Race's apparel context runs before the rewrite, known gear postfixes still execute, and
+		/// unknown generation patches make the option default to off.
 		/// </remarks>
 		/// <seealso cref="Patches.RimWorld_PawnApparelGenerator_GenerateStartingApparelFor_Rebuild"/>
 		/// <seealso cref="Patches.RimWorld_PawnWeaponGenerator_TryGenerateWeaponFor_Rebuild"/>

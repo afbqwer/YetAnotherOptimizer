@@ -11,14 +11,14 @@ namespace YaOpt.Patches
 	/// selection in <see cref="PawnGearRebuild"/>.
 	/// </summary>
 	/// <remarks>
-	/// Runs at the highest prefix priority so HAR's pool-filtering prefix, which is neutralised anyway,
-	/// never executes before the replacement body. On a runtime failure the rewrite disables itself; this
-	/// prefix then lets the original method and HAR's own prefixes run again.
+	/// Runs before Passer Race's generation context so its HAR apparel restriction scope remains active.
+	/// The rewrite skips the original body while postfixes and Passer's finalizer still run.
 	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptPawnGearRebuild"/>
 	/// <seealso cref="PawnGearRebuildCompat"/>
 	[HarmonyPatch(typeof(PawnApparelGenerator), nameof(PawnApparelGenerator.GenerateStartingApparelFor))]
 	[HarmonyPriority(Priority.First)]
+	[HarmonyBefore(PawnGearRebuildCompat.PasserHarmonyId)]
 	internal static class RimWorld_PawnApparelGenerator_GenerateStartingApparelFor_Rebuild
 	{
 		static bool Prepare()

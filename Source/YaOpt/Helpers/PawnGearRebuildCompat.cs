@@ -10,15 +10,13 @@ namespace YaOpt.Helpers
 {
 	/// <summary>
 	/// Decides whether the constructive pawn gear rewrite can replace the vanilla generation methods,
-	/// and locates the Humanoid Alien Races patch methods that have to be neutralised first.
+	/// and locates foreign patches that need neutralising or explicit ordering.
 	/// </summary>
 	/// <remarks>
-	/// Replacing the two generation methods bypasses every other patch on them, so any foreign patch
-	/// disables the option unless it belongs to the known HAR gear patches, which are neutralised. HAR's
-	/// patch surface is all-or-nothing: if any of its four gear patch methods is missing, the pools it
-	/// builds and restores would get out of sync and corrupt the shared pair lists, so the option is
-	/// disabled and vanilla plus HAR run unchanged. The check runs on every patch attempt before patches
-	/// are applied, and a runtime failure also falls back for the rest of the session.
+	/// Prefixes and transpilers can be bypassed by the rewrite, while postfixes still run. Unknown
+	/// patches disable the option; HAR's pool patches are neutralised, Passer Race's generation context
+	/// runs first, and known gear postfixes are preserved without runtime reflection. Top-up wear
+	/// checks are memoized per Pawn only when a foreign wearable check is present.
 	/// </remarks>
 	/// <seealso cref="YaOpt.YaOptSettings.OptPawnGearRebuild"/>
 	/// <seealso cref="Patches.Compatibility.HumanoidAlienRaces.AlienRace_PawnGearNeutralizer"/>
@@ -30,6 +28,18 @@ namespace YaOpt.Helpers
 		private const string HarPatchesType = "AlienRace.HarmonyPatches";
 
 		private const string HarRestrictionsType = "AlienRace.RaceRestrictionSettings";
+
+		internal const string PasserHarmonyId = "passerrace.final";
+
+		private const string PasserApparelType = "PasserRace.PAS_ApparelCompatibility";
+
+		private enum PatchRole
+		{
+			Transpiler,
+			Prefix,
+			Postfix,
+			Finalizer
+		}
 
 		/// <summary>
 		/// HAR's only other patch on the replaced methods. It injects pool restore calls into the
@@ -51,6 +61,10 @@ namespace YaOpt.Helpers
 
 		private static MethodInfo[] _harPatchMethods;
 
+		private static MethodInfo[] _passerPatchMethods;
+
+		private static bool _requiresTopUpWearValidation;
+
 		/// <summary>
 		/// True when the rewrite is enabled and all compatibility checks passed for this patch cycle.
 		/// </summary>
@@ -69,11 +83,15 @@ namespace YaOpt.Helpers
 
 		internal static MethodInfo[] HarPatchMethods => _harPatchMethods;
 
+		internal static bool RequiresTopUpWearValidation => _requiresTopUpWearValidation;
+
 		internal static void Refresh()
 		{
 			_ready = false;
 			_canSkipWear = false;
 			_harPatchMethods = null;
+			_passerPatchMethods = null;
+			_requiresTopUpWearValidation = false;
 
 			var option = YaOptGlobal.Settings?.OptPawnGearRebuild;
 			var apparelMethod = AccessTools.Method(typeof(PawnApparelGenerator),
@@ -94,12 +112,17 @@ namespace YaOpt.Helpers
 			}
 			else
 			{
+				_passerPatchMethods = FindPasserGearPatches(apparelMethod);
 				var reasons = new List<string>();
 				CollectForeignConflicts(apparelMethod, reasons);
 				CollectForeignConflicts(weaponMethod, reasons);
 				if (reasons.Count > 0)
 					ReportConflict(reasons);
 			}
+
+			_requiresTopUpWearValidation = PatchConflictGuard.HasForeignPatch(
+				AccessTools.Method(typeof(ApparelProperties), nameof(ApparelProperties.PawnCanWear),
+					new[] { typeof(Pawn), typeof(bool) }));
 
 			if (option == null || !option.Enabled || apparelMethod == null || weaponMethod == null)
 			{
@@ -208,6 +231,9 @@ namespace YaOpt.Helpers
 			result[1] = FindHarPatch(apparelInfo.Postfixes, HarGearPatchNames[1]);
 			result[2] = FindHarPatch(weaponInfo.Prefixes, HarGearPatchNames[2]);
 			result[3] = FindHarPatch(weaponInfo.Postfixes, HarGearPatchNames[3]);
+			// Current HAR builds expose the cleanup postfix under its original method name.
+			if (result[3] == null)
+				result[3] = FindHarPatch(weaponInfo.Postfixes, "TryGenerateWeaponForPostfix");
 
 			for (var i = 0; i < result.Length; i++)
 			{
@@ -235,6 +261,47 @@ namespace YaOpt.Helpers
 			return method.DeclaringType?.Assembly.GetName().Name == "AlienRace";
 		}
 
+		private static MethodInfo[] FindPasserGearPatches(MethodBase apparelMethod)
+		{
+			var info = Harmony.GetPatchInfo(apparelMethod);
+			if (info == null)
+				return null;
+
+			Patch prefix = null;
+			Patch finalizer = null;
+			for (var i = 0; i < info.Prefixes.Count; i++)
+			{
+				var patch = info.Prefixes[i];
+				if (patch.owner == PasserHarmonyId
+					&& patch.PatchMethod.DeclaringType?.FullName == PasserApparelType
+					&& patch.PatchMethod.Name == "GenerationPrefix")
+				{
+					prefix = patch;
+					break;
+				}
+			}
+
+			if (prefix == null)
+				return null;
+
+			for (var i = 0; i < info.Finalizers.Count; i++)
+			{
+				var patch = info.Finalizers[i];
+				if (patch.owner == PasserHarmonyId
+					&& patch.PatchMethod.DeclaringType?.FullName == PasserApparelType
+					&& patch.PatchMethod.Name == "GenerationFinalizer")
+				{
+					finalizer = patch;
+					break;
+				}
+			}
+
+			if (finalizer == null || prefix.priority != Priority.First || finalizer.priority != Priority.Last)
+				return null;
+
+			return new[] { prefix.PatchMethod, finalizer.PatchMethod };
+		}
+
 		private static void CollectForeignConflicts(MethodBase target, List<string> results)
 		{
 			if (target == null || YaOptMod.Instance == null)
@@ -250,31 +317,40 @@ namespace YaOpt.Helpers
 
 			foreach (var patch in info.Transpilers)
 			{
-				if (IsForeign(patch, harmonyId, earlyId))
+				if (IsForeign(patch, harmonyId, earlyId, PatchRole.Transpiler))
 					results.Add(patch.owner + " (transpiler) → " + targetName);
 			}
 
 			foreach (var patch in info.Prefixes)
 			{
-				if (IsForeign(patch, harmonyId, earlyId))
+				if (IsForeign(patch, harmonyId, earlyId, PatchRole.Prefix))
 					results.Add(patch.owner + " (prefix) → " + targetName);
 			}
 
 			foreach (var patch in info.Postfixes)
 			{
-				if (IsForeign(patch, harmonyId, earlyId))
+				if (IsForeign(patch, harmonyId, earlyId, PatchRole.Postfix))
 					results.Add(patch.owner + " (postfix) → " + targetName);
+			}
+
+			foreach (var patch in info.Finalizers)
+			{
+				if (IsForeign(patch, harmonyId, earlyId, PatchRole.Finalizer))
+					results.Add(patch.owner + " (finalizer) → " + targetName);
 			}
 		}
 
-		private static bool IsForeign(Patch patch, string harmonyId, string earlyId)
+		private static bool IsForeign(Patch patch, string harmonyId, string earlyId, PatchRole role)
 		{
 			if (patch.owner == harmonyId || patch.owner == earlyId)
 				return false;
 
 			var method = patch.PatchMethod;
-			if (IsAlienRace(method) && method.Name == HarWeaponTranspilerName)
+			if (role == PatchRole.Transpiler && IsAlienRace(method)
+				&& method.Name == HarWeaponTranspilerName)
+			{
 				return false;
+			}
 
 			if (_harPatchMethods != null)
 			{
@@ -285,7 +361,38 @@ namespace YaOpt.Helpers
 				}
 			}
 
-			return true;
+			if (_passerPatchMethods != null)
+			{
+				if (role == PatchRole.Prefix && _passerPatchMethods[0] == method)
+					return false;
+				if (role == PatchRole.Finalizer && _passerPatchMethods[1] == method)
+					return false;
+			}
+
+			return role != PatchRole.Postfix || !IsKnownGearPostfix(patch);
+		}
+
+		private static bool IsKnownGearPostfix(Patch patch)
+		{
+			var method = patch.PatchMethod;
+			var type = method.DeclaringType?.FullName;
+			switch (patch.owner)
+			{
+				case "wowgag.EvolvingEnemyStrongholds":
+					return type == "EvolvingEnemyStrongholds.Patch_StripLeakedCommanderGear"
+						&& method.Name == "Postfix";
+				case "Fortified":
+					return type == "Fortified.Patch_PawnWeaponGenerator_TryGenerateWeaponFor"
+						&& method.Name == "Postfix";
+				case "DMSSR":
+					return type == "DMSSR.Bosses.Bullfrog.Patch_DendroFixedPrimaryWeapon"
+						&& method.Name == "Postfix";
+				case "OskarPotocki.VEF":
+					return type == "VEF.Apparels.Patch_PawnApparelGenerator"
+						&& method.Name == "GenerateStartingApparelFor_Postfix";
+				default:
+					return false;
+			}
 		}
 
 		/// <summary>
