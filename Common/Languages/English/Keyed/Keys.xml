@@ -332,6 +332,9 @@
 	<YaOpt.Setting.Option.RoomStatsThrottle>Room Stats Interval</YaOpt.Setting.Option.RoomStatsThrottle>
 	<YaOpt.Setting.Option.RoomStatsThrottle.Desc>Limits a room to one stats and role recompute every 128 ticks. Vanilla recomputes as soon as the room is read after any item inside it spawns or despawns, and each recompute runs every room stat and room role worker, so a busy stockpile can trigger it several times per second. Reads in between return the previous values.</YaOpt.Setting.Option.RoomStatsThrottle.Desc>
 	<YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>Room stats, the room role label and mood thoughts based on the room can lag by up to about two seconds. Turn this off if a mod relies on room stats changing instantly, for example on prison cell conversion.</YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>
+	<YaOpt.Setting.Option.AlertThrottle>Alert Update Throttling</YaOpt.Setting.Option.AlertThrottle>
+	<YaOpt.Setting.Option.AlertThrottle.Desc>Measures how long each alert's recalculation takes and schedules it by cost. Cheap alerts keep the vanilla cadence; expensive ones are checked less often, at most once every 15 seconds (High priority once every 5 seconds). Critical alerts are never delayed. The first few seconds after a game loads are used to learn the costs.</YaOpt.Setting.Option.AlertThrottle.Desc>
+	<YaOpt.Setting.Option.AlertThrottle.Compatibility>Alerts can appear or disappear up to one scheduling interval late. Mods that already replace AlertsReadoutUpdate (performance analyzers or other alert throttlers) may prevent this patch from applying; a YaOpt warning is written to the log when that happens.</YaOpt.Setting.Option.AlertThrottle.Compatibility>
 	<YaOpt.Setting.Tab.Main>All</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

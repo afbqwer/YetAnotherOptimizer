@@ -896,6 +896,28 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Schedules alert recalculations by their measured cost instead of the fixed 24-frame stride.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla recalculates every alert on a 24-frame stride, so an alert whose <c>GetReport()</c>
+		/// walks the whole map pays that cost 2.5 times per second. This option measures each alert and
+		/// stretches only the expensive ones: cheap alerts keep the vanilla cadence, expensive ones are
+		/// retried every few seconds up to once per 15 seconds, and <c>AlertPriority.Critical</c> alerts
+		/// are never delayed. The first few seconds after a game loads are an exploration window per
+		/// alert. The quest, precept, scenario and action-delay alert blocks are not throttled.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_AlertsReadout_AlertsReadoutUpdate"/>
+		/// <seealso cref="Helpers.AlertThrottleHelper"/>
+		public OptimizationOption OptAlertThrottle { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.AlertThrottle",
+			Desc = "YaOpt.Setting.Option.AlertThrottle.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.AlertThrottle.Compatibility",
+			Category = OptimizationCategory.Fps,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Limits how often a room recomputes its stats and role after something inside it changed.
 		/// </summary>
 		/// <remarks>
