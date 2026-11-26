@@ -44,6 +44,19 @@ namespace YaOpt.Settings
 			}
 		}
 
+		/// <summary>
+		/// Turns the option off as its default because a foreign patch was detected. Unlike a ban the
+		/// player can still enable it, so the default is lowered without locking the checkbox.
+		/// </summary>
+		internal void SetDefaultOff()
+		{
+			if (IsLockedOff)
+				return;
+
+			_default = false;
+			_enabled = false;
+		}
+
 		public string Name { get; set; } = string.Empty;
 
 		public string Desc { get; set; } = string.Empty;

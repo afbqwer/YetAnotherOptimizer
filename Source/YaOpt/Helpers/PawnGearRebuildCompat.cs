@@ -76,68 +76,34 @@ namespace YaOpt.Helpers
 			_harPatchMethods = null;
 
 			var option = YaOptGlobal.Settings?.OptPawnGearRebuild;
-			if (option == null || !option.Enabled)
-			{
-				PawnGearPools.Configure(null, null);
-				return;
-			}
-
 			var apparelMethod = AccessTools.Method(typeof(PawnApparelGenerator),
 				nameof(PawnApparelGenerator.GenerateStartingApparelFor));
 			var weaponMethod = AccessTools.Method(typeof(PawnWeaponGenerator),
 				nameof(PawnWeaponGenerator.TryGenerateWeaponFor));
+
+			// Detect even when the option is off so the settings can show the reason and apply the
+			// default. A concrete HAR incompatibility is a hard ban and leaves nothing to run.
 			if (apparelMethod == null || weaponMethod == null)
 			{
-				Ban("找不到装备生成方法");
-				return;
+				ReportConflict("找不到装备生成方法");
 			}
-
-			var harPatches = AccessTools.TypeByName(HarPatchesType);
-			var harRestrictions = AccessTools.TypeByName(HarRestrictionsType);
-			if (harPatches != null || harRestrictions != null)
+			else if (!CheckHar(apparelMethod, weaponMethod))
 			{
-				if (harPatches == null || harRestrictions == null)
-				{
-					Ban("HAR 类型不完整");
-					return;
-				}
-
-				var canWear = AccessTools.Method(harRestrictions, "CanWear",
-					new[] { typeof(ThingDef), typeof(ThingDef) });
-				var canEquip = AccessTools.Method(harRestrictions, "CanEquip",
-					new[] { typeof(ThingDef), typeof(ThingDef) });
-				if (canWear == null || canEquip == null)
-				{
-					Ban("HAR 种族限制方法缺失");
-					return;
-				}
-
-				var canWearDelegate = AccessTools.MethodDelegate<Func<ThingDef, ThingDef, bool>>(canWear);
-				var canEquipDelegate = AccessTools.MethodDelegate<Func<ThingDef, ThingDef, bool>>(canEquip);
-				if (canWearDelegate == null || canEquipDelegate == null)
-				{
-					Ban("HAR 种族限制方法无法绑定");
-					return;
-				}
-
-				PawnGearPools.Configure(canWearDelegate, canEquipDelegate);
-
-				_harPatchMethods = FindHarGearPatches(apparelMethod, weaponMethod);
-				if (_harPatchMethods == null)
-				{
-					Ban("HAR 装备补丁面不完整");
-					return;
-				}
+				PawnGearPools.Configure(null, null);
+				return;
 			}
 			else
 			{
-				PawnGearPools.Configure(null, null);
+				var reasons = new List<string>();
+				CollectForeignConflicts(apparelMethod, reasons);
+				CollectForeignConflicts(weaponMethod, reasons);
+				if (reasons.Count > 0)
+					ReportConflict(reasons);
 			}
 
-			var conflict = FindForeignConflict(apparelMethod) ?? FindForeignConflict(weaponMethod);
-			if (conflict != null)
+			if (option == null || !option.Enabled || apparelMethod == null || weaponMethod == null)
 			{
-				Ban("其他 Mod 补丁：" + conflict);
+				PawnGearPools.Configure(null, null);
 				return;
 			}
 
@@ -145,6 +111,56 @@ namespace YaOpt.Helpers
 			_canSkipWear = CanReplaceWear();
 			if (!_canSkipWear)
 				YaOptMod.Debug("OptPawnGearRebuild: vanilla wear path kept, a foreign patch touches it or HasPartsToWear");
+		}
+
+		/// <summary>
+		/// Checks the Humanoid Alien Races patch surface and neutralises its gear patches. Returns
+		/// false when HAR is present but incomplete, which disables the rewrite entirely.
+		/// </summary>
+		private static bool CheckHar(MethodBase apparelMethod, MethodBase weaponMethod)
+		{
+			var harPatches = AccessTools.TypeByName(HarPatchesType);
+			var harRestrictions = AccessTools.TypeByName(HarRestrictionsType);
+			if (harPatches == null && harRestrictions == null)
+			{
+				PawnGearPools.Configure(null, null);
+				return true;
+			}
+
+			if (harPatches == null || harRestrictions == null)
+			{
+				HardBan("HAR 类型不完整");
+				return false;
+			}
+
+			var canWear = AccessTools.Method(harRestrictions, "CanWear",
+				new[] { typeof(ThingDef), typeof(ThingDef) });
+			var canEquip = AccessTools.Method(harRestrictions, "CanEquip",
+				new[] { typeof(ThingDef), typeof(ThingDef) });
+			if (canWear == null || canEquip == null)
+			{
+				HardBan("HAR 种族限制方法缺失");
+				return false;
+			}
+
+			var canWearDelegate = AccessTools.MethodDelegate<Func<ThingDef, ThingDef, bool>>(canWear);
+			var canEquipDelegate = AccessTools.MethodDelegate<Func<ThingDef, ThingDef, bool>>(canEquip);
+			if (canWearDelegate == null || canEquipDelegate == null)
+			{
+				HardBan("HAR 种族限制方法无法绑定");
+				return false;
+			}
+
+			PawnGearPools.Configure(canWearDelegate, canEquipDelegate);
+
+			_harPatchMethods = FindHarGearPatches(apparelMethod, weaponMethod);
+			if (_harPatchMethods == null)
+			{
+				HardBan("HAR 装备补丁面不完整");
+				return false;
+			}
+
+			return true;
 		}
 
 		/// <summary>
@@ -219,37 +235,36 @@ namespace YaOpt.Helpers
 			return method.DeclaringType?.Assembly.GetName().Name == "AlienRace";
 		}
 
-		private static string FindForeignConflict(MethodBase target)
+		private static void CollectForeignConflicts(MethodBase target, List<string> results)
 		{
 			if (target == null || YaOptMod.Instance == null)
-				return null;
+				return;
 
 			var info = Harmony.GetPatchInfo(target);
 			if (info == null)
-				return null;
+				return;
 
 			var harmonyId = YaOptMod.Instance.Harmony.Id;
 			var earlyId = YaOptMod.Instance.EarlyHarmony.Id;
+			var targetName = target.DeclaringType?.Name + "." + target.Name;
 
 			foreach (var patch in info.Transpilers)
 			{
 				if (IsForeign(patch, harmonyId, earlyId))
-					return patch.owner + " (transpiler)";
+					results.Add(patch.owner + " (transpiler) → " + targetName);
 			}
 
 			foreach (var patch in info.Prefixes)
 			{
 				if (IsForeign(patch, harmonyId, earlyId))
-					return patch.owner + " (prefix)";
+					results.Add(patch.owner + " (prefix) → " + targetName);
 			}
 
 			foreach (var patch in info.Postfixes)
 			{
 				if (IsForeign(patch, harmonyId, earlyId))
-					return patch.owner + " (postfix)";
+					results.Add(patch.owner + " (postfix) → " + targetName);
 			}
-
-			return null;
 		}
 
 		private static bool IsForeign(Patch patch, string harmonyId, string earlyId)
@@ -273,13 +288,31 @@ namespace YaOpt.Helpers
 			return true;
 		}
 
-		private static void Ban(string reason)
+		/// <summary>
+		/// A foreign patch (or missing vanilla method) disables the rewrite by default. The player may
+		/// still enable it, in which case the rewrite runs over the other patch.
+		/// </summary>
+		private static void ReportConflict(string reason)
+		{
+			CompatibilityDefines.PatchConflict(SettingId, reason);
+			YaOptMod.Warning("OptPawnGearRebuild disabled by default: " + reason);
+		}
+
+		private static void ReportConflict(IReadOnlyList<string> reasons)
+		{
+			CompatibilityDefines.PatchConflict(SettingId, reasons);
+			YaOptMod.Warning("OptPawnGearRebuild disabled by default: " + string.Join(", ", reasons));
+		}
+
+		/// <summary>
+		/// A concrete Humanoid Alien Races incompatibility that makes the rewrite unsafe.
+		/// </summary>
+		private static void HardBan(string reason)
 		{
 			_ready = false;
 			_harPatchMethods = null;
-			if (CompatibilityDefines.CachedBannedOptimizations.Add(SettingId))
-				CompatibilityDefines.CachedBannedBy[SettingId] = reason;
-			YaOptMod.Warning("OptPawnGearRebuild disabled: " + reason);
+			CompatibilityDefines.Ban(SettingId, reason);
+			YaOptMod.Warning("OptPawnGearRebuild banned: " + reason);
 		}
 	}
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using Verse;
@@ -30,7 +31,7 @@ namespace YaOpt.Helpers
 			var fish = PerformanceFishReason();
 			if (fish != null)
 			{
-				changed |= Ban(nameof(YaOptSettings.OptGasGridTick), fish);
+				changed |= HardBan(nameof(YaOptSettings.OptGasGridTick), fish);
 			}
 
 			changed |= Check(nameof(YaOptSettings.OptGasGridTick), GasTargets());
@@ -70,6 +71,7 @@ namespace YaOpt.Helpers
 
 		private static bool Check(string settingId, MethodInfo[] targets)
 		{
+			var reasons = new List<string>();
 			foreach (var target in targets)
 			{
 				if (target == null)
@@ -77,85 +79,37 @@ namespace YaOpt.Helpers
 					continue;
 				}
 
-				var conflict = FindForeignConflict(target);
-				if (conflict == null)
-				{
-					continue;
-				}
-
-				var changed = Ban(settingId, "其他 Mod 补丁：" + conflict + " → " +
-										  target.DeclaringType?.Name + "." + target.Name);
-				YaOptMod.Warning($"{settingId} disabled: {conflict} patches " +
-								 $"{target.DeclaringType?.FullName}.{target.Name}.");
-				return changed;
+				PatchConflictGuard.CollectForeignConflicts(target, includeAll: false, reasons);
 			}
 
-			return false;
+			if (reasons.Count == 0)
+			{
+				return false;
+			}
+
+			var changed = DefaultOff(settingId, reasons);
+			YaOptMod.Warning($"{settingId} disabled by default: {string.Join(", ", reasons)}");
+			return changed;
 		}
 
-		/// <summary>
-		/// Only conflicts that would silently change behaviour count: a transpiler rewrites the body we
-		/// replace or bypass, and a boolean prefix at or below our priority can either short-circuit us
-		/// or be short-circuited by our replacement.
-		/// </summary>
-		/// <remarks>
-		/// Pure instrumentation coexists: postfixes always run, and a prefix above priority 400 (for
-		/// example GPP's probes at 600/800) runs before ours. That keeps profiling mods usable.
-		/// </remarks>
-		private static string FindForeignConflict(MethodBase target)
-		{
-			var info = Harmony.GetPatchInfo(target);
-			if (info == null)
-			{
-				return null;
-			}
-
-			var mod = YaOptMod.Instance;
-			if (mod == null)
-			{
-				return null;
-			}
-
-			var harmonyId = mod.Harmony.Id;
-			var earlyId = mod.EarlyHarmony.Id;
-
-			foreach (var patch in info.Transpilers)
-			{
-				if (patch.owner != harmonyId && patch.owner != earlyId)
-				{
-					return patch.owner + " (transpiler)";
-				}
-			}
-
-			foreach (var patch in info.Prefixes)
-			{
-				if (patch.owner == harmonyId || patch.owner == earlyId)
-				{
-					continue;
-				}
-				if (patch.priority > Priority.Normal)
-				{
-					continue;
-				}
-				if (patch.PatchMethod.ReturnType == typeof(bool))
-				{
-					return patch.owner + " (prefix)";
-				}
-			}
-
-			return null;
-		}
-
-		private static bool Ban(string settingId, string reason)
+		private static bool HardBan(string settingId, string reason)
 		{
 			if (CompatibilityDefines.CachedBannedOptimizations.Contains(settingId))
 			{
 				return false;
 			}
 
-			CompatibilityDefines.CachedBannedOptimizations.Add(settingId);
-			CompatibilityDefines.CachedBannedBy[settingId] = reason;
+			CompatibilityDefines.Ban(settingId, reason);
 			return true;
+		}
+
+		/// <summary>
+		/// Disables the optimization by default because a foreign patch was detected. The player can
+		/// still enable it, so this is not a ban.
+		/// </summary>
+		private static bool DefaultOff(string settingId, IReadOnlyList<string> reasons)
+		{
+			return CompatibilityDefines.PatchConflict(settingId, reasons);
 		}
 
 		/// <summary>

@@ -60,6 +60,7 @@ namespace YaOpt.Patches
 			GenerationOptimizationCompat.Refresh();
 			QuestGenerationOptimizationCompat.Refresh();
 			PawnGearRebuildCompat.Refresh();
+			PatchConflictDetector.Refresh();
 			if (!force && !gridCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())
 				return;
 

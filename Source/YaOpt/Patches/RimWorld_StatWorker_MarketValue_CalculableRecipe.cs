@@ -23,7 +23,7 @@ namespace YaOpt.Patches
 				return false;
 
 			var target = AccessTools.Method(typeof(StatWorker_MarketValue), nameof(StatWorker_MarketValue.CalculableRecipe));
-			return !PatchConflictGuard.HasForeignConflict(target);
+			return target != null;
 		}
 
 		static bool Prefix(BuildableDef def, ref RecipeDef __result)

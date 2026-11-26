@@ -29,9 +29,8 @@ namespace YaOpt.Patches
 			if (YaOptGlobal.Settings?.OptPawnGearSessionCache.Enabled != true || PawnGearRebuildCompat.Ready)
 				return false;
 
-			var target = AccessTools.Method(typeof(GenTemperature), nameof(GenTemperature.SafeTemperatureRange),
-				new[] { typeof(Pawn), typeof(List<ThingStuffPair>) });
-			return !PatchConflictGuard.HasForeignPatch(target);
+			return AccessTools.Method(typeof(GenTemperature), nameof(GenTemperature.SafeTemperatureRange),
+				new[] { typeof(Pawn), typeof(List<ThingStuffPair>) }) != null;
 		}
 
 		static bool Prefix(Pawn p, List<ThingStuffPair> apparel, ref FloatRange __result)

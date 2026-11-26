@@ -22,8 +22,8 @@ namespace YaOpt.Patches
 			if (YaOptGlobal.Settings?.OptSoundOneShotManager.Enabled != true)
 				return false;
 
-			return !PatchConflictGuard.HasForeignConflict(
-				AccessTools.Method(typeof(SampleOneShotManager), nameof(SampleOneShotManager.TryAddPlayingOneShot)));
+			return AccessTools.Method(typeof(SampleOneShotManager),
+				nameof(SampleOneShotManager.TryAddPlayingOneShot)) != null;
 		}
 
 		static bool Prefix(SampleOneShotManager __instance, SampleOneShot newSample)

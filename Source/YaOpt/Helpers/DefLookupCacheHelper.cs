@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using RimWorld;
@@ -50,40 +51,43 @@ namespace YaOpt.Helpers
 
 			if (YaOptGlobal.HasMod(DuplicateProviderModId))
 			{
-				changed |= Ban(nameof(YaOptSettings.OptDefLookupCache), "重复的 Def 查找缓存 Mod");
-				changed |= Ban(nameof(YaOptSettings.OptBiomeAnimalIndex), "重复的 Def 查找缓存 Mod");
-				changed |= Ban(nameof(YaOptSettings.OptGiddyUpOffsetCache), "重复的 Def 查找缓存 Mod");
-				changed |= Ban(nameof(YaOptSettings.OptExosuitXmlFast), "重复的 Def 查找缓存 Mod");
+				changed |= HardBan(nameof(YaOptSettings.OptDefLookupCache), "重复的 Def 查找缓存 Mod");
+				changed |= HardBan(nameof(YaOptSettings.OptBiomeAnimalIndex), "重复的 Def 查找缓存 Mod");
+				changed |= HardBan(nameof(YaOptSettings.OptGiddyUpOffsetCache), "重复的 Def 查找缓存 Mod");
+				changed |= HardBan(nameof(YaOptSettings.OptExosuitXmlFast), "重复的 Def 查找缓存 Mod");
 				return changed;
 			}
 
-			var recipeTargetsPatched =
-				HasForeignPatch(AccessTools.PropertyGetter(typeof(ThingDef), nameof(ThingDef.AllRecipes))) ||
-				HasForeignPatch(AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers))) ||
-				HasForeignPatch(AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.IsSurgery))) ||
-				HasForeignPatch(AccessTools.PropertyGetter(typeof(ResearchProjectDef),
-					nameof(ResearchProjectDef.UnlockedDefs))) ||
-				HasForeignPatch(AccessTools.Method(typeof(ResearchPrerequisitesUtility),
-					nameof(ResearchPrerequisitesUtility.ComputeResearchPrerequisites))) ||
-				HasForeignPatch(AccessTools.Method(typeof(ResearchPrerequisitesUtility),
+			var reasons = new List<string>();
+			Collect(reasons,
+				AccessTools.PropertyGetter(typeof(ThingDef), nameof(ThingDef.AllRecipes)),
+				AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.AllRecipeUsers)),
+				AccessTools.PropertyGetter(typeof(RecipeDef), nameof(RecipeDef.IsSurgery)),
+				AccessTools.PropertyGetter(typeof(ResearchProjectDef), nameof(ResearchProjectDef.UnlockedDefs)),
+				AccessTools.Method(typeof(ResearchPrerequisitesUtility),
+					nameof(ResearchPrerequisitesUtility.ComputeResearchPrerequisites)),
+				AccessTools.Method(typeof(ResearchPrerequisitesUtility),
 					nameof(ResearchPrerequisitesUtility.UnlockedDefsGroupedByPrerequisites)));
-			if (recipeTargetsPatched)
-				changed |= Ban(nameof(YaOptSettings.OptDefLookupCache), "其他配方或研究索引补丁");
+			if (reasons.Count > 0)
+				changed |= DefaultOff(nameof(YaOptSettings.OptDefLookupCache), reasons);
 
-			var biomeTargetsPatched =
-				HasForeignPatch(AccessTools.PropertyGetter(typeof(BiomeDef), nameof(BiomeDef.AllWildAnimals))) ||
-				HasForeignPatch(AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfAnimal))) ||
-				HasForeignPatch(AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfPollutionAnimal))) ||
-				HasForeignPatch(AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfCoastalAnimal)));
-			if (biomeTargetsPatched)
-				changed |= Ban(nameof(YaOptSettings.OptBiomeAnimalIndex), "其他生物群系动物索引补丁");
+			reasons = new List<string>();
+			Collect(reasons,
+				AccessTools.PropertyGetter(typeof(BiomeDef), nameof(BiomeDef.AllWildAnimals)),
+				AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfAnimal)),
+				AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfPollutionAnimal)),
+				AccessTools.Method(typeof(BiomeDef), nameof(BiomeDef.CommonalityOfCoastalAnimal)));
+			if (reasons.Count > 0)
+				changed |= DefaultOff(nameof(YaOptSettings.OptBiomeAnimalIndex), reasons);
 
 			// The GiddyUp patch only seeds and saves around the original pass, so it stays compatible
 			// with other patches on ProcessPawnKinds. The Exosuit prefix replaces the original
 			// implementation, so a foreign patch there would be skipped.
 			var exosuitWorker = AccessTools.Method(AccessTools.TypeByName("Exosuit.XmlBackCompat"), "ApplyWorker");
-			if (HasForeignPatch(exosuitWorker))
-				changed |= Ban(nameof(YaOptSettings.OptExosuitXmlFast), "其他 Exosuit 补丁");
+			var exosuitReasons = new List<string>();
+			Collect(exosuitReasons, exosuitWorker);
+			if (exosuitReasons.Count > 0)
+				changed |= DefaultOff(nameof(YaOptSettings.OptExosuitXmlFast), exosuitReasons);
 
 			// A ban added from XML (CompatibilityDef) or a disabled option must also drop data that
 			// was built earlier in the load.
@@ -96,41 +100,49 @@ namespace YaOpt.Helpers
 			return changed;
 		}
 
-		private static bool Ban(string settingId, string reason)
+		/// <summary>
+		/// A duplicate def-index provider is a known mod conflict, so the option is locked off.
+		/// </summary>
+		private static bool HardBan(string settingId, string reason)
 		{
-			if (!CompatibilityDefines.CachedBannedOptimizations.Add(settingId))
+			if (CompatibilityDefines.CachedBannedOptimizations.Contains(settingId))
 				return false;
 
-			CompatibilityDefines.CachedBannedBy[settingId] = reason;
-			YaOptMod.Debug($"{settingId} disabled: {reason}");
+			CompatibilityDefines.Ban(settingId, reason);
+			YaOptMod.Debug($"{settingId} banned: {reason}");
 
 			// Drop the built data so the getter patches immediately fall back to vanilla.
+			InvalidateData(settingId);
+			return true;
+		}
+
+		/// <summary>
+		/// A foreign patch disables the option by default, but the player may enable it. Data is
+		/// dropped by the enabled checks that follow the detection pass.
+		/// </summary>
+		private static bool DefaultOff(string settingId, IReadOnlyList<string> reasons)
+		{
+			var added = CompatibilityDefines.PatchConflict(settingId, reasons);
+			YaOptMod.Debug($"{settingId} disabled by default: {string.Join(", ", reasons)}");
+			return added;
+		}
+
+		private static void InvalidateData(string settingId)
+		{
 			if (settingId == nameof(YaOptSettings.OptDefLookupCache))
 				DefLookupIndex.Invalidate();
 			else if (settingId == nameof(YaOptSettings.OptBiomeAnimalIndex))
 				BiomeAnimalIndex.Invalidate();
-
-			return true;
 		}
 
-		private static bool HasForeignPatch(MethodBase target)
+		/// <summary>
+		/// Collects every foreign patch on the targets, including postfixes, matching the old
+		/// has-any-patch check.
+		/// </summary>
+		private static void Collect(List<string> results, params MethodBase[] targets)
 		{
-			if (target == null)
-				return false;
-
-			var info = Harmony.GetPatchInfo(target);
-			if (info == null)
-				return false;
-
-			var harmony = YaOptMod.Instance.Harmony;
-			var earlyHarmony = YaOptMod.Instance.EarlyHarmony;
-			foreach (var owner in info.Owners)
-			{
-				if (owner != harmony.Id && owner != earlyHarmony.Id)
-					return true;
-			}
-
-			return false;
+			for (var i = 0; i < targets.Length; i++)
+				PatchConflictGuard.CollectForeignConflicts(targets[i], includeAll: true, results);
 		}
 	}
 }

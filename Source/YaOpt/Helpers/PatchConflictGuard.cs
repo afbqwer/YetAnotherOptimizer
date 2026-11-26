@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 
@@ -14,14 +15,83 @@ namespace YaOpt.Helpers
 	/// </remarks>
 	internal static class PatchConflictGuard
 	{
-		internal static bool HasForeignConflict(MethodBase target)
+		/// <summary>
+		/// Appends every foreign patch that conflicts with <paramref name="target"/>, formatted for the
+		/// settings tooltip. Uses the same rules as <see cref="FindForeignConflict"/>.
+		/// </summary>
+		internal static void CollectForeignConflicts(MethodBase target, bool includeAll, List<string> results)
 		{
-			if (target == null)
-				return true;
-			if (YaOptMod.Instance == null)
-				return true;
+			if (target == null || YaOptMod.Instance == null)
+				return;
 
-			return FindForeignConflict(target) != null;
+			var info = Harmony.GetPatchInfo(target);
+			if (info == null)
+				return;
+
+			var mod = YaOptMod.Instance;
+			var harmonyId = mod.Harmony.Id;
+			var earlyId = mod.EarlyHarmony.Id;
+
+			foreach (var patch in info.Transpilers)
+			{
+				if (patch.owner != harmonyId && patch.owner != earlyId)
+					results.Add(Describe(patch.owner, "transpiler", target));
+			}
+
+			foreach (var patch in info.Prefixes)
+			{
+				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (includeAll || (patch.priority <= Priority.Normal && patch.PatchMethod.ReturnType == typeof(bool)))
+					results.Add(Describe(patch.owner, "prefix", target));
+			}
+
+			if (includeAll)
+			{
+				foreach (var patch in info.Postfixes)
+				{
+					if (patch.owner != harmonyId && patch.owner != earlyId)
+						results.Add(Describe(patch.owner, "postfix", target));
+				}
+			}
+		}
+
+		/// <summary>
+		/// Appends every foreign prefix at or below normal priority and every transpiler that touches
+		/// <paramref name="target"/>. A replacement prefix that returns false skips every prefix ordered
+		/// after it, including plain void instrumentation, so those methods cannot safely be replaced.
+		/// </summary>
+		internal static void CollectForeignPrefixOrTranspilers(MethodBase target, List<string> results)
+		{
+			if (target == null || YaOptMod.Instance == null)
+				return;
+
+			var info = Harmony.GetPatchInfo(target);
+			if (info == null)
+				return;
+
+			var mod = YaOptMod.Instance;
+			var harmonyId = mod.Harmony.Id;
+			var earlyId = mod.EarlyHarmony.Id;
+
+			foreach (var patch in info.Transpilers)
+			{
+				if (patch.owner != harmonyId && patch.owner != earlyId)
+					results.Add(Describe(patch.owner, "transpiler", target));
+			}
+
+			foreach (var patch in info.Prefixes)
+			{
+				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (patch.priority <= Priority.Normal)
+					results.Add(Describe(patch.owner, "prefix", target));
+			}
+		}
+
+		private static string Describe(string owner, string kind, MethodBase target)
+		{
+			return owner + " (" + kind + ") → " + target.DeclaringType?.Name + "." + target.Name;
 		}
 
 		/// <summary>
@@ -83,44 +153,6 @@ namespace YaOpt.Helpers
 					if (patch.owner != harmonyId && patch.owner != earlyId)
 						return patch.owner + " (postfix)";
 				}
-			}
-
-			return null;
-		}
-
-		/// <summary>
-		/// Finds any foreign prefix that runs at or below normal priority, or a transpiler.
-		/// </summary>
-		/// <remarks>
-		/// A replacement prefix that returns false skips every prefix ordered after it, including plain
-		/// void instrumentation, so those methods cannot safely be replaced. Higher-priority prefixes run
-		/// before the replacement and are not skipped. Postfixes still run and are not a conflict.
-		/// </remarks>
-		internal static string FindForeignPrefixOrTranspiler(MethodBase target)
-		{
-			if (target == null || YaOptMod.Instance == null)
-				return null;
-
-			var info = Harmony.GetPatchInfo(target);
-			if (info == null)
-				return null;
-
-			var mod = YaOptMod.Instance;
-			var harmonyId = mod.Harmony.Id;
-			var earlyId = mod.EarlyHarmony.Id;
-
-			foreach (var patch in info.Transpilers)
-			{
-				if (patch.owner != harmonyId && patch.owner != earlyId)
-					return patch.owner + " (transpiler)";
-			}
-
-			foreach (var patch in info.Prefixes)
-			{
-				if (patch.owner == harmonyId || patch.owner == earlyId)
-					continue;
-				if (patch.priority <= Priority.Normal)
-					return patch.owner + " (prefix)";
 			}
 
 			return null;

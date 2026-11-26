@@ -35,8 +35,8 @@ namespace YaOpt.Patches
 				return false;
 
 			// The cache replays a call that was skipped: any foreign patch would either be applied twice
-			// or lose its side effects. GenerationOptimizationCompat also bans the setting for the UI.
-			return !PatchConflictGuard.HasForeignPatch(TargetMethod());
+			// or lose its side effects. GenerationOptimizationCompat defaults the option off in that case.
+			return TargetMethod() != null;
 		}
 
 		static bool Prefix(ThingSetMaker_MarketValue __instance, ThingSetMakerParams parms, int seed,

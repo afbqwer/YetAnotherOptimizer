@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
 using RimWorld;
@@ -30,21 +31,21 @@ namespace YaOpt.Helpers
 
 		private static void CheckCanGenerateFastPath()
 		{
+			var reasons = new List<string>();
 			foreach (var target in FastPathTargets())
 			{
 				if (target == null)
 					continue;
 
-				var conflict = PatchConflictGuard.FindForeignConflict(target);
-				if (conflict == null)
-					continue;
-
-				Ban(nameof(YaOpt.YaOptSettings.OptThingSetMakerCanGenerateFastPath),
-					"其他 Mod 补丁：" + conflict + " → " + target.DeclaringType?.Name + "." + target.Name);
-				YaOptMod.Warning("OptThingSetMakerCanGenerateFastPath disabled: " + conflict + " patches " +
-								 target.DeclaringType?.FullName + "." + target.Name + ".");
-				return;
+				PatchConflictGuard.CollectForeignConflicts(target, includeAll: false, reasons);
 			}
+
+			if (reasons.Count == 0)
+				return;
+
+			DefaultOff(nameof(YaOpt.YaOptSettings.OptThingSetMakerCanGenerateFastPath), reasons);
+			YaOptMod.Warning("OptThingSetMakerCanGenerateFastPath disabled by default: " +
+							 string.Join(", ", reasons));
 		}
 
 		private static void CheckSampleCache()
@@ -57,14 +58,14 @@ namespace YaOpt.Helpers
 
 			// The cached list already contains the effects of any postfix, so replaying the cache would
 			// apply them a second time.
-			var conflict = PatchConflictGuard.FindForeignConflict(target, includeAll: true);
-			if (conflict == null)
+			var reasons = new List<string>();
+			PatchConflictGuard.CollectForeignConflicts(target, includeAll: true, reasons);
+			if (reasons.Count == 0)
 				return;
 
-			Ban(nameof(YaOpt.YaOptSettings.OptThingSetMakerSampleCache),
-				"其他 Mod 补丁：" + conflict + " → ThingSetMaker_MarketValue.GeneratePossibleDefs");
-			YaOptMod.Warning("OptThingSetMakerSampleCache disabled: " + conflict +
-							 " patches ThingSetMaker_MarketValue.GeneratePossibleDefs.");
+			DefaultOff(nameof(YaOpt.YaOptSettings.OptThingSetMakerSampleCache), reasons);
+			YaOptMod.Warning("OptThingSetMakerSampleCache disabled by default: " +
+							 string.Join(", ", reasons));
 		}
 
 		private static MethodInfo[] FastPathTargets()
@@ -85,12 +86,9 @@ namespace YaOpt.Helpers
 			};
 		}
 
-		private static void Ban(string settingId, string reason)
+		private static void DefaultOff(string settingId, IReadOnlyList<string> reasons)
 		{
-			if (!CompatibilityDefines.CachedBannedOptimizations.Add(settingId))
-				return;
-
-			CompatibilityDefines.CachedBannedBy[settingId] = reason;
+			CompatibilityDefines.PatchConflict(settingId, reasons);
 		}
 	}
 }

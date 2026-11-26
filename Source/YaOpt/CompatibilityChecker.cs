@@ -252,8 +252,7 @@ namespace YaOpt
 		{
 			if (YaOptGlobal.HasMod("vopaga.hyperdrive"))
 			{
-				CompatibilityDefines.CachedBannedOptimizations.Add("OptFastPatchOperation");
-				CompatibilityDefines.CachedBannedBy["OptFastPatchOperation"] = "Hyperdrive";
+				CompatibilityDefines.Ban("OptFastPatchOperation", "Hyperdrive");
 			}
 		}
 	}

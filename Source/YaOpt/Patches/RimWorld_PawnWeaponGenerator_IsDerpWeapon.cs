@@ -24,8 +24,7 @@ namespace YaOpt.Patches
 			if (YaOptGlobal.Settings?.OptGenerationDefCache.Enabled != true)
 				return false;
 
-			var target = AccessTools.Method(typeof(PawnWeaponGenerator), nameof(PawnWeaponGenerator.IsDerpWeapon));
-			return !PatchConflictGuard.HasForeignConflict(target);
+			return AccessTools.Method(typeof(PawnWeaponGenerator), nameof(PawnWeaponGenerator.IsDerpWeapon)) != null;
 		}
 
 		static bool Prefix(ThingDef thing, ThingDef stuff, ref bool __result)

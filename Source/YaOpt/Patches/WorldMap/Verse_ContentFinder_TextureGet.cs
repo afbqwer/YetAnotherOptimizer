@@ -112,34 +112,41 @@ namespace YaOpt.Patches
 					return true;
 
 				var ownId = YaOptGlobal.Harmony.Id;
+				var earlyId = YaOptMod.Instance.EarlyHarmony.Id;
+				var reasons = new List<string>();
 				foreach (var owner in info.Owners)
 				{
-					if (owner == ownId)
+					if (owner == ownId || owner == earlyId)
 						continue;
 
-					Block("another mod patches ContentFinder<Texture2D>.Get: " + owner);
+					reasons.Add(owner + " → ContentFinder<Texture2D>.Get");
+				}
+
+				if (reasons.Count > 0)
+				{
+					Block(reasons);
 					return false;
 				}
 			}
 			catch (Exception ex)
 			{
-				Block("could not inspect Harmony patches: " + ex.Message);
+				Block(new List<string> { "could not inspect Harmony patches: " + ex.Message });
 			}
 
 			return !_blocked;
 		}
 
-		private static void Block(string reason)
+		private static void Block(IReadOnlyList<string> reasons)
 		{
 			if (_blocked)
 				return;
 
 			_blocked = true;
-			CompatibilityDefines.CachedBannedOptimizations.Add(nameof(YaOptSettings.OptWorldMapTextureCache));
-			CompatibilityDefines.CachedBannedBy[nameof(YaOptSettings.OptWorldMapTextureCache)] = "其他纹理查找补丁";
+			CompatibilityDefines.PatchConflict(nameof(YaOptSettings.OptWorldMapTextureCache), reasons);
 			_cache.Clear();
 			_missingCache.Clear();
-			YaOptMod.Warning("World-map texture lookup cache disabled for this session: " + reason);
+			YaOptMod.Warning("World-map texture lookup cache disabled for this session: " +
+							 string.Join("; ", reasons));
 		}
 	}
 }

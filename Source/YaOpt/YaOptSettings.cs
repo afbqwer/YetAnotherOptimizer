@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using Unity.Mathematics;
 using UnityEngine;
 using Verse;
+using YaOpt.Defines;
 using YaOpt.Helpers;
 using YaOpt.Patches;
 using YaOpt.Settings;
@@ -1571,6 +1572,12 @@ namespace YaOpt
 		[Unsaved]
 		private readonly SettingsPanel _settingsPanel;
 
+		/// <summary>
+		/// Options that a detected foreign patch already turned off by default. Saving the ids keeps
+		/// the player's later decision (enabling them by hand) from being overridden on every load.
+		/// </summary>
+		private List<string> _conflictDefaultsApplied = new List<string>();
+
 		public IReadOnlyList<OptimizationOption> AllOptimizations => _allOptimizations.AsReadOnly();
 
 		public bool DebugLogging
@@ -1635,6 +1642,9 @@ namespace YaOpt
 						option.FuncExposeData(this);
 				}
 			}
+			Scribe_Collections.Look(ref _conflictDefaultsApplied, "conflictDefaultsApplied", LookMode.Value);
+			if (_conflictDefaultsApplied == null)
+				_conflictDefaultsApplied = new List<string>();
 			if (YaOptGlobal.IsLibraryLoaded && Scribe.mode == LoadSaveMode.LoadingVars)
 			{
 				ValidateOptions();
@@ -1647,6 +1657,35 @@ namespace YaOpt
 			{
 				option.Validate();
 			}
+		}
+
+		/// <summary>
+		/// Turns an option off as its default the first time a foreign patch is detected on it. A
+		/// saved choice from an earlier session is respected, so a manual enable survives restarts.
+		/// </summary>
+		internal void ApplyPatchConflictDefault(string settingId)
+		{
+			if (_conflictDefaultsApplied == null)
+				_conflictDefaultsApplied = new List<string>();
+			if (_conflictDefaultsApplied.Contains(settingId))
+				return;
+			if (CompatibilityDefines.CachedBannedOptimizations.Contains(settingId))
+				return;
+
+			OptimizationOption option = null;
+			for (var i = 0; i < _allOptimizations.Count; i++)
+			{
+				if (_allOptimizations[i].SettingId == settingId)
+				{
+					option = _allOptimizations[i];
+					break;
+				}
+			}
+			if (option == null)
+				return;
+
+			_conflictDefaultsApplied.Add(settingId);
+			option.SetDefaultOff();
 		}
 
 		public void DoSettingsWindowContents(Rect inRect)

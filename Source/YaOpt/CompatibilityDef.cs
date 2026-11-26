@@ -40,9 +40,8 @@ namespace YaOpt
 						continue;
 					}
 					YaOptMod.Debug($"Optimization {bannedOptimization} is banned by {defName} from {mod}.");
-					CompatibilityDefines.CachedBannedOptimizations.Add(bannedOptimization);
-					CompatibilityDefines.CachedBannedBy[bannedOptimization] =
-						"YaOpt.Setting.Note.FromMod".Translate(defName, mod);
+					CompatibilityDefines.Ban(bannedOptimization,
+						"YaOpt.Setting.Note.FromMod".Translate(defName, mod));
 				}
 			}
 

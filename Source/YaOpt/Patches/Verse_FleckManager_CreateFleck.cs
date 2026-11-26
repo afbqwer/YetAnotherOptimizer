@@ -23,16 +23,12 @@ namespace YaOpt.Patches
 			if (YaOptGlobal.Settings?.OptFleckCreateInPlace.Enabled != true)
 				return false;
 
-			// A foreign patch on this method or on a system's CreateFleck must keep vanilla behaviour.
-			if (PatchConflictGuard.HasForeignConflict(AccessTools.Method(typeof(FleckManager), nameof(FleckManager.CreateFleck))))
-				return false;
-			if (PatchConflictGuard.HasForeignConflict(AccessTools.Method(typeof(FleckSystemStatic), nameof(FleckSystem.CreateFleck))))
-				return false;
-			if (PatchConflictGuard.HasForeignConflict(AccessTools.Method(typeof(FleckSystemThrown), nameof(FleckSystem.CreateFleck))))
-				return false;
-			if (PatchConflictGuard.HasForeignConflict(AccessTools.Method(typeof(FleckSystemSplash), nameof(FleckSystem.CreateFleck))))
-				return false;
-			return true;
+			// A foreign patch on this method or on a system's CreateFleck would be bypassed. That case is
+// detected up front and disables the option by default; here we only require the targets to exist.
+			return AccessTools.Method(typeof(FleckManager), nameof(FleckManager.CreateFleck)) != null &&
+				   AccessTools.Method(typeof(FleckSystemStatic), nameof(FleckSystem.CreateFleck)) != null &&
+				   AccessTools.Method(typeof(FleckSystemThrown), nameof(FleckSystem.CreateFleck)) != null &&
+				   AccessTools.Method(typeof(FleckSystemSplash), nameof(FleckSystem.CreateFleck)) != null;
 		}
 
 		static bool Prefix(FleckManager __instance, FleckCreationData fleckData)

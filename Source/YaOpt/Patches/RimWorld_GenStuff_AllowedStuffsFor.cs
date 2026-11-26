@@ -25,7 +25,7 @@ namespace YaOpt.Patches
 				return false;
 
 			var target = AccessTools.Method(typeof(GenStuff), nameof(GenStuff.AllowedStuffsFor));
-			return !PatchConflictGuard.HasForeignConflict(target);
+			return target != null;
 		}
 
 		static bool Prefix(BuildableDef td, TechLevel maxTechLevel, bool checkAllowedInStuffGeneration,

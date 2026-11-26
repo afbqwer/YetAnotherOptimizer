@@ -41,20 +41,19 @@ namespace YaOpt.Helpers
 			if (target == null)
 			{
 				var reason = "YaOpt.Setting.Note.Conflict.QuestMethodMissing".Translate().ToString();
-				Ban(FastPathSetting, reason);
-				Ban(FallbackSetting, reason);
+				DefaultOff(FastPathSetting, reason);
+				DefaultOff(FallbackSetting, reason);
 				return;
 			}
 
-			var conflict = PatchConflictGuard.FindForeignPrefixOrTranspiler(target);
-			if (conflict == null)
+			var reasons = new List<string>();
+			PatchConflictGuard.CollectForeignPrefixOrTranspilers(target, reasons);
+			if (reasons.Count == 0)
 				return;
 
-			var message = "YaOpt.Setting.Note.Conflict.QuestMethodPatch".Translate(conflict).ToString();
-			Ban(FastPathSetting, message);
-			Ban(FallbackSetting, message);
-			YaOptMod.Warning("OptQuestSelectionFastPath disabled: " + conflict +
-							 " patches NaturalRandomQuestChooser.ChooseNaturalRandomQuest.");
+			DefaultOff(FastPathSetting, reasons);
+			DefaultOff(FallbackSetting, reasons);
+			YaOptMod.Warning("OptQuestSelectionFastPath disabled by default: " + string.Join(", ", reasons));
 		}
 
 		private static void CheckPointNormalization()
@@ -62,24 +61,20 @@ namespace YaOpt.Helpers
 			var targets = GetGenerateQuestTargets();
 			if (targets.Count == 0)
 			{
-				Ban(NormalizeSetting,
+				DefaultOff(NormalizeSetting,
 					"YaOpt.Setting.Note.Conflict.QuestMethodMissing".Translate().ToString());
 				return;
 			}
 
+			var reasons = new List<string>();
 			for (var i = 0; i < targets.Count; i++)
-			{
-				var target = targets[i];
-				var conflict = PatchConflictGuard.FindForeignPrefixOrTranspiler(target);
-				if (conflict == null)
-					continue;
+				PatchConflictGuard.CollectForeignPrefixOrTranspilers(targets[i], reasons);
 
-				Ban(NormalizeSetting,
-					"YaOpt.Setting.Note.Conflict.QuestMethodPatch".Translate(conflict).ToString());
-				YaOptMod.Warning("OptQuestPointsNormalize disabled: " + conflict +
-								 " patches QuestUtility.GenerateQuestAndMakeAvailable.");
+			if (reasons.Count == 0)
 				return;
-			}
+
+			DefaultOff(NormalizeSetting, reasons);
+			YaOptMod.Warning("OptQuestPointsNormalize disabled by default: " + string.Join(", ", reasons));
 		}
 
 		private static List<MethodBase> GetGenerateQuestTargets()
@@ -103,10 +98,14 @@ namespace YaOpt.Helpers
 			return result;
 		}
 
-		private static void Ban(string settingId, string reason)
+		private static void DefaultOff(string settingId, string reason)
 		{
-			if (CompatibilityDefines.CachedBannedOptimizations.Add(settingId))
-				CompatibilityDefines.CachedBannedBy[settingId] = reason;
+			CompatibilityDefines.PatchConflict(settingId, reason);
+		}
+
+		private static void DefaultOff(string settingId, IReadOnlyList<string> reasons)
+		{
+			CompatibilityDefines.PatchConflict(settingId, reasons);
 		}
 	}
 }

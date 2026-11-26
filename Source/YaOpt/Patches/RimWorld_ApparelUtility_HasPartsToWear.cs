@@ -25,8 +25,7 @@ namespace YaOpt.Patches
 			if (YaOptGlobal.Settings?.OptPawnGearSessionCache.Enabled != true || PawnGearRebuildCompat.Ready)
 				return false;
 
-			return !PatchConflictGuard.HasForeignPatch(
-				AccessTools.Method(typeof(ApparelUtility), nameof(ApparelUtility.HasPartsToWear)));
+			return AccessTools.Method(typeof(ApparelUtility), nameof(ApparelUtility.HasPartsToWear)) != null;
 		}
 
 		static bool Prefix(Pawn p, ThingDef apparel, ref bool __result)

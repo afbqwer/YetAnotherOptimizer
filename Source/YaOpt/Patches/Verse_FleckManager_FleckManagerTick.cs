@@ -23,18 +23,13 @@ namespace YaOpt.Patches
 			if (YaOptGlobal.Settings?.OptFleckTickLoop.Enabled != true)
 				return false;
 
-			// We replace the loop that calls Ticks directly, so a foreign patch on either the manager
-			// method or an underlying system's Tick must keep vanilla behaviour.
-			var target = AccessTools.Method(typeof(FleckManager), nameof(FleckManager.FleckManagerTick));
-			if (PatchConflictGuard.HasForeignConflict(target))
-				return false;
-			if (PatchConflictGuard.HasForeignConflict(AccessTools.Method(typeof(FleckSystemStatic), nameof(FleckSystem.Tick))))
-				return false;
-			if (PatchConflictGuard.HasForeignConflict(AccessTools.Method(typeof(FleckSystemThrown), nameof(FleckSystem.Tick))))
-				return false;
-			if (PatchConflictGuard.HasForeignConflict(AccessTools.Method(typeof(FleckSystemSplash), nameof(FleckSystem.Tick))))
-				return false;
-			return true;
+			// We replace the loop that calls Ticks directly, so a foreign patch on the manager method or
+			// an underlying system's Tick would be bypassed. That case is detected up front and disables
+			// the option by default; here we only require the targets to exist.
+			return AccessTools.Method(typeof(FleckManager), nameof(FleckManager.FleckManagerTick)) != null &&
+				   AccessTools.Method(typeof(FleckSystemStatic), nameof(FleckSystem.Tick)) != null &&
+				   AccessTools.Method(typeof(FleckSystemThrown), nameof(FleckSystem.Tick)) != null &&
+				   AccessTools.Method(typeof(FleckSystemSplash), nameof(FleckSystem.Tick)) != null;
 		}
 
 		static bool Prefix(FleckManager __instance)

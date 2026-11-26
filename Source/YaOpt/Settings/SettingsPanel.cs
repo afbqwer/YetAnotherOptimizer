@@ -255,11 +255,13 @@ namespace YaOpt.Settings
 			var hasNoteS = !string.IsNullOrWhiteSpace(option.NoteStability);
 			var hasNoteC = !string.IsNullOrWhiteSpace(option.NoteCompatibility);
 			var hasNoteMT = !string.IsNullOrWhiteSpace(option.NoteMultithread);
+			// A ban (specific mod) and a patch conflict (default off) share one marker and tooltip.
+			var hasConflict = CompatibilityDefines.TryGetConflict(option.SettingId, out var conflictKind);
 			// Mark the options that are enabled but could not be installed this session, so the
 			// player sees it without having to hover.
 			var isSkipped = option == _settings.OptFastListerRemove &&
 							ListerThingsHelper.FastRemoveConflict != null;
-			if (hasNoteS || hasNoteC || hasNoteMT || isSkipped)
+			if (hasNoteS || hasNoteC || hasNoteMT || hasConflict || isSkipped)
 			{
 				var sb = new StringBuilder(label);
 				if (hasNoteS)
@@ -268,13 +270,14 @@ namespace YaOpt.Settings
 					sb.Append(" <color=#DEB0D0>[C]</color>");
 				if (hasNoteMT)
 					sb.Append(" <color=#0044FF>[MT]</color>");
-				if (isSkipped)
+				if (hasConflict || isSkipped)
 					sb.Append(" <color=#FF9020>[!]</color>");
 				label = sb.ToString();
 			}
 			var enabled = option._enabled;
+			// Only a hard ban locks the checkbox; a detected patch only lowers the default.
 			var disabledByDef = option.IsLockedOff ||
-								CompatibilityDefines.CachedBannedOptimizations.Contains(option.SettingId);
+								(hasConflict && conflictKind == ConflictKind.Ban);
 			DrawCheckboxLabeled(listing, label, enabled, disabledByDef, out var mouseOver, out var result);
 			if (mouseOver && _lastMouseOverOption != option)
 			{
@@ -324,12 +327,26 @@ namespace YaOpt.Settings
 			_lastMouseOverOption = option;
 			var sb = new StringBuilder();
 
-			if (CompatibilityDefines.CachedBannedOptimizations.Contains(option.SettingId))
+			if (CompatibilityDefines.TryGetConflict(option.SettingId, out var kind, out var reasons))
 			{
-				sb.Append("<color=#FF2020>")
-					.Append("YaOpt.Setting.Note.Banned".Translate(
-						CompatibilityDefines.CachedBannedBy[option.SettingId]))
-					.AppendLine("</color>");
+				if (kind == ConflictKind.Ban)
+				{
+					sb.Append("<color=#FF2020>")
+						.Append("YaOpt.Setting.Note.Banned".Translate(reasons[0]))
+						.AppendLine("</color>");
+				}
+				else
+				{
+					sb.Append("<color=#FF9020>")
+						.Append("YaOpt.Setting.Note.DefaultOff".Translate())
+						.AppendLine("</color>");
+					for (var i = 0; i < reasons.Count; i++)
+					{
+						sb.Append("<color=#FF9020>")
+							.Append("YaOpt.Setting.Note.ConflictItem".Translate(reasons[i]))
+							.AppendLine("</color>");
+					}
+				}
 			}
 
 			// Turns the option off in the player's eyes only when it really was skipped, not when

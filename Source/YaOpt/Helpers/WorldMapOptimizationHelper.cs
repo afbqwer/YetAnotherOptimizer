@@ -1,6 +1,7 @@
 using HarmonyLib;
 using RimWorld.Planet;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
 using Verse;
@@ -27,26 +28,25 @@ namespace YaOpt.Helpers
 
 			var textureGet = AccessTools.Method(typeof(ContentFinder<Texture2D>), nameof(ContentFinder<Texture2D>.Get),
 				new[] { typeof(string), typeof(bool) });
-			if (HasForeignPatch(textureGet))
-				Ban(nameof(YaOptSettings.OptWorldMapTextureCache), "其他纹理查找补丁");
+			DefaultOffFromTargets(nameof(YaOptSettings.OptWorldMapTextureCache), textureGet);
 
 			var subMeshGet = AccessTools.Method(typeof(WorldDrawLayerBase), "GetSubMesh",
 				new[] { typeof(Material), typeof(int).MakeByRefType() });
 			var clearSubMeshes = AccessTools.Method(typeof(WorldDrawLayerBase), "ClearSubMeshes",
 				new[] { typeof(MeshParts) });
 			if (YaOptGlobal.HasMod("wowgag.guiperformancepatch"))
-				Ban(nameof(YaOptSettings.OptWorldMapSubMeshCache), "WOWGAG's Performance Patch");
-			else if (HasForeignPatch(subMeshGet) || HasForeignPatch(clearSubMeshes))
-				Ban(nameof(YaOptSettings.OptWorldMapSubMeshCache), "其他子网格补丁");
+				HardBan(nameof(YaOptSettings.OptWorldMapSubMeshCache), "WOWGAG's Performance Patch");
+			else
+				DefaultOffFromTargets(nameof(YaOptSettings.OptWorldMapSubMeshCache), subMeshGet, clearSubMeshes);
 
 			if (YaOptGlobal.HasMod("oskarpotocki.vfe.insectoid2"))
 			{
 				var insectAdd = FindMethod("VFEInsectoids.WorldDrawLayer_Insects", "TryAddMeshForTile",
 					new[] { typeof(PlanetTile) });
 				if (!VFEInsectoids_WorldDrawLayer_Insects_TryAddMeshForTile.IsAvailable())
-					Ban(nameof(YaOptSettings.OptWorldMapInsectLayer), "VFE Insectoids 版本不兼容");
-				else if (HasForeignPatch(insectAdd))
-					Ban(nameof(YaOptSettings.OptWorldMapInsectLayer), "其他昆虫图层补丁");
+					HardBan(nameof(YaOptSettings.OptWorldMapInsectLayer), "VFE Insectoids 版本不兼容");
+				else
+					DefaultOffFromTargets(nameof(YaOptSettings.OptWorldMapInsectLayer), insectAdd);
 			}
 
 			if (YaOptGlobal.HasMod("regrowth.botr.core"))
@@ -54,9 +54,9 @@ namespace YaOpt.Helpers
 				var regenerate = FindMethod("ReGrowthCore.WorldDrawLayer_Beautification", "Regenerate", Type.EmptyTypes);
 				var fallback = FindMethod("ReGrowthCore.ReGrowthMod", "get_DefaultWMBPTextureFallback", Type.EmptyTypes);
 				if (!ReGrowthCore_WorldDrawLayer_Beautification_Regenerate.IsAvailable())
-					Ban(nameof(YaOptSettings.OptWorldMapRegrowth), "ReGrowth 版本不兼容");
-				else if (HasForeignPatch(regenerate) || HasForeignPatch(fallback))
-					Ban(nameof(YaOptSettings.OptWorldMapRegrowth), "其他美化层补丁");
+					HardBan(nameof(YaOptSettings.OptWorldMapRegrowth), "ReGrowth 版本不兼容");
+				else
+					DefaultOffFromTargets(nameof(YaOptSettings.OptWorldMapRegrowth), regenerate, fallback);
 			}
 
 			if (YaOptGlobal.HasMod("m00nl1ght.GeologicalLandforms"))
@@ -64,16 +64,16 @@ namespace YaOpt.Helpers
 				var tileInfo = AccessTools.TypeByName("GeologicalLandforms.WorldTileInfo");
 				if (tileInfo != null && AccessTools.Method(tileInfo, "WarmCache", Type.EmptyTypes) != null)
 				{
-					Ban(nameof(YaOptSettings.OptWorldMapLandformsParallel), "Geological Landforms");
+					HardBan(nameof(YaOptSettings.OptWorldMapLandformsParallel), "Geological Landforms");
 				}
 				else
 				{
 					var regenerate = FindMethod("GeologicalLandforms.WorldLayer_Landforms", "Regenerate", Type.EmptyTypes);
 					var get = FindMethod("GeologicalLandforms.WorldTileInfo", "Get", new[] { typeof(int), typeof(bool) });
 					if (!GeologicalLandforms_WorldLayer_Landforms_Regenerate.IsAvailable())
-						Ban(nameof(YaOptSettings.OptWorldMapLandformsParallel), "Geological Landforms 版本不兼容");
-					else if (HasForeignPatch(regenerate) || HasForeignPatch(get))
-						Ban(nameof(YaOptSettings.OptWorldMapLandformsParallel), "其他地质地形补丁");
+						HardBan(nameof(YaOptSettings.OptWorldMapLandformsParallel), "Geological Landforms 版本不兼容");
+					else
+						DefaultOffFromTargets(nameof(YaOptSettings.OptWorldMapLandformsParallel), regenerate, get);
 				}
 			}
 		}
@@ -88,37 +88,34 @@ namespace YaOpt.Helpers
 
 		private static void BanAll(string reason)
 		{
-			Ban(nameof(YaOptSettings.OptWorldMapTextureCache), reason);
-			Ban(nameof(YaOptSettings.OptWorldMapSubMeshCache), reason);
-			Ban(nameof(YaOptSettings.OptWorldMapInsectLayer), reason);
-			Ban(nameof(YaOptSettings.OptWorldMapRegrowth), reason);
-			Ban(nameof(YaOptSettings.OptWorldMapLandformsParallel), reason);
+			HardBan(nameof(YaOptSettings.OptWorldMapTextureCache), reason);
+			HardBan(nameof(YaOptSettings.OptWorldMapSubMeshCache), reason);
+			HardBan(nameof(YaOptSettings.OptWorldMapInsectLayer), reason);
+			HardBan(nameof(YaOptSettings.OptWorldMapRegrowth), reason);
+			HardBan(nameof(YaOptSettings.OptWorldMapLandformsParallel), reason);
 		}
 
-		private static void Ban(string settingId, string reason)
+		/// <summary>
+		/// A known mod conflict (duplicate provider, bundled feature, incompatible version) locks the
+		/// option off.
+		/// </summary>
+		private static void HardBan(string settingId, string reason)
 		{
-			CompatibilityDefines.CachedBannedOptimizations.Add(settingId);
-			CompatibilityDefines.CachedBannedBy[settingId] = reason;
+			CompatibilityDefines.Ban(settingId, reason);
 		}
 
-		private static bool HasForeignPatch(MethodBase target)
+		/// <summary>
+		/// Disables the option by default when any foreign patch touches its targets, listing every
+		/// conflict; the player may still enable it.
+		/// </summary>
+		private static void DefaultOffFromTargets(string settingId, params MethodBase[] targets)
 		{
-			if (target == null)
-				return false;
+			var reasons = new List<string>();
+			for (var i = 0; i < targets.Length; i++)
+				PatchConflictGuard.CollectForeignConflicts(targets[i], includeAll: true, reasons);
 
-			var info = Harmony.GetPatchInfo(target);
-			if (info == null)
-				return false;
-
-			var harmony = YaOptMod.Instance.Harmony;
-			var earlyHarmony = YaOptMod.Instance.EarlyHarmony;
-			foreach (var owner in info.Owners)
-			{
-				if (owner != harmony.Id && owner != earlyHarmony.Id)
-					return true;
-			}
-
-			return false;
+			if (reasons.Count > 0)
+				CompatibilityDefines.PatchConflict(settingId, reasons);
 		}
 
 		private static MethodInfo FindMethod(string typeName, string methodName, Type[] parameters)

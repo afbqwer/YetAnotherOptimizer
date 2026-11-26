@@ -27,8 +27,7 @@ namespace YaOpt.Patches
 			if (YaOptGlobal.Settings?.OptPawnGearSessionCache.Enabled != true || PawnGearRebuildCompat.Ready)
 				return false;
 
-			var target = AccessTools.Method(typeof(PawnApparelGenerator), MethodName);
-			return !PatchConflictGuard.HasForeignPatch(target);
+			return AccessTools.Method(typeof(PawnApparelGenerator), MethodName) != null;
 		}
 
 		static bool Prefix(Pawn pawn, ThingStuffPair pair, ref bool __result)
