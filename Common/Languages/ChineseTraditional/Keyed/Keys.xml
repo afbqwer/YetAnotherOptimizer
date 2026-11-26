@@ -342,7 +342,7 @@
 	<YaOpt.Setting.Option.RoomStatsThrottle.Desc>每個房間最多每 128 tick 重算一次屬性與用途。原版只要房間內有物品生成或消失，之後任何一次讀取都會觸發重算，而每次重算要跑完所有房間屬性與房間用途評分，繁忙的倉庫每秒可能觸發多次。間隔內的讀取回傳上一次的結果。</YaOpt.Setting.Option.RoomStatsThrottle.Desc>
 	<YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>房間屬性、房間用途名稱以及基於房間屬性的心情最多會延遲約兩秒。如果某個模組依賴房間屬性立即變化（例如囚室轉換），請關閉此項。</YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>
 	<YaOpt.Setting.Option.AlertThrottle>警報更新節流</YaOpt.Setting.Option.AlertThrottle>
-	<YaOpt.Setting.Option.AlertThrottle.Desc>統計每個警報重算的耗時，並依成本安排更新頻率：廉價警報保持原版節奏，昂貴的警報最多每 15 秒檢查一次（高優先級最多每 5 秒）。關鍵警報永不延遲。每次進入遊戲後的最初幾秒用於學習各警報的耗時。任務、戒律、劇本與延時動作產生的警報不參與節流。</YaOpt.Setting.Option.AlertThrottle.Desc>
+	<YaOpt.Setting.Option.AlertThrottle.Desc>統計每個警報重算的耗時，並依成本安排更新頻率：廉價警報保持原版節奏，昂貴的警報最多每 5 秒檢查一次（高優先級最多每 2 秒）。關鍵警報永不延遲。每次進入遊戲後的最初幾秒用於學習各警報的耗時。任務、戒律、劇本與延時動作產生的警報不參與節流。</YaOpt.Setting.Option.AlertThrottle.Desc>
 	<YaOpt.Setting.Option.AlertThrottle.Compatibility>警報的顯示或消失最多可能延遲一個調度間隔。若已有模組替換了 AlertsReadoutUpdate（效能分析器或其他警報節流模組），本補丁可能無法套用，此時日誌中會出現 YaOpt 警告。</YaOpt.Setting.Option.AlertThrottle.Compatibility>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>

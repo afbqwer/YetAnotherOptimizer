@@ -42,9 +42,9 @@ namespace YaOpt.Helpers
 		/// </summary>
 		private const double CostToIntervalSecondsPerMs = 1.5;
 
-		private const double HighPriorityMaxIntervalSeconds = 5.0;
+		private const double HighPriorityMaxIntervalSeconds = 2.0;
 
-		private const double MediumPriorityMaxIntervalSeconds = 15.0;
+		private const double MediumPriorityMaxIntervalSeconds = 5.0;
 
 		/// <summary>
 		/// Re-check quickly right after an alert changes state, so the icon is confirmed promptly.
