@@ -287,8 +287,9 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
+		/// Reduces dynamic render-preparation chunks to four items to reduce load-imbalance tail latency.
 		/// </summary>
+		/// <seealso cref="Patches.Verse_DynamicDrawManager_PreDrawVisibleThings"/>
 		public OptimizationOption OptPrepareBatchCount { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.PrepareBatchCount",
@@ -298,8 +299,11 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
+		/// Prepares vanilla pawn material property blocks during parallel render preparation.
 		/// </summary>
+		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_GetMaterialPropertyBlock"/>
+		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_PreDraw"/>
+		/// <seealso cref="Patches.Verse_PawnRenderTree_ParallelPreDraw"/>
 		public OptimizationOption OptParallelMaterialUpdate { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ParallelMaterialUpdate",
@@ -2036,8 +2040,6 @@ namespace YaOpt
 			nameof(OptParallelThoughtUpdate),
 			nameof(OptParallelPostMapTick),
 			nameof(OptEarlyRenderPrepare),
-			nameof(OptPrepareBatchCount),
-			nameof(OptParallelMaterialUpdate),
 
 			// Superseded by vanilla 1.7 or incompatible with the 1.7 engine.
 			nameof(OptThingGetComp),

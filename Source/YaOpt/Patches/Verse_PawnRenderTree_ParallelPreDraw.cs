@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using Verse;
 using YaOpt.Helpers;
+using YaOpt.Prepatch;
 
 namespace YaOpt.Patches
 {
@@ -17,14 +18,16 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptFastRecacheRequested.Enabled;
+			return YaOptGlobal.Settings.OptFastRecacheRequested.Enabled ||
+				   (YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled && PrepatcherState.ParallelMaterialUpdateActive);
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
+			var fastRecache = YaOptGlobal.Settings.OptFastRecacheRequested.Enabled;
 			foreach (var instruction in instructions)
 			{
-				if (instruction.opcode == OpCodes.Callvirt && instruction.operand is MethodInfo methodInfo &&
+				if (fastRecache && instruction.opcode == OpCodes.Callvirt && instruction.operand is MethodInfo methodInfo &&
 					methodInfo.Name == "get_RecacheRequested")
 				{
 					yield return CodeInstruction.Call(
@@ -33,6 +36,18 @@ namespace YaOpt.Patches
 					continue;
 				}
 				yield return instruction;
+			}
+		}
+
+		static void Postfix(PawnDrawParms parms, List<PawnGraphicDrawRequest> ___drawRequests)
+		{
+			if (!YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled || !PrepatcherState.ParallelMaterialUpdateActive)
+				return;
+
+			for (var i = 0; i < ___drawRequests.Count; i++)
+			{
+				var request = ___drawRequests[i];
+				ParallelPreDrawHelper.PrepareMaterialPropertyBlock(request.node, request.material, parms);
 			}
 		}
 	}

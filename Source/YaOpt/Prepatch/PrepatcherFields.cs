@@ -41,6 +41,12 @@ namespace YaOpt.Prepatch
 		[PrepatcherField]
 		public static extern ref ToilRecursionGuard.State ToilGuard(this JobDriver target);
 
+		/// <summary>
+		/// Set while a node's material property block is prepared for the current draw request.
+		/// </summary>
+		[PrepatcherField]
+		public static extern ref bool MaterialPrepared(this PawnRenderNode target);
+
 		public static ListerBuildingsCache.State CreateListerState()
 		{
 			return new ListerBuildingsCache.State();

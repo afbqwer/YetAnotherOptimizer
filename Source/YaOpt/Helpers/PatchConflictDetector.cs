@@ -42,6 +42,7 @@ namespace YaOpt.Helpers
 			CheckRegionQueryFast();
 			CheckTempTerrainMerge();
 			CheckPawnComputeMatrix();
+			CheckPawnRenderPreparation();
 		}
 
 		/// <summary>
@@ -217,6 +218,19 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(PawnRenderTree), "ComputeMatrix"));
 			Check(nameof(YaOptSettings.OptComputeMatrixBurst), includeAll: false,
 				AccessTools.Method(typeof(PawnRenderTree), nameof(PawnRenderTree.TryGetMatrix)));
+		}
+
+		private static void CheckPawnRenderPreparation()
+		{
+			Check(nameof(YaOptSettings.OptPrepareBatchCount), includeAll: false,
+				AccessTools.Method(typeof(DynamicDrawManager), "PreDrawVisibleThings"));
+
+			Check(nameof(YaOptSettings.OptParallelMaterialUpdate), includeAll: false,
+				AccessTools.Method(typeof(PawnRenderTree), nameof(PawnRenderTree.ParallelPreDraw)),
+				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.PreDraw)),
+				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.GetMaterialPropertyBlock)));
+			Check(nameof(YaOptSettings.OptParallelMaterialUpdate), includeAll: true,
+				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.AppendDrawRequests)));
 		}
 
 		private static void CheckReplacement(string settingId, params MethodBase[] targets)

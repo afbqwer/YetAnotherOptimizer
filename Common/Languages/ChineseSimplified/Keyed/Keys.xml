@@ -95,9 +95,9 @@
 	<YaOpt.Setting.Option.EarlyRenderPrepare.Desc>提前启动物体渲染的准备工作。原版游戏虽然支持多线程准备物体渲染数据，但只在静态地形绘制完成后才开始。此优化将准备工作提前到地形绘制之前启动，利用主线程绘制地形的时间在后台并行处理物体数据，从而减少主线程的等待时间。</YaOpt.Setting.Option.EarlyRenderPrepare.Desc>
 	<YaOpt.Setting.Option.EarlyRenderPrepare.Compatibility>在渲染准备阶段绘图的Mod，绘制的图案会被地形遮住。</YaOpt.Setting.Option.EarlyRenderPrepare.Compatibility>
 	<YaOpt.Setting.Option.PrepareBatchCount>微调渲染准备批次数量</YaOpt.Setting.Option.PrepareBatchCount>
-	<YaOpt.Setting.Option.PrepareBatchCount.Desc>原版游戏在并行准备渲染数据时使用较大的批次数量。然而不同物体（如角色与物品）的渲染准备开销差异巨大，且分布不均（如袭击时的角色扎堆）。这导致线程负载不均衡，部分线程早早完成，而其他线程仍在处理重负载。此优化将批次数量调小，使空闲线程能通过工作窃取算法分担更多工作，从而平衡负载。</YaOpt.Setting.Option.PrepareBatchCount.Desc>
+	<YaOpt.Setting.Option.PrepareBatchCount.Desc>将动态渲染准备的批次大小固定为 4。当高开销角色聚集时，更小的批次可让空闲线程领取更多尚未处理的工作，降低负载不均造成的帧时间长尾，但也会增加一定的调度开销。</YaOpt.Setting.Option.PrepareBatchCount.Desc>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate>并行材质参数更新</YaOpt.Setting.Option.ParallelMaterialUpdate>
-	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>将材质参数更新放入并行的物体渲染准备中进行。原版游戏仅在主线程中执行此操作，但通常并不需要。如果检测到有Mod重载了特定物体的材质参数更新逻辑（可能包含非线程安全的操作），本Mod会自动将这些物体的更新退化回主线程执行。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
+	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>将原版 pawn 的材质属性块准备移入并行渲染准备阶段。自定义渲染请求或材质逻辑的 worker，以及仍需延迟解析的材质，会继续在主线程更新。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
 	<YaOpt.Setting.Option.FastRecacheRequested>内联缓存更新检查</YaOpt.Setting.Option.FastRecacheRequested>
 	<YaOpt.Setting.Option.FastRecacheRequested.Desc>优化物体是否需要重新生成渲染参数的检查。原版游戏通过递归调用渲染树上的每一个子节点来检查是否有子节点要求更新。统计发现97%的物体渲染树不超过4层，此优化将前4层节点的检查内联到一个函数中，省去了虚函数调用的开销。注：性能监测显示提升很小，未来版本可能移除。</YaOpt.Setting.Option.FastRecacheRequested.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad>延迟纹理加载</YaOpt.Setting.Option.LazyTextureLoad>
