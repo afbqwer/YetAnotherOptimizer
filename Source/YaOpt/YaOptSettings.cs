@@ -1208,6 +1208,29 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Prevents degenerate generation data from aborting the whole world-generation step.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla <c>PawnTechHediffsGenerator</c> reads <c>BaseMarketValue</c> from a null weighted
+		/// pick when every candidate implant costs zero, and a null entry in
+		/// <c>techHediffsRequired</c> reaches the install path. A faction leader generated after 120
+		/// failed attempts is also dereferenced without a check. Any of these throws through
+		/// <c>GeneratePawn</c> and makes the world generator skip the rest of the faction step. The
+		/// guards keep the vanilla random stream and only skip the pathological entry.
+		/// </remarks>
+		/// <seealso cref="Helpers.TechHediffFallback"/>
+		/// <seealso cref="Patches.RimWorld_PawnTechHediffsGenerator_GenerateTechHediffsFor"/>
+		/// <seealso cref="Patches.RimWorld_PawnTechHediffsGenerator_InstallPart"/>
+		/// <seealso cref="Patches.RimWorld_Faction_TryGenerateNewLeader"/>
+		public OptimizationOption OptPawnGenerationFailureGuard { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PawnGenerationFailureGuard",
+			Desc = "YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility",
+			Category = OptimizationCategory.Tps,
+		};
+
+		/// <summary>
 		/// Replaces apparel and weapon generation with constructive selection instead of retrying a full
 		/// random candidate set.
 		/// </summary>

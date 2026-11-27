@@ -274,6 +274,9 @@
 	<YaOpt.Setting.Option.PawnGenerationIndex>Pawn 生成索引化</YaOpt.Setting.Option.PawnGenerationIndex>
 	<YaOpt.Setting.Option.PawnGenerationIndex.Desc>在 pawn 生成期間使用單執行緒索引與快取：必選裝備查找、服裝篩選權重單遍、關係樣本權重單遍、Rosaline 出生父母查詢和基因通知批次處理。裝備索引需要開啟裝備重寫。任一子路徑遇到不相容補丁或方法缺失時獨立回退，不會把生成工作移到其它執行緒。</YaOpt.Setting.Option.PawnGenerationIndex.Desc>
 	<YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>已知 HAR、Rosaline 與 RPEF 關係補丁已明確識別；未知關係機率補丁、被其它模組 patch 的 Rosaline 查詢或批次處理通知方法只停用對應子路徑。</YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>
+	<YaOpt.Setting.Option.PawnGenerationFailureGuard>Pawn 生成失敗保護</YaOpt.Setting.Option.PawnGenerationFailureGuard>
+	<YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc>阻止退化的生成資料中斷 Pawn 生成。候選植入體總價值為 0 時原版會取到 null 再讀取其市場價值；techHediffsRequired 中的空條目會進入安裝流程；120 次生成嘗試全部失敗的派系領袖會被直接解引用。保護只跳過該條目或返回「無領袖」，隨機數序列與正常結果不變。預設開啟。</YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc>
+	<YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility>以 transpiler 實作，同一方法上的其它補丁仍會執行；原版方法形狀變化時自動跳過保護，保持原版行為。</YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility>
 	<YaOpt.Setting.Option.PawnGearSessionCache>Pawn 裝備生成會話快取</YaOpt.Setting.Option.PawnGearSessionCache>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Desc>在一次服裝或武器生成呼叫內復用不會變化的結果。服裝生成最多會重試 80 次候選組合，每次重試都重新檢查相同的材料限制與溫度屬性；武器選擇則會對每個候選權重求值兩次。快取只存活一次呼叫，隨機數序列與最終產物都與原版一致。</YaOpt.Setting.Option.PawnGearSessionCache.Desc>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>與 HAR 等種族模組共存；僅當其它模組直接 patch 被快取的方法時，對應部分自動停用。</YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>

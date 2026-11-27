@@ -274,6 +274,9 @@
 	<YaOpt.Setting.Option.PawnGenerationIndex>Pawn 生成索引化</YaOpt.Setting.Option.PawnGenerationIndex>
 	<YaOpt.Setting.Option.PawnGenerationIndex.Desc>在 pawn 生成期间使用单线程索引与缓存：必选装备查找、服装筛选权重单遍、关系样本权重单遍、Rosaline 出生父母查询和基因通知批处理。装备索引需要开启装备重写。任一子路径遇到不兼容补丁或方法缺失时独立回退，不会把生成工作移到其它线程。</YaOpt.Setting.Option.PawnGenerationIndex.Desc>
 	<YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>已知 HAR、Rosaline 与 RPEF 关系补丁已明确识别；未知关系概率补丁、被其它模组 patch 的 Rosaline 查询或批处理通知方法只停用对应子路径。</YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>
+	<YaOpt.Setting.Option.PawnGenerationFailureGuard>Pawn 生成失败保护</YaOpt.Setting.Option.PawnGenerationFailureGuard>
+	<YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc>阻止退化的生成数据中断 Pawn 生成。候选植入体总价值为 0 时原版会取到 null 再读取其市场价值；techHediffsRequired 中的空条目会进入安装流程；120 次生成尝试全部失败的派系领袖会被直接解引用。保护只跳过该条目或返回“无领袖”，随机数序列与正常结果不变。默认开启。</YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc>
+	<YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility>以 transpiler 实现，同一方法上的其它补丁仍会执行；原版方法形状变化时自动跳过保护，保持原版行为。</YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility>
 	<YaOpt.Setting.Option.PawnGearSessionCache>Pawn 装备生成会话缓存</YaOpt.Setting.Option.PawnGearSessionCache>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Desc>在一次服装或武器生成调用内复用不会变化的结果。服装生成最多会重试 80 次候选组合，每次重试都重新检查相同的材料限制与温度属性；武器选择则会对每个候选权重求值两次。缓存只存活一次调用，随机数序列与最终产物都与原版一致。</YaOpt.Setting.Option.PawnGearSessionCache.Desc>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>与 HAR 等种族模组共存；仅当其它模组直接 patch 被缓存的方法时，对应部分自动停用。</YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>
