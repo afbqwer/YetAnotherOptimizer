@@ -9,7 +9,7 @@ namespace YaOpt.Patches
 	/// <remarks>
 	/// Vanilla reacquires a target every 900-1800 ticks even when the shambler is standing idle
 	/// with nothing in mind. When a search finishes without a target, this patch moves the next
-	/// one to 15000-17499 ticks. The 180-tick post-engagement grace keeps a shambler that just
+	/// one to 9000-12000 ticks. The 180-tick post-engagement grace keeps a shambler that just
 	/// lost its target responsive, and active targets or delayed alerts keep the vanilla interval.
 	/// Damage, lord alerts and nearby activation still set targets through their own paths.
 	/// </remarks>
@@ -18,9 +18,9 @@ namespace YaOpt.Patches
 	[HarmonyPatch(nameof(Hediff_Shambler.TickInterval))]
 	internal static class Verse_Hediff_Shambler_TickInterval
 	{
-		private const int IDLE_INTERVAL_MIN = 15000;
+		private const int IDLE_INTERVAL_MIN = 9000;
 
-		private const int IDLE_INTERVAL_MAX = 17499;
+		private const int IDLE_INTERVAL_MAX = 12000;
 
 		private const int ACTIVE_GRACE_TICKS = 180;
 

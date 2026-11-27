@@ -177,7 +177,7 @@
 	<YaOpt.Setting.Option.IdeoCheck.Desc>遊戲在檢查文化是否允許做某事時，會遍歷其下所有的戒律。此最佳化會在戒律每次更新時，為它建立快取，記錄那些涉及到禁令的戒律，然後在檢查文化是否允許做某事時，只遍歷那些有禁令的戒律。</YaOpt.Setting.Option.IdeoCheck.Desc>
 	<YaOpt.Setting.Option.BedThrottle>床鋪檢查最佳化</YaOpt.Setting.Option.BedThrottle>
 	<YaOpt.Setting.Option.BedThrottle.Desc>最佳化臥床角色的床鋪可用性檢測，原版臥床角色每幀都會檢測當前床鋪是否可用，雖然很有必要，但卻包含了一些運算量較大的計算，比如判斷因病臥床的角色是否痊癒等。節流後每15幀（0.25秒）才會進行一次完整檢測，其他14幀只會進行簡單的快速檢測，如判斷床鋪是否被毀。</YaOpt.Setting.Option.BedThrottle.Desc>
-	<YaOpt.Setting.Option.BedThrottle.Compatibility>與Performance Fish（FailOnBedNoLongerUsable）、[WG] WOWGAG's Performance Patch的「床位可用性判定間隔」（Tick標籤頁）重複，只生效一個。Performance Fish每64幀檢測一次、其餘時間不檢測，更快；本項檢測更頻繁，更安全。床鋪意外不可用極罕見，建議用Performance Fish。</YaOpt.Setting.Option.BedThrottle.Compatibility>
+	<YaOpt.Setting.Option.BedThrottle.Compatibility>與[WG] WOWGAG's Performance Patch的「床位可用性判定間隔」（Tick標籤頁）重複，只生效一個。本項每15幀做一次完整檢測、其餘幀只做快速檢測，比長時間不檢測更安全。床鋪意外不可用極罕見。</YaOpt.Setting.Option.BedThrottle.Compatibility>
 	<YaOpt.Setting.Option.IdleThrottle>閒置檢查最佳化</YaOpt.Setting.Option.IdleThrottle>
 	<YaOpt.Setting.Option.IdleThrottle.Desc>對遊戲中閒置角色（睡覺和閒逛）的中斷閒置檢測做節流。具體最佳化包括：\n1.最佳化臥床角色起床工作的檢測間隔，原版遊戲的臥床角色每211幀會進行一次工作判定，最佳化可以延長這個間隔，還可以讓間隔變為動態間隔，根據臥床的殖民者數量來控制間隔，確保小型殖民地的角色依然能快速響應突發情況。\n2.最佳化閒逛角色的工作檢測間隔，原版處於閒置狀態的殖民者每125~200幀會進行一次工作判定，最佳化可以延長這個間隔，並且也能實現動態間隔，根據處於無事可做狀態的殖民者數量來控制間隔。</YaOpt.Setting.Option.IdleThrottle.Desc>
 	<YaOpt.Setting.Option.IdleThrottle.Compatibility>與[WG] WOWGAG's Performance Patch的「躺下時緊急工作檢查間隔」（Tick標籤頁）重複，只生效一個。本項按躺下的殖民者人數動態計算間隔，對方使用固定間隔（預設422幀，可調211~1266幀）。</YaOpt.Setting.Option.IdleThrottle.Compatibility>
@@ -211,7 +211,7 @@
 	<YaOpt.Setting.Option.WindUpdate.Desc>遊戲會在每一個邏輯幀中為所有植物材質更新風力強度參數，這是沒必要的。最佳化後將僅在渲染幀中更新風力強度。</YaOpt.Setting.Option.WindUpdate.Desc>
 	<YaOpt.Setting.Option.FastListerRemove>物體移除最佳化</YaOpt.Setting.Option.FastListerRemove>
 	<YaOpt.Setting.Option.FastListerRemove.Desc>最佳化從遊戲中移除物體時的效率。原版遊戲在移除物體時，需要在多個檢索列表中進行線性搜索以找到並刪除物體。此最佳化為每個物體添加了索引記錄，移除時可直接定位並使用“交換移除”策略（將末尾物體移至空位）。</YaOpt.Setting.Option.FastListerRemove.Desc>
-	<YaOpt.Setting.Option.FastListerRemove.Compatibility>與[WG] WOWGAG's Performance Patch、GUIPerformancePatch的「加快物品清單移除」（Tick標籤頁）重複。本項的索引查找快於對方的清單末尾掃描，建議關掉對方那項並重新啟動以啟用本項。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
+	<YaOpt.Setting.Option.FastListerRemove.Compatibility>與[WG] WOWGAG's Performance Patch的「加快物品清單移除」（Tick標籤頁）重複。本項的索引查找快於對方的清單末尾掃描，建議關掉對方那項並重新啟動以啟用本項。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物體快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>為地圖的已生成物體容器建立索引，使 DeSpawn 時的移除從「線性查找 + 列表搬移」變為 O(1) 的字典查找與交換移除。索引按需構建，若檢測到索引與列表不一致會自動回退原版邏輯。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
 	<YaOpt.Setting.Option.GenTypesLockFree>直接密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>
@@ -244,7 +244,7 @@
 	<YaOpt.Setting.Option.InvisibilityCache>隱形狀態快取</YaOpt.Setting.Option.InvisibilityCache>
 	<YaOpt.Setting.Option.InvisibilityCache.Desc>用快取的逐角色狀態回答 IsPsychologicallyInvisible、IsHiddenFromPlayer 和 GetAlpha，不再掃描 Hediff 清單。原版對每個可見角色每幀要執行多次這類掃描。</YaOpt.Setting.Option.InvisibilityCache.Desc>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle>蹣跚者閒置索敵節流</YaOpt.Setting.Option.ShamblerIdleThrottle>
-	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>將蹣跚者的閒置週期索敵從 900-1800 幀延長到 15000-17499 幀。已有目標、待觸發的警戒或最近 180 幀內交過戰的蹣跚者保持原版頻率；受傷、Lord 警戒和附近蹣跚者的喚醒仍會立即指定目標。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
+	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>將蹣跚者的閒置週期索敵從 900-1800 幀延長到 9000-12000 幀。已有目標、待觸發的警戒或最近 180 幀內交過戰的蹣跚者保持原版頻率；受傷、Lord 警戒和附近蹣跚者的喚醒仍會立即指定目標。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
 	<YaOpt.Setting.Option.RefuelSearchCache>Refuel搜尋快取</YaOpt.Setting.Option.RefuelSearchCache>
 	<YaOpt.Setting.Option.RefuelSearchCache.Desc>在Refuel工作的可執行檢查與任務建立之間重用一次最佳燃料和全部燃料的搜尋結果，並提供一份地圖Refuel候選清單。候選清單在生成和消失時維護；燃料量、自動Refuel開關、霧、預約等動態條件仍由原版即時檢查。該清單只用於正常局部掃描之後的全域回退。</YaOpt.Setting.Option.RefuelSearchCache.Desc>
 	<YaOpt.Setting.Option.DeathThoughts>死亡想法最佳化</YaOpt.Setting.Option.DeathThoughts>

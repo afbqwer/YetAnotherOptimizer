@@ -1328,8 +1328,8 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.PawnGenerationFailureGuard",
 			Desc = "YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility",
-			Category = OptimizationCategory.Tps,
-			SubCategory = "PawnGeneration"
+			Category = OptimizationCategory.Misc,
+			SubCategory = "Stability"
 		};
 
 		/// <summary>
@@ -1811,7 +1811,7 @@ namespace YaOpt
 		/// </summary>
 		/// <remarks>
 		/// Vanilla searches every 900-1800 ticks even while the shambler is standing idle.
-		/// Idle search is stretched to 15000-17499 ticks. Active shamblers, the 180-tick
+		/// Idle search is stretched to 9000-12000 ticks. Active shamblers, the 180-tick
 		/// post-engagement grace and delayed alerts keep vanilla timing.
 		/// </remarks>
 		/// <seealso cref="Patches.Verse_Hediff_Shambler_TickInterval"/>
