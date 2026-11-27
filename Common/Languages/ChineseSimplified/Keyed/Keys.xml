@@ -263,6 +263,10 @@
 	<YaOpt.Setting.Option.ImmunityStatCache.Desc>将 ImmunityGainSpeed 缓存20 tick。每条免疫记录在每个健康间隔都会重新求值一次该属性，尽管它很少变化。食物、休息、床、休息状态或年龄变化最多需要20 tick（约三分之一秒）才会反映到免疫获取速度上。</YaOpt.Setting.Option.ImmunityStatCache.Desc>
 	<YaOpt.Setting.Option.NutritionStatCache>食物营养值属性缓存</YaOpt.Setting.Option.NutritionStatCache>
 	<YaOpt.Setting.Option.NutritionStatCache.Desc>在 FoodUtility.NutritionForEater 内将 Nutrition 属性缓存20 tick，所有 AI 寻食都会经过这里。原版会为每个殖民者的每次扫描重新求值每个候选食物的营养值。进食者的 RawNutritionFactor 仍然每次单独求值。模组对营养值的动态修改最多需要20 tick 才会影响寻食结果。</YaOpt.Setting.Option.NutritionStatCache.Desc>
+	<YaOpt.Setting.Option.EnumHasFlagBitTest>食物类型标志位测试</YaOpt.Setting.Option.EnumHasFlagBitTest>
+	<YaOpt.Setting.Option.EnumHasFlagBitTest.Desc>Enum.HasFlag 的形参是装箱的 Enum，每次调用会分配两个 24 字节对象（值一个、标志一个）。优化后的 JIT 会把它折叠成普通位测试并消掉两次装箱，但停在 tier 0 的代码——包括被其他模组 transpile 改写的方法体——会一直分配。本项把 ThingDef 的食物类型标志位调用替换为完全等价的 (flags &amp; flag) == flag，不改变任何行为。</YaOpt.Setting.Option.EnumHasFlagBitTest.Desc>
+	<YaOpt.Setting.Option.FoodPlantSearchBfs>快速觅食植物</YaOpt.Setting.Option.FoodPlantSearchBfs>
+	<YaOpt.Setting.Option.FoodPlantSearchBfs.Desc>当殖民者能吃植物或树木时，原版会把全图食物源当成一个扁平列表逐个扫描，先算完分才做过滤。草地上这张表有数千株植物，每次寻食都要全算一遍，每个饿了的殖民者都重复一次。本项改为按邻近区域搜索植物、直接取最近的一株，非植物食物仍走原版扫描。植物没有腐烂与配料状态，原版评分也不含营养值，所以最近的一株通常就是原来的答案；只有带独立最优度偏移、或带特质/理念植物想法的模组植物，以及两个候选同分时，结果才可能不同。</YaOpt.Setting.Option.FoodPlantSearchBfs.Desc>
 	<YaOpt.Setting.Option.DrugPolicyCache>药物策略缓存</YaOpt.Setting.Option.DrugPolicyCache>
 	<YaOpt.Setting.Option.DrugPolicyCache.Desc>将药物策略条目的线性查找改为索引查找，并在同一 tick 内复用计划用药 JobGiver 的优先级结果。药物定义较多时，原版每次选 job 都会让这两个 JobGiver 反复扫描整张策略表。命中时会校验策略是否被修改，因此药物策略界面的改动立即生效。</YaOpt.Setting.Option.DrugPolicyCache.Desc>
 	<YaOpt.Setting.Option.DrugScheduleCache>药物计划判定缓存</YaOpt.Setting.Option.DrugScheduleCache>

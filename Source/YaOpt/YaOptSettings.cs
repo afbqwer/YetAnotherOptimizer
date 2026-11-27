@@ -801,6 +801,51 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Replaces <c>Enum.HasFlag</c> on <see cref="RimWorld.FoodTypeFlags"/> with a bit test.
+		/// </summary>
+		/// <remarks>
+		/// <c>HasFlag</c> takes an <see cref="System.Enum"/>, so both the receiver and the argument
+		/// are boxed - two 24-byte allocations per call. An optimized JIT folds the pattern into
+		/// <c>(x &amp; flag) == flag</c> and drops the boxes, but code that stays in tier 0 (including
+		/// method bodies rewritten by another mod's transpiler) keeps allocating. The rewrite is the
+		/// exact definition of <c>HasFlag</c> and applies to the three <see cref="Verse.ThingDef"/>
+		/// food-type getters and to <see cref="FoodUtility.GetFoodKind(ThingDef)"/>.
+		/// </remarks>
+		/// <seealso cref="Patches.MultiTargets_EnumHasFlag"/>
+		public OptimizationOption OptEnumHasFlagBitTest { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.EnumHasFlagBitTest",
+			Desc = "YaOpt.Setting.Option.EnumHasFlagBitTest.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
+			Default = true,
+		};
+
+		/// <summary>
+		/// Searches plant food by region expansion instead of scoring every plant on the map.
+		/// </summary>
+		/// <remarks>
+		/// When the eater's <see cref="RimWorld.FoodTypeFlags"/> includes <c>Plant</c> or <c>Tree</c>,
+		/// vanilla scans the whole map as one flat list and calls
+		/// <see cref="FoodUtility.FoodOptimality"/> on every candidate before the validator can
+		/// reject it, so a grass-covered map costs thousands of thought evaluations per food search
+		/// and per hungry pawn. Plants carry no rot or ingredient comps and vanilla's optimality
+		/// ignores nutrition, so the nearest reachable plant scores the same as the flat scan's
+		/// answer. Only modded plant defs with per-def optimality offsets, trait ingestible
+		/// modifiers or ideo thoughts can differ, plus the tie-break between equal scores.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_FoodUtility_BestFoodSourceOnMap_PlantBfs"/>
+		/// <seealso cref="Helpers.FoodPlantSearchHelper"/>
+		public OptimizationOption OptFoodPlantSearchBfs { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FoodPlantSearchBfs",
+			Desc = "YaOpt.Setting.Option.FoodPlantSearchBfs.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
+			Default = true,
+		};
+
+		/// <summary>
 		/// Indexes <see cref="DrugPolicy"/> entry lookups and reuses the scheduled-drug job givers'
 		/// priorities within one tick.
 		/// </summary>
