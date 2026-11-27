@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Text;
 using Verse;
+using Verse.AI;
 using Waylith.Injection;
 using YaOpt.Helpers;
 
@@ -32,6 +33,14 @@ namespace YaOpt.Prepatch
 		/// </summary>
 		internal static bool InvisibilityActive;
 
+		/// <summary>
+		/// True when the per-driver toil guard field is injected. The guard patch checks this in
+		/// <c>Prepare</c>, because calling an uninjected <c>extern</c> accessor would throw.
+		/// </summary>
+		internal static bool ToilGuardActive;
+
+		private static bool _warnedToilGuardInactive;
+
 		internal static void MarkListerPatched()
 		{
 			ListerPatched = true;
@@ -56,6 +65,7 @@ namespace YaOpt.Prepatch
 				ImmunityActive = false;
 				RefuelCandidatesActive = false;
 				InvisibilityActive = false;
+				ToilGuardActive = false;
 				return;
 			}
 
@@ -71,6 +81,15 @@ namespace YaOpt.Prepatch
 				HasInjectedAccessorField(nameof(PrepatcherFields.RefuelCandidates), typeof(Map)) &&
 				HasInjectedField(typeof(Map), typeof(RefuelWorkCandidates.State)) &&
 				settings.OptRefuelSearchCache.Enabled;
+
+			ToilGuardActive = settings.OptToilRecursionGuard.Enabled &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.ToilGuard), typeof(JobDriver)) &&
+				HasInjectedField(typeof(JobDriver), typeof(ToilRecursionGuard.State));
+			if (settings.OptToilRecursionGuard.Enabled && !ToilGuardActive && !_warnedToilGuardInactive)
+			{
+				_warnedToilGuardInactive = true;
+				YaOptMod.Warning("The toil recursion guard is enabled but its per-driver field was not injected; the guard stays inactive.");
+			}
 
 			// A field-name match is the reliable gate here: Pawn already has other long fields,
 			// so a type match would false-positive, and the rewritten accessor's IL body is not

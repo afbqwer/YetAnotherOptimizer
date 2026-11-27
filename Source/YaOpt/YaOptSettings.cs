@@ -73,6 +73,28 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Caps how many toils a driver may advance through in one tick.
+		/// </summary>
+		/// <remarks>
+		/// <c>JobDriver.TryActuallyStartNextToil</c> executes the next toil's initAction on the
+		/// current stack frame. Instant toils keep cascading, and PatherArrival toils complete
+		/// synchronously when the pawn is already at the target, so a toil graph that jumps back
+		/// into such a toil recurses without bound. On CoreCLR a stack overflow cannot be caught
+		/// and kills the process. Excess advances are postponed to the next tick; a driver that
+		/// still cannot advance for one second has its job ended with an error instead of looping
+		/// forever. Normal jobs never reach the limit.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_AI_JobDriver_TryActuallyStartNextToil"/>
+		/// <seealso cref="YaOpt.Helpers.ToilRecursionGuard"/>
+		public OptimizationOption OptToilRecursionGuard { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ToilRecursionGuard",
+			Desc = "YaOpt.Setting.Option.ToilRecursionGuard.Desc",
+			Category = OptimizationCategory.Main,
+			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll
+		};
+
+		/// <summary>
 		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
 		/// </summary>
 		public OptimizationOption OptMaterialGetColor { get; } = new OptimizationOption

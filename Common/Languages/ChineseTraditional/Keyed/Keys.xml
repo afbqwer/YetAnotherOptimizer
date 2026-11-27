@@ -53,6 +53,8 @@
 	<YaOpt.Setting.Option.EnhancedCrashLog.Desc>把受控 UnhandledException 的堆疊（含方法名稱與原始碼行）附加到存檔目錄 Logs 子資料夾下的 YaOpt_Crash_&lt;pid&gt;.log，與原生 VEH 的故障現場在同一份報告中。下次啟動時，會把最近一次當機的報告完整複製到 YaOpt_Crash-prev.log，並在遊戲日誌中列印摘要；其餘舊報告會被刪除，Logs 子資料夾只保留本次與上一次的報告。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.EnhancedCrashLog.Desc>
 	<YaOpt.Setting.Option.FatalStderrCapture>記錄致命錯誤的 stderr 原文</YaOpt.Setting.Option.FatalStderrCapture>
 	<YaOpt.Setting.Option.FatalStderrCapture.Desc>以無緩衝方式把處理程序 stderr 重新導向到 YaOpt_Crash_&lt;pid&gt;.log，讓執行階段在結束前輸出的內容（例如堆疊溢位時反覆出現的函式名稱）附加到同一份報告。當 [WG] WOWGAG's Performance Patch 已載入，或 stderr 已是檔案/主控台時會自動停用，避免接管其他 Mod 正在使用的全域控制代碼。僅限 Windows。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.FatalStderrCapture.Desc>
+	<YaOpt.Setting.Option.ToilRecursionGuard>Toil 迴圈防護</YaOpt.Setting.Option.ToilRecursionGuard>
+	<YaOpt.Setting.Option.ToilRecursionGuard.Desc>限制單個小人於一個 tick 內能推進的 toil 數量。原版會在目前堆疊框架上直接執行下一個 toil 的啟動動作，而部分 toil 會立即完成（Instant toil，或目標格就是腳下所在格）。若 toil 圖反覆跳回這種會立即完成的 toil，就會持續遞迴直到堆疊溢位；在 .NET 下堆疊溢位無法攔截，行程會直接結束。超出上限的推進會延後到下一個 tick；若連續 1 秒仍無法推進，則記錄錯誤並結束該工作，避免小人永久卡死。正常工作流程不會觸及上限，因此不改變遊戲行為。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.ToilRecursionGuard.Desc>
 	<YaOpt.Setting.Option.MaterialGetColor>材質顏色快取</YaOpt.Setting.Option.MaterialGetColor>
 	<YaOpt.Setting.Option.MaterialGetColor.Desc>快取材質顏色以減少頻繁呼叫底層引擎函式帶來的開銷。當顏色發生變化時會自動更新快取。</YaOpt.Setting.Option.MaterialGetColor.Desc>
 	<YaOpt.Setting.Option.GlowGridCombine>光照合併最佳化</YaOpt.Setting.Option.GlowGridCombine>

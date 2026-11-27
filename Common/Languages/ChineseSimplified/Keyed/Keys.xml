@@ -53,6 +53,8 @@
 	<YaOpt.Setting.Option.EnhancedCrashLog.Desc>把托管 UnhandledException 的堆栈（含方法名与源码行）追加到存档目录 Logs 子文件夹下的 YaOpt_Crash_&lt;pid&gt;.log，与原生 VEH 的故障现场在同一份报告里。下次启动时，会把最近一次崩溃的报告完整复制到 YaOpt_Crash-prev.log，并在游戏日志中打印摘要；其余旧报告会被删除，Logs 文件夹只保留本次与上一次的报告。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.EnhancedCrashLog.Desc>
 	<YaOpt.Setting.Option.FatalStderrCapture>记录致命错误的 stderr 原文</YaOpt.Setting.Option.FatalStderrCapture>
 	<YaOpt.Setting.Option.FatalStderrCapture.Desc>以无缓冲方式把进程 stderr 重定向到 YaOpt_Crash_&lt;pid&gt;.log，让运行时在退出前打出的内容（例如栈溢出时反复出现的函数名）追加到同一份报告。当 [WG] WOWGAG's Performance Patch 已加载，或 stderr 已是文件/控制台时会自动禁用，避免接管其他 Mod 正在使用的全局句柄。仅限 Windows。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.FatalStderrCapture.Desc>
+	<YaOpt.Setting.Option.ToilRecursionGuard>Toil 循环防护</YaOpt.Setting.Option.ToilRecursionGuard>
+	<YaOpt.Setting.Option.ToilRecursionGuard.Desc>限制单个小人在一个 tick 内能推进的 toil 数量。原版会在当前栈帧上直接执行下一个 toil 的启动动作，而部分 toil 会立即完成（Instant toil，或目标格就是脚下所在格）。如果 toil 图反复跳回这种会立即完成的 toil，就会持续递归直到栈溢出；在 .NET 下栈溢出无法捕获，进程会直接退出。超出上限的推进会被推迟到下一个 tick；若连续 1 秒仍无法推进，则报错并结束该工作，避免小人永久卡死。正常工作流不会触及上限，因此不改变游戏行为。更改此选项后需要重启游戏来生效。</YaOpt.Setting.Option.ToilRecursionGuard.Desc>
 	<YaOpt.Setting.Option.MaterialGetColor>材质颜色缓存</YaOpt.Setting.Option.MaterialGetColor>
 	<YaOpt.Setting.Option.MaterialGetColor.Desc>缓存材质颜色以减少频繁调用底层引擎函数带来的开销。当颜色发生变化时会自动更新缓存。</YaOpt.Setting.Option.MaterialGetColor.Desc>
 	<YaOpt.Setting.Option.GlowGridCombine>光照合并优化</YaOpt.Setting.Option.GlowGridCombine>
