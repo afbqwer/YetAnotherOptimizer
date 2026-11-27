@@ -559,9 +559,21 @@ namespace YaOpt.Helpers
 		{
 			parameters = default;
 
+			StatPart_Quality quality = null;
+			var hasContentsBeauty = false;
+			if (stat.parts != null)
+			{
+				for (var i = 0; i < stat.parts.Count; i++)
+				{
+					if (stat.parts[i] is StatPart_Quality part)
+						quality = part;
+					else if (stat.parts[i] is StatPart_ContentsBeauty)
+						hasContentsBeauty = true;
+				}
+			}
+
 			if (stat.parts == null || stat.parts.Count != 2
-				|| !(stat.parts[0] is StatPart_Quality quality)
-				|| !(stat.parts[1] is StatPart_ContentsBeauty))
+				|| quality == null || !hasContentsBeauty)
 			{
 				YaOptMod.Error($"{stat.defName} no longer has exactly [StatPart_Quality, " +
 					"StatPart_ContentsBeauty]; the beauty fast path is disabled.");

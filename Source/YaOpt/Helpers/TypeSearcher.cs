@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Verse;
 
 namespace YaOpt.Helpers
@@ -27,22 +28,36 @@ namespace YaOpt.Helpers
 			if (count == 0)
 				return;
 
+			void ScanTypes(IEnumerable<Type> candidates)
+			{
+				foreach (var type in candidates)
+				{
+					if (type == null)
+						continue;
+
+					for (var i = 0; i < count; i++)
+					{
+						var searchingType = types[i];
+						if (searchingType.IsAssignableFrom(type))
+						{
+							YaOptMod.Debug($"Found a derived class of {searchingType.Name}: {type.FullName}");
+							searchingTypeAndCallbacks[searchingType].Invoke(type);
+						}
+					}
+				}
+			}
+
 			foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
 			{
 				try
 				{
-					foreach (var type in assembly.GetTypes())
-					{
-						for (var i = 0; i < count; i++)
-						{
-							var searchingType = types[i];
-							if (searchingType.IsAssignableFrom(type))
-							{
-								YaOptMod.Debug($"Found a derived class of {searchingType.Name}: {type.FullName}");
-								searchingTypeAndCallbacks[searchingType].Invoke(type);
-							}
-						}
-					}
+					ScanTypes(assembly.GetTypes());
+				}
+				catch (ReflectionTypeLoadException ex)
+				{
+					YaOptMod.Warning($"Partial type load failure in assembly '{assembly.FullName}': " +
+						string.Join(Environment.NewLine, ex.LoaderExceptions.Select(error => error?.Message)));
+					ScanTypes(ex.Types);
 				}
 				catch (Exception ex)
 				{
