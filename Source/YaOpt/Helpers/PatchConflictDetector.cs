@@ -43,6 +43,7 @@ namespace YaOpt.Helpers
 			CheckOxygenJobFastExit();
 			CheckShamblerStateCache();
 			CheckRegionQueryFast();
+			CheckRegionProcessorDistFilter();
 			CheckBeautyFastPath();
 			CheckTempTerrainMerge();
 			CheckPawnComputeMatrix();
@@ -237,6 +238,19 @@ namespace YaOpt.Helpers
 			Check(nameof(YaOptSettings.OptRegionQueryFast), includeAll: true,
 				AccessTools.Method(typeof(RegionAndRoomQuery), nameof(RegionAndRoomQuery.RegionAt)),
 				AccessTools.Method(typeof(RegionGrid), nameof(RegionGrid.GetValidRegionAt)));
+		}
+
+		/// <summary>
+		/// The distance-first guard skips reachability calls for things that vanilla cannot select,
+		/// so a foreign prefix or transpiler on that method would not see those calls. A foreign
+		/// transpiler on <c>ProcessThing</c> itself can also reshape the body past our IL check.
+		/// </summary>
+		private static void CheckRegionProcessorDistFilter()
+		{
+			Check(nameof(YaOptSettings.OptRegionProcessorDistFilter), includeAll: false,
+				AccessTools.Method(typeof(ReachabilityWithinRegion),
+					nameof(ReachabilityWithinRegion.ThingFromRegionListerReachable)),
+				AccessTools.Method(typeof(RegionProcessorClosestThingReachable), "ProcessThing"));
 		}
 
 		/// <summary>

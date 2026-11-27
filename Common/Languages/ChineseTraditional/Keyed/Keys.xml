@@ -231,6 +231,9 @@
 	<YaOpt.Setting.Option.RegionQueryFast>區域查詢快速路徑</YaOpt.Setting.Option.RegionQueryFast>
 	<YaOpt.Setting.Option.RegionQueryFast.Desc>當區域網格沒有待重建內容時，直接讀取區域陣列，省去每次區域/房間查詢的重建檢查與重複邊界檢查。區域為髒、更新器停用、網格已釋放或越界時仍走原版邏輯（包含日誌）。不快取任何結果，因此無需失效處理。</YaOpt.Setting.Option.RegionQueryFast.Desc>
 	<YaOpt.Setting.Option.RegionQueryFast.Compatibility>若其他模組修改了 RegionAt 或 GetValidRegionAt，本選項可能繞過它們。</YaOpt.Setting.Option.RegionQueryFast.Compatibility>
+	<YaOpt.Setting.Option.RegionProcessorDistFilter>最近物品搜尋優先算距離</YaOpt.Setting.Option.RegionProcessorDistFilter>
+	<YaOpt.Setting.Option.RegionProcessorDistFilter.Desc>無優先權的最近可達物品搜尋中，先依距離平方過濾，再進行可達性檢查。超出最大距離、或無法優於目前最佳候選的物品會在路徑網格與禁止檢查之前被跳過。驗證器呼叫與搜尋順序不變，帶優先權的搜尋仍走原版邏輯。</YaOpt.Setting.Option.RegionProcessorDistFilter.Desc>
+	<YaOpt.Setting.Option.RegionProcessorDistFilter.Compatibility>若其他模組修改了 ThingFromRegionListerReachable，被距離過濾掉的物品可能繞過它們。</YaOpt.Setting.Option.RegionProcessorDistFilter.Compatibility>
 	<YaOpt.Setting.Option.CameraUpdateRate>更新速率計算最佳化</YaOpt.Setting.Option.CameraUpdateRate>
 	<YaOpt.Setting.Option.CameraUpdateRate.Desc>遊戲會在每一幀計算物體在螢幕上的可見性，並調低螢幕外物體的更新速率，然而這個計算過於精細了，以至於它本身就有一定的開銷。此最佳化微調了可見性判斷，稍微放寬了判定標準，減少了更新速率計算的開銷，代價是在一些特定條件下可能有少量接近螢幕邊緣但不可見的物體也被誤判為可見，讓系統增加它們的更新速率導致執行開銷。但在大部分情況下，這個最佳化是值得的。</YaOpt.Setting.Option.CameraUpdateRate.Desc>
 	<YaOpt.Setting.Option.GetMapPawns>地圖角色檢索最佳化</YaOpt.Setting.Option.GetMapPawns>
