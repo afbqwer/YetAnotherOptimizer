@@ -12,7 +12,7 @@
 .trae/
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-RimHUD-src
+.analysis
 
 # Mono auto generated files
 mono_crash.*
