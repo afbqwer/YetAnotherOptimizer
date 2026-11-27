@@ -97,7 +97,11 @@
 	<YaOpt.Setting.Option.PrepareBatchCount>微调渲染准备批次数量</YaOpt.Setting.Option.PrepareBatchCount>
 	<YaOpt.Setting.Option.PrepareBatchCount.Desc>将动态渲染准备的批次大小固定为 4。当高开销角色聚集时，更小的批次可让空闲线程领取更多尚未处理的工作，降低负载不均造成的帧时间长尾，但也会增加一定的调度开销。</YaOpt.Setting.Option.PrepareBatchCount.Desc>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate>并行材质参数更新</YaOpt.Setting.Option.ParallelMaterialUpdate>
-	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>在并行渲染准备阶段填充每个节点已有的材质属性块。具有自定义渲染请求或材质逻辑的 worker，以及仍需延迟解析的材质，会继续在主线程处理。此优化假定原版每个节点只生成一个绘制请求；若 Mod 在未覆盖该路径的情况下为同一节点生成多个使用不同材质的请求，可能出现颜色错误。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
+	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>在并行渲染准备阶段填充每个节点已有的材质属性块。材质颜色、着色器和遮罩由主线程缓存并定期校验，worker 只读取缓存，不读取 Material 的颜色、着色器或遮罩。多绘制请求节点、具有自定义材质路径的 worker 以及仍需延迟解析的材质会回退主线程。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
+	<YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility>与 WOWGAG's Performance Patch 的材质与角色绘制优化冲突。请关闭其中的「复用绘制角色时的材质信息」「复用材质基础颜色属性编号」「绘制时跳过重复的颜色设置」。</YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility>
+	<YaOpt.Setting.Option.ReuseCorpseRender>复用尸体渲染准备</YaOpt.Setting.Option.ReuseCorpseRender>
+	<YaOpt.Setting.Option.ReuseCorpseRender.Desc>对死亡角色复用已生成的绘制请求和矩阵。仅当姿势、位置、旋转、染色和重绘标记均未变化时生效，最多连续复用 30 次；存在动画、逐请求材质或重绘请求时回退原版。</YaOpt.Setting.Option.ReuseCorpseRender.Desc>
+	<YaOpt.Setting.Option.ReuseCorpseRender.Compatibility>与 WOWGAG's Performance Patch 的「复用尸体渲染」冲突，请关闭对方该项。</YaOpt.Setting.Option.ReuseCorpseRender.Compatibility>
 	<YaOpt.Setting.Option.FastRecacheRequested>内联缓存更新检查</YaOpt.Setting.Option.FastRecacheRequested>
 	<YaOpt.Setting.Option.FastRecacheRequested.Desc>优化物体是否需要重新生成渲染参数的检查。原版游戏通过递归调用渲染树上的每一个子节点来检查是否有子节点要求更新。统计发现97%的物体渲染树不超过4层，此优化将前4层节点的检查内联到一个函数中，省去了虚函数调用的开销。注：性能监测显示提升很小，未来版本可能移除。</YaOpt.Setting.Option.FastRecacheRequested.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad>延迟纹理加载</YaOpt.Setting.Option.LazyTextureLoad>
@@ -358,8 +362,6 @@
 	<YaOpt.Setting.Option.PathIncrementalGrid.Desc>原版只要存在任意格子变化（包括没有任何代价源读取的空地上的预约或搬运），就会重建所有寻路代价网格（整图、每个通行参数）。此优化只重算变化格并原地修补缓存网格，代价与原版完全一致，但不再整图重建。少量变化改为串行收集以省去线程池开销。依赖自定义网格、规避网格、允许区域或领主行走网格的网格仍会像原版一样整图重建。</YaOpt.Setting.Option.PathIncrementalGrid.Desc>
 	<YaOpt.Setting.Option.PathJobCompletion>寻路任务完成复用</YaOpt.Setting.Option.PathJobCompletion>
 	<YaOpt.Setting.Option.PathJobCompletion.Desc>直接遍历句柄完成所有寻路任务，避免每 tick 分配、填充并释放一个 Persistent 原生数组。</YaOpt.Setting.Option.PathJobCompletion.Desc>
-	<YaOpt.Setting.Option.PathMoveTicksCache>移动耗时缓存</YaOpt.Setting.Option.PathMoveTicksCache>
-	<YaOpt.Setting.Option.PathMoveTicksCache.Desc>在当前 tick 内缓存 Pawn.TicksPerMove。原版在每个 pawn 走入每一格时、以及参数化路径时都会重新求值，而其输入只在 tick 之间变化。缓存仅维持一个 tick，行走途中属性变化会在一个 tick 内生效。</YaOpt.Setting.Option.PathMoveTicksCache.Desc>
 	<YaOpt.Setting.Option.PathFindNowNoBarrier>同步寻路屏障跳过</YaOpt.Setting.Option.PathFindNowNoBarrier>
 	<YaOpt.Setting.Option.PathFindNowNoBarrier.Desc>FindPathNow 开头会等待全部在飞寻路任务。该等待只为保护随后的数据收集，而本 tick 若已收集过则收集是空操作。此优化在常见情况下跳过该等待，消除袭击与地图生成中同步寻路造成的停顿；真正需要收集时仍会等待。</YaOpt.Setting.Option.PathFindNowNoBarrier.Desc>
 	<YaOpt.Setting.Option.PathNodeReset>寻路节点复位</YaOpt.Setting.Option.PathNodeReset>

@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Verse;
 using YaOpt.Helpers;
+using YaOpt.Prepatch;
 
 namespace YaOpt.Patches
 {
@@ -14,12 +15,13 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled;
+			return YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled &&
+				PrepatcherState.PreparedMaterialActive;
 		}
 
 		static void Prefix()
 		{
-			ParallelPreDrawHelper.PrepareFactionColors();
+			ParallelPreDrawHelper.PrepareMaterialState();
 		}
 	}
 }

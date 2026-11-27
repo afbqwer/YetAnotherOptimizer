@@ -39,7 +39,22 @@ namespace YaOpt.Prepatch
 		/// </summary>
 		internal static bool ToilGuardActive;
 
+		/// <summary>
+		/// True when the per-node material preparation stamp was injected. The render patches check
+		/// this in <c>Prepare</c> because calling an uninjected <c>extern</c> accessor would throw.
+		/// </summary>
+		internal static bool PreparedMaterialActive;
+
+		/// <summary>
+		/// True when the per-tree corpse render cache field was injected.
+		/// </summary>
+		internal static bool CorpseRenderActive;
+
 		private static bool _warnedToilGuardInactive;
+
+		private static bool _warnedPreparedMaterialInactive;
+
+		private static bool _warnedCorpseRenderInactive;
 		internal static void MarkListerPatched()
 		{
 			ListerPatched = true;
@@ -65,6 +80,8 @@ namespace YaOpt.Prepatch
 				RefuelCandidatesActive = false;
 				InvisibilityActive = false;
 				ToilGuardActive = false;
+				PreparedMaterialActive = false;
+				CorpseRenderActive = false;
 				return;
 			}
 
@@ -88,6 +105,26 @@ namespace YaOpt.Prepatch
 			{
 				_warnedToilGuardInactive = true;
 				YaOptMod.Warning("The toil recursion guard is enabled but its per-driver field was not injected; the guard stays inactive.");
+			}
+
+			PreparedMaterialActive = settings.OptParallelMaterialUpdate.Enabled &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.PreparedMaterial), typeof(PawnRenderNode)) &&
+				HasInjectedField(typeof(PawnRenderNode), typeof(MaterialPrepareState));
+			if (settings.OptParallelMaterialUpdate.Enabled && !PreparedMaterialActive &&
+				!_warnedPreparedMaterialInactive)
+			{
+				_warnedPreparedMaterialInactive = true;
+				YaOptMod.Warning("Parallel material updates are enabled but the per-node prepared-material field was not injected; the optimization stays inactive.");
+			}
+
+			CorpseRenderActive = settings.OptReuseCorpseRender.Enabled &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.CorpseRender), typeof(PawnRenderTree)) &&
+				HasInjectedField(typeof(PawnRenderTree), typeof(CorpseRenderState));
+			if (settings.OptReuseCorpseRender.Enabled && !CorpseRenderActive &&
+				!_warnedCorpseRenderInactive)
+			{
+				_warnedCorpseRenderInactive = true;
+				YaOptMod.Warning("Corpse render reuse is enabled but its per-tree field was not injected; the optimization stays inactive.");
 			}
 
 			// A field-name match is the reliable gate here: Pawn already has other long fields,

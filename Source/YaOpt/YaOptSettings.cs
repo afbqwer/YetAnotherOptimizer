@@ -305,9 +305,9 @@ namespace YaOpt
 		/// </summary>
 		/// <remarks>
 		/// Writes each node's own <see cref="Verse.PawnRenderNode.MatPropBlock"/>, which matches the
-		/// vanilla one-request-per-node render path. Workers with custom render or material logic and
-		/// deferred materials stay on the main thread. Mods that create multiple different-material
-		/// requests for one node without overriding the detected render path are not supported.
+		/// vanilla one-request-per-node render path. Material properties come from a main-thread
+		/// fact cache so workers never touch Unity material accessors. Workers with custom render or
+		/// material logic and deferred materials stay on the main thread.
 		/// </remarks>
 		/// <seealso cref="Patches.Verse_PawnRenderTree_ParallelPreDraw"/>
 		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_PreDraw"/>
@@ -317,8 +317,27 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ParallelMaterialUpdate",
 			Desc = "YaOpt.Setting.Option.ParallelMaterialUpdate.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility",
 			Category = OptimizationCategory.Fps,
 			SubCategory = "Graphics"
+		};
+
+		/// <summary>
+		/// Reuses a dead pawn's prepared draw requests and matrices while its draw inputs stay unchanged.
+		/// </summary>
+		/// <remarks>
+		/// Limited to dead pawns and refreshed at least every 30 calls. A tree with an active animation,
+		/// per-request materials or a pending recache always runs the vanilla method.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_PawnRenderTree_ParallelPreDraw_CorpseCache"/>
+		public OptimizationOption OptReuseCorpseRender { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ReuseCorpseRender",
+			Desc = "YaOpt.Setting.Option.ReuseCorpseRender.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.ReuseCorpseRender.Compatibility",
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics",
+			Default = true
 		};
 
 		/// <summary>
@@ -2067,19 +2086,6 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.PathJobCompletion",
 			Desc = "YaOpt.Setting.Option.PathJobCompletion.Desc",
-			Category = OptimizationCategory.Tps,
-			SubCategory = "Pathfinding"
-		};
-
-		/// <summary>
-		/// Caches <see cref="Pawn.TicksPerMove"/> for the current tick.
-		/// </summary>
-		/// <seealso cref="Patches.Verse_Pawn_TicksPerMove"/>
-		/// <seealso cref="Helpers.Pathfinding.TicksPerMoveCache"/>
-		public OptimizationOption OptPathMoveTicksCache { get; } = new OptimizationOption
-		{
-			Name = "YaOpt.Setting.Option.PathMoveTicksCache",
-			Desc = "YaOpt.Setting.Option.PathMoveTicksCache.Desc",
 			Category = OptimizationCategory.Tps,
 			SubCategory = "Pathfinding"
 		};

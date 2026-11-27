@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using Verse;
+using YaOpt.Prepatch;
 
 namespace YaOpt.Helpers
 {
@@ -34,6 +36,8 @@ namespace YaOpt.Helpers
 		public static bool FastRecacheRequestedAvailable { get; private set; } = true;
 
 		private static readonly HashSet<Type> CustomMaterialPathWorkers = new HashSet<Type>();
+
+		private static volatile int _renderFrame;
 
 		static ParallelPreDrawHelper()
 		{
@@ -141,7 +145,7 @@ namespace YaOpt.Helpers
 			if (!DebugViewSettings.singleThreadedDrawing)
 			{
 				if (YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled)
-					PrepareFactionColors();
+					PrepareMaterialState();
 
 				var details = _earlyDetails;
 				var drawThings = manager.drawThings;
@@ -308,7 +312,7 @@ namespace YaOpt.Helpers
 			if (!DebugViewSettings.singleThreadedDrawing)
 			{
 				if (YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled)
-					PrepareFactionColors();
+					PrepareMaterialState();
 
 				var drawThings = manager.drawThings;
 				for (var i = 0; i < details.Length; i++)
@@ -384,6 +388,9 @@ namespace YaOpt.Helpers
 
 			if (IsMethodOverridden(type, nameof(PawnRenderNodeWorker.PreDraw)) ||
 				IsMethodOverridden(type, nameof(PawnRenderNodeWorker.GetMaterialPropertyBlock)) ||
+				IsMethodOverridden(type, "GetGraphic") ||
+				IsMethodOverridden(type, "GetGraphicState") ||
+				IsMethodOverridden(type, "GetMaterial") ||
 				IsMethodOverridden(type, nameof(PawnRenderNodeWorker.AppendDrawRequests)) ||
 				IsMethodOverridden(type, nameof(PawnRenderNodeWorker.GetFinalizedMaterial)))
 			{
@@ -404,6 +411,16 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
+		/// Initializes lazy faction colors and validates cached material facts before workers run.
+		/// </summary>
+		public static void PrepareMaterialState()
+		{
+			_renderFrame = Time.frameCount;
+			MaterialFactCache.ValidateSome();
+			PrepareFactionColors();
+		}
+
+		/// <summary>
 		/// Initializes lazy faction colors before material preparation runs on worker threads.
 		/// </summary>
 		public static void PrepareFactionColors()
@@ -416,33 +433,61 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
-		/// Returns whether <see cref="PrepareMaterialPropertyBlock"/> can fill the block for this draw.
+		/// Returns whether the draw phase may use the block prepared for the current request.
 		/// </summary>
-		/// <remarks>
-		/// The draw patches use the same check before returning the pre-filled block. This keeps
-		/// deferred materials and custom worker paths on the vanilla main-thread path.
-		/// </remarks>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool CanUsePreparedBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
 		{
+			return IsEligible(node, material, parms) && PrepatcherState.PreparedMaterialActive &&
+				node.PreparedMaterial().Matches(Time.frameCount, material, parms);
+		}
+
+		/// <summary>
+		/// Consumes the prepared stamp so another request or draw cannot reuse the cleared block.
+		/// </summary>
+		public static bool TryUsePreparedBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
+		{
+			if (!CanUsePreparedBlock(node, material, parms))
+			{
+				MaterialFactCache.Observe(material);
+				return false;
+			}
+
+			node.PreparedMaterial().Clear();
+			return true;
+		}
+
+		private static bool IsEligible(PawnRenderNode node, Material material, PawnDrawParms parms)
+		{
 			return node != null && material != null && !material.IsDeferredMaterial &&
+				!node.CheckMaterialEveryDrawRequest &&
 				(!parms.Statue || parms.statueColor.HasValue) &&
 				CanParallelMaterialUpdate(node.Worker);
 		}
 
 		public static void PrepareMaterialPropertyBlocks(List<PawnGraphicDrawRequest> requests, PawnDrawParms parms)
 		{
+			if (!PrepatcherState.PreparedMaterialActive)
+				return;
+
+			var frame = _renderFrame;
 			for (var i = 0; i < requests.Count; i++)
 			{
 				var request = requests[i];
-				PrepareMaterialPropertyBlock(request.node, request.material, parms);
+				var node = request.node;
+				var material = request.material;
+				if (!IsEligible(node, material, parms) ||
+					!MaterialFactCache.TryGet(material, out var fact))
+					continue;
+
+				WriteMaterialPropertyBlock(node, parms, fact);
+				node.PreparedMaterial().Set(frame, material, parms);
 			}
 		}
 
-		private static void PrepareMaterialPropertyBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
+		private static void WriteMaterialPropertyBlock(PawnRenderNode node, PawnDrawParms parms,
+			MaterialFact fact)
 		{
-			if (!CanUsePreparedBlock(node, material, parms))
-				return;
-
 			var block = node.MatPropBlock;
 			if (parms.Statue)
 			{
@@ -450,12 +495,12 @@ namespace YaOpt.Helpers
 			}
 			else
 			{
-				block.SetColor(ShaderPropertyIDs.Color, parms.tint * material.color);
+				block.SetColor(ShaderPropertyIDs.Color, parms.tint * fact.Color);
 			}
 
-			if (material.shader == ShaderDatabase.CutoutWithOverlay)
+			if (fact.Overlay)
 			{
-				if (parms.pawn.Faction != null && material.GetMaskTexture() != null)
+				if (parms.pawn.Faction != null && fact.HasMask)
 					PawnRenderUtility.SetMatPropBlockOverlay(block, parms.pawn.Faction.AllegianceColor);
 				else
 					PawnRenderUtility.SetMatPropBlockOverlay(block, Color.white, 0f);

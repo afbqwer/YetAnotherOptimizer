@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using Verse;
 using YaOpt.Helpers;
+using YaOpt.Prepatch;
 
 namespace YaOpt.Patches
 {
@@ -20,7 +21,8 @@ namespace YaOpt.Patches
 		static bool Prepare()
 		{
 			return YaOptGlobal.Settings.OptFastRecacheRequested.Enabled ||
-					YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled;
+					(YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled &&
+					 PrepatcherState.PreparedMaterialActive);
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
@@ -42,7 +44,8 @@ namespace YaOpt.Patches
 
 		static void Postfix(PawnDrawParms parms, List<PawnGraphicDrawRequest> ___drawRequests)
 		{
-			if (!YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled)
+			if (!YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled ||
+				!PrepatcherState.PreparedMaterialActive)
 				return;
 
 			ParallelPreDrawHelper.PrepareMaterialPropertyBlocks(___drawRequests, parms);

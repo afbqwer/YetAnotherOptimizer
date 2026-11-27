@@ -225,11 +225,6 @@ namespace YaOpt.Helpers
 		{
 			Check(nameof(YaOptSettings.OptPrepareBatchCount), includeAll: false,
 				AccessTools.Method(typeof(DynamicDrawManager), "PreDrawVisibleThings"));
-
-			Check(nameof(YaOptSettings.OptParallelMaterialUpdate), includeAll: false,
-				AccessTools.Method(typeof(PawnRenderTree), nameof(PawnRenderTree.ParallelPreDraw)),
-				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.PreDraw)),
-				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.GetMaterialPropertyBlock)));
 		}
 
 		/// <summary>

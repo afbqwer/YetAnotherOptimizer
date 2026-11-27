@@ -52,10 +52,6 @@ namespace YaOpt.Helpers.Pathfinding
 			{
 				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.ForceCompleteScheduledJobs))
 			});
-			changed |= Check(nameof(YaOptSettings.OptPathMoveTicksCache), new MethodBase[]
-			{
-				AccessTools.Method(typeof(Pawn), nameof(Pawn.TicksPerMove))
-			});
 			changed |= Check(nameof(YaOptSettings.OptPathNodeReset), new MethodBase[]
 			{
 				AccessTools.Method(typeof(PathFinderJob), nameof(PathFinderJob.Execute))

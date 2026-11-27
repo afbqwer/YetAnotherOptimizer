@@ -1,4 +1,5 @@
 using Prepatcher;
+using RimWorld;
 using Verse;
 using Verse.AI;
 using YaOpt.Helpers;
@@ -40,6 +41,19 @@ namespace YaOpt.Prepatch
 		/// </summary>
 		[PrepatcherField]
 		public static extern ref ToilRecursionGuard.State ToilGuard(this JobDriver target);
+
+		/// <summary>
+		/// Draw parameters used by the parallel material preparation, so the draw phase can tell
+		/// whether this node's block was filled for the current request.
+		/// </summary>
+		[PrepatcherField]
+		public static extern ref MaterialPrepareState PreparedMaterial(this PawnRenderNode target);
+
+		/// <summary>
+		/// Cached draw inputs for dead-pawn render preparation reuse.
+		/// </summary>
+		[PrepatcherField]
+		public static extern ref CorpseRenderState CorpseRender(this PawnRenderTree target);
 
 		public static ListerBuildingsCache.State CreateListerState()
 		{

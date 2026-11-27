@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using Verse;
 using YaOpt.Helpers;
+using YaOpt.Prepatch;
 
 namespace YaOpt.Patches
 {
@@ -16,7 +17,8 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled;
+			return YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled &&
+				PrepatcherState.PreparedMaterialActive;
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -26,7 +28,7 @@ namespace YaOpt.Patches
 			yield return CodeInstruction.LoadArgument(2);
 			yield return CodeInstruction.LoadArgument(3);
 			yield return CodeInstruction.Call(typeof(ParallelPreDrawHelper),
-				nameof(ParallelPreDrawHelper.CanUsePreparedBlock));
+				nameof(ParallelPreDrawHelper.TryUsePreparedBlock));
 			yield return new CodeInstruction(OpCodes.Brfalse_S, label);
 			yield return CodeInstruction.LoadArgument(1);
 			yield return new CodeInstruction(OpCodes.Callvirt,
