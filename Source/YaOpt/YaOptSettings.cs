@@ -1215,6 +1215,17 @@ namespace YaOpt
 			Default = true,
 		};
 
+		/// <summary>Limits every alert, including Critical alerts, to one recalculation every 60 frames.</summary>
+		public OptimizationOption OptAlertGlobalThrottle { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.AlertGlobalThrottle",
+			Desc = "YaOpt.Setting.Option.AlertGlobalThrottle.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.AlertGlobalThrottle.Compatibility",
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Interface",
+			Default = false
+		};
+
 		/// <summary>
 		/// Limits how often a room recomputes its stats and role after something inside it changed.
 		/// </summary>

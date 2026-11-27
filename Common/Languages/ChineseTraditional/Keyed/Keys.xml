@@ -376,6 +376,9 @@
 	<YaOpt.Setting.Option.AlertThrottle>警報更新節流</YaOpt.Setting.Option.AlertThrottle>
 	<YaOpt.Setting.Option.AlertThrottle.Desc>統計每個警報重算的耗時，並依成本安排更新頻率：廉價警報保持原版節奏，昂貴的警報最多每 5 秒檢查一次（高優先級最多每 2 秒）。關鍵警報永不延遲。每次進入遊戲後的最初幾秒用於學習各警報的耗時。任務、戒律、劇本與延時動作產生的警報不參與節流。</YaOpt.Setting.Option.AlertThrottle.Desc>
 	<YaOpt.Setting.Option.AlertThrottle.Compatibility>警報的顯示或消失最多可能延遲一個調度間隔。若已有模組替換了 AlertsReadoutUpdate（效能分析器或其他警報節流模組），本補丁可能無法套用，此時日誌中會出現 YaOpt 警告。</YaOpt.Setting.Option.AlertThrottle.Compatibility>
+	<YaOpt.Setting.Option.AlertGlobalThrottle>全域警報更新間隔</YaOpt.Setting.Option.AlertGlobalThrottle>
+	<YaOpt.Setting.Option.AlertGlobalThrottle.Desc>所有警報（包括關鍵警報）最多每 60 幀重算一次。強制移除仍立即生效。這是硬性最小間隔；與依成本節流同時開啟時也會生效。在 60 FPS 下，警報出現或消失最多可能延遲約 1 秒。</YaOpt.Setting.Option.AlertGlobalThrottle.Desc>
+	<YaOpt.Setting.Option.AlertGlobalThrottle.Compatibility>在 Alert.Recalculate 入口生效，因此任務、戒律、劇本、延時動作和懸停詳情產生的重算也會被覆蓋。若其他模組替換了 Alert.Recalculate，本補丁可能無法套用。</YaOpt.Setting.Option.AlertGlobalThrottle.Compatibility>
 	<YaOpt.Setting.Option.PathJobCompletion>尋路任務完成復用</YaOpt.Setting.Option.PathJobCompletion>
 	<YaOpt.Setting.Option.PathJobCompletion.Desc>直接走訪句柄完成所有尋路任務，避免每 tick 配置、填充並釋放一個 Persistent 原生陣列。</YaOpt.Setting.Option.PathJobCompletion.Desc>
 	<YaOpt.Setting.Option.PathFindNowNoBarrier>同步尋路屏障跳過</YaOpt.Setting.Option.PathFindNowNoBarrier>
