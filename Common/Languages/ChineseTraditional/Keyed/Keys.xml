@@ -241,12 +241,15 @@
 	<YaOpt.Setting.Option.ListerBuildingsCache.Desc>按 Def 為殖民者建築建立索引，讓 ColonistsHaveBuilding、AllBuildingsColonistOfDef 和 ColonistsHaveBuildingWithPowerOn 直接查詢該地圖索引。索引在首次查詢時建立，並在增刪建築時維護；清單結果會複製到原版結果緩衝區，空結果也會快取，呼叫方不會污染索引。</YaOpt.Setting.Option.ListerBuildingsCache.Desc>
 	<YaOpt.Setting.Option.ImmunityCache>免疫檢查快取</YaOpt.Setting.Option.ImmunityCache>
 	<YaOpt.Setting.Option.ImmunityCache.Desc>快取目前可自然免疫的疾病清單，直到角色的 Hediff 清單發生變化。原版每幀都會為每個角色重建該清單。</YaOpt.Setting.Option.ImmunityCache.Desc>
+	<YaOpt.Setting.Option.SocialOpinionFastPath>社交意見快速路徑</YaOpt.Setting.Option.SocialOpinionFastPath>
+	<YaOpt.Setting.Option.SocialOpinionFastPath.Desc>去掉意見計算中的兩處重複：社交想法清單每次呼叫只掃一遍，而不是每個想法分組掃一遍（每個想法的影響值也只算一次而非兩次）；社交想法建立時跳過一次重複的 CanGetThought 判定。兩項改寫的數值與原版完全一致。社交面板每幀都會為每個可見角色查詢意見，因此在面板打開時影響幀率。</YaOpt.Setting.Option.SocialOpinionFastPath.Desc>
 	<YaOpt.Setting.Option.InvisibilityCache>隱形狀態快取</YaOpt.Setting.Option.InvisibilityCache>
 	<YaOpt.Setting.Option.InvisibilityCache.Desc>用快取的逐角色狀態回答 IsPsychologicallyInvisible、IsHiddenFromPlayer 和 GetAlpha，不再掃描 Hediff 清單。原版對每個可見角色每幀要執行多次這類掃描。</YaOpt.Setting.Option.InvisibilityCache.Desc>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle>蹣跚者閒置索敵節流</YaOpt.Setting.Option.ShamblerIdleThrottle>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>將蹣跚者的閒置週期索敵從 900-1800 幀延長到 9000-12000 幀。已有目標、待觸發的警戒或最近 180 幀內交過戰的蹣跚者保持原版頻率；受傷、Lord 警戒和附近蹣跚者的喚醒仍會立即指定目標。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
 	<YaOpt.Setting.Option.GravshipJobFastExit>飛船上下船任務檢查優化</YaOpt.Setting.Option.GravshipJobFastExit>
 	<YaOpt.Setting.Option.GravshipJobFastExit.Desc>原版在無引力引擎或無需上下船時已經會早退。本項保持原版控制流程，只把引擎清單的 FirstOrDefault LINQ 列舉替換為直接索引，避免額外查詢、列舉器開銷和活動任務重複掃描。</YaOpt.Setting.Option.GravshipJobFastExit.Desc>
+	<YaOpt.Setting.Option.GravshipJobFastExit.Compatibility>已相容 Vanilla Gravship Expanded Chapter 1 的引擎清單 Transpiler；其他修改該方法的模組仍會使本項預設關閉。</YaOpt.Setting.Option.GravshipJobFastExit.Compatibility>
 	<YaOpt.Setting.Option.OxygenJobFastExit>氧氣任務早退</YaOpt.Setting.Option.OxygenJobFastExit>
 	<YaOpt.Setting.Option.OxygenJobFastExit.Desc>在非真空地圖直接跳過 JobGiver_FindOxygen，避免每個角色反覆計算真空抗性、檢查真空暴露狀態並查詢所在位置。真空地圖仍執行原版邏輯。</YaOpt.Setting.Option.OxygenJobFastExit.Desc>
 	<YaOpt.Setting.Option.ShamblerStateCache>蹣跚者狀態快取</YaOpt.Setting.Option.ShamblerStateCache>

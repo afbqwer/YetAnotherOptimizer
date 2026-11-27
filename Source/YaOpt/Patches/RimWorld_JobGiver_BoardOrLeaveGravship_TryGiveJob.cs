@@ -27,10 +27,10 @@ namespace YaOpt.Patches
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
+			CodeInstruction previous = null;
 			foreach (var instruction in instructions)
 			{
-				if (instruction.Calls(nameof(Enumerable.FirstOrDefault)) &&
-					instruction.operand is MethodInfo method && method.DeclaringType == typeof(Enumerable))
+				if (CanReplace(instruction, previous))
 				{
 					instruction.opcode = OpCodes.Call;
 					instruction.operand = AccessTools.Method(
@@ -38,8 +38,23 @@ namespace YaOpt.Patches
 						nameof(FirstOrNull));
 				}
 
+				previous = instruction;
 				yield return instruction;
 			}
+		}
+
+		private static bool CanReplace(CodeInstruction instruction, CodeInstruction previous)
+		{
+			if (!instruction.Calls(nameof(Enumerable.FirstOrDefault)) ||
+				!(instruction.operand is MethodInfo method) ||
+				method.DeclaringType != typeof(Enumerable) ||
+				!method.IsGenericMethod || method.GetGenericArguments()[0] != typeof(Thing))
+			{
+				return false;
+			}
+
+			return previous?.operand is MethodInfo provider &&
+				provider.ReturnType == typeof(List<Thing>);
 		}
 	}
 }

@@ -74,6 +74,37 @@ namespace YaOpt.Prepatch
 			PrepatcherState.MarkRefuelPatched();
 		}
 
+		/// <summary>
+		/// Collapses the social opinion pipeline into one scan and drops a duplicate thought-state
+		/// query. Both targets carry no Harmony patches in a 1000+ mod list, which is why a load-time
+		/// body replacement is safe here: no prefix, postfix or transpiler is competing for the IL.
+		/// </summary>
+		/// <remarks>
+		/// Done in a single free patch so the flag is only set when both replacements landed; a
+		/// half-applied pair would still be correct (each body has its own fallback) but would report
+		/// the option as active while half of it is vanilla.
+		/// </remarks>
+		[FreePatch]
+		private static void PatchSocialOpinion(ModuleDefinition module)
+		{
+			var handler = module.GetType("RimWorld", "ThoughtHandler") ??
+						  throw new MissingTypeException("RimWorld.ThoughtHandler");
+			var total = FindInstanceMethod(handler, nameof(ThoughtHandler.TotalOpinionOffset), "Verse.Pawn");
+			Replace(module, total, Import(module, typeof(PrepatcherMethods),
+				nameof(PrepatcherMethods.TotalOpinionOffset),
+				typeof(ThoughtHandler), typeof(Pawn)));
+
+			var situational = module.GetType("RimWorld", "SituationalThoughtHandler") ??
+							  throw new MissingTypeException("RimWorld.SituationalThoughtHandler");
+			var tryCreate = FindInstanceMethod(situational, "TryCreateSocialThought",
+				"RimWorld.ThoughtDef", "Verse.Pawn");
+			Replace(module, tryCreate, Import(module, typeof(PrepatcherMethods),
+				nameof(PrepatcherMethods.TryCreateSocialThought),
+				typeof(SituationalThoughtHandler), typeof(ThoughtDef), typeof(Pawn)));
+
+			PrepatcherState.MarkSocialOpinionPatched();
+		}
+
 		private static MethodReference Import(ModuleDefinition module, Type type, string name,
 			params Type[] parameterTypes)
 		{

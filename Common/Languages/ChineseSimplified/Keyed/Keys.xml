@@ -241,12 +241,15 @@
 	<YaOpt.Setting.Option.ListerBuildingsCache.Desc>按 Def 为殖民者建筑建立索引，让 ColonistsHaveBuilding、AllBuildingsColonistOfDef 和 ColonistsHaveBuildingWithPowerOn 直接查询该地图索引。索引在首次查询时建立，并在增删建筑时维护；列表结果复制到原版结果缓冲区，空结果也会缓存，调用方不会污染索引。</YaOpt.Setting.Option.ListerBuildingsCache.Desc>
 	<YaOpt.Setting.Option.ImmunityCache>免疫检查缓存</YaOpt.Setting.Option.ImmunityCache>
 	<YaOpt.Setting.Option.ImmunityCache.Desc>缓存当前可自然免疫的疾病列表，直到角色的 Hediff 列表发生变化。原版每帧都会为每个角色重建该列表。</YaOpt.Setting.Option.ImmunityCache.Desc>
+	<YaOpt.Setting.Option.SocialOpinionFastPath>社交意见快速路径</YaOpt.Setting.Option.SocialOpinionFastPath>
+	<YaOpt.Setting.Option.SocialOpinionFastPath.Desc>去掉意见计算中的两处重复：社交想法列表每次调用只扫一遍，而不是每个想法分组扫一遍（每个想法的影响值也只算一次而非两次）；社交想法创建时跳过一次重复的 CanGetThought 判定。两项改写的数值与原版完全一致。社交面板每帧都会为每个可见角色查询意见，因此在面板打开时影响帧率。</YaOpt.Setting.Option.SocialOpinionFastPath.Desc>
 	<YaOpt.Setting.Option.InvisibilityCache>隐形状态缓存</YaOpt.Setting.Option.InvisibilityCache>
 	<YaOpt.Setting.Option.InvisibilityCache.Desc>用缓存的逐角色状态回答 IsPsychologicallyInvisible、IsHiddenFromPlayer 和 GetAlpha，不再扫描 Hediff 列表。原版对每个可见角色每帧要执行多次这类扫描。</YaOpt.Setting.Option.InvisibilityCache.Desc>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle>蹒跚怪空闲索敌节流</YaOpt.Setting.Option.ShamblerIdleThrottle>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>将蹒跚怪的空闲周期索敌从 900-1800 帧延长到 9000-12000 帧。已有目标、待触发的警戒或最近 180 帧内交过战的蹒跚怪保持原版频率；受伤、Lord 警戒和附近蹒跚怪的唤醒仍会立即指定目标。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
 	<YaOpt.Setting.Option.GravshipJobFastExit>飞船上下船任务检查优化</YaOpt.Setting.Option.GravshipJobFastExit>
 	<YaOpt.Setting.Option.GravshipJobFastExit.Desc>原版在无引力引擎或无需上下船时已经会早退。本项保持原版控制流，只把引擎列表的 FirstOrDefault LINQ 枚举替换为直接索引，避免额外查询、枚举器开销和活动任务重复扫描。</YaOpt.Setting.Option.GravshipJobFastExit.Desc>
+	<YaOpt.Setting.Option.GravshipJobFastExit.Compatibility>已兼容 Vanilla Gravship Expanded Chapter 1 的引擎列表 Transpiler；其他修改该方法的模组仍会使本项默认关闭。</YaOpt.Setting.Option.GravshipJobFastExit.Compatibility>
 	<YaOpt.Setting.Option.OxygenJobFastExit>氧气任务早退</YaOpt.Setting.Option.OxygenJobFastExit>
 	<YaOpt.Setting.Option.OxygenJobFastExit.Desc>在非真空地图直接跳过 JobGiver_FindOxygen，避免每个角色反复计算真空抗性、检查真空暴露状态并查询所在位置。真空地图仍执行原版逻辑。</YaOpt.Setting.Option.OxygenJobFastExit.Desc>
 	<YaOpt.Setting.Option.ShamblerStateCache>蹒跚怪状态缓存</YaOpt.Setting.Option.ShamblerStateCache>

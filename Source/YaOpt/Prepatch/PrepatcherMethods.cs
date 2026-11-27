@@ -70,6 +70,21 @@ namespace YaOpt.Prepatch
 			return ImmunityCache.NeededImmunitiesNow(handler);
 		}
 
+		public static int TotalOpinionOffset(ThoughtHandler handler, Pawn otherPawn)
+		{
+			return PrepatcherState.SocialOpinionActive
+				? SocialOpinionHelper.TotalOpinionOffset(handler, otherPawn)
+				: SocialOpinionHelper.VanillaTotalOpinionOffset(handler, otherPawn);
+		}
+
+		public static Thought_SituationalSocial TryCreateSocialThought(SituationalThoughtHandler handler,
+			ThoughtDef def, Pawn otherPawn)
+		{
+			return PrepatcherState.SocialOpinionActive
+				? SocialOpinionHelper.TryCreateSocialThought(handler, def, otherPawn)
+				: SocialOpinionHelper.VanillaTryCreateSocialThought(handler, def, otherPawn);
+		}
+
 		public static IEnumerable<Thing> PotentialWorkThingsGlobal(WorkGiver_Scanner scanner, Pawn pawn)
 		{
 			if (!PrepatcherState.RefuelCandidatesActive ||

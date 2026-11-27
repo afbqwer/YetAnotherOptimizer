@@ -647,6 +647,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.GravshipJobFastExit",
 			Desc = "YaOpt.Setting.Option.GravshipJobFastExit.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.GravshipJobFastExit.Compatibility",
 			Category = OptimizationCategory.Tps,
 			SubCategory = "Gameplay",
 			FuncShow = (_) => ModsConfig.OdysseyActive
@@ -1895,6 +1896,33 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.ImmunityCache.Desc",
 			Category = OptimizationCategory.Tps,
 			SubCategory = "StatsAndCaches"
+		};
+
+		/// <summary>
+		/// Removes the duplicate scans in the social opinion pipeline, which is what the social tab
+		/// runs for every visible pawn on every frame.
+		/// </summary>
+		/// <remarks>
+		/// Two independent redundancies, both result-preserving:
+		/// <list type="bullet">
+		/// <item><c>ThoughtHandler.TotalOpinionOffset</c> rescans the whole social-thought list once
+		/// per distinct thought group (and calls <c>OpinionOffset()</c> twice per thought). One scan
+		/// serves the whole call and each thought's offset is computed once.</item>
+		/// <item><c>SituationalThoughtHandler.TryCreateSocialThought</c> evaluates
+		/// <c>ThoughtUtility.CanGetThought</c> and then calls the worker, which evaluates it again
+		/// through <c>ThoughtWorker.FailState</c>. The inner duplicate is skipped.</item>
+		/// </list>
+		/// Neither target carries a Harmony patch, so the replacement runs alongside the existing
+		/// GPP / HAR / VPE patches on the surrounding methods instead of competing with them.
+		/// </remarks>
+		/// <seealso cref="Prepatch.PrepatcherFreePatches"/>
+		/// <seealso cref="Helpers.SocialOpinionHelper"/>
+		public OptimizationOption OptSocialOpinionFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.SocialOpinionFastPath",
+			Desc = "YaOpt.Setting.Option.SocialOpinionFastPath.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay"
 		};
 
 		/// <summary>

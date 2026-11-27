@@ -64,6 +64,9 @@
 		<Publicize Include="Assembly-CSharp:Verse.Thing.MaxTickIntervalRate" />
 		<Publicize Include="Assembly-CSharp:Verse.Thing.UpdateRateTickOffset" />
 		<Publicize Include="Assembly-CSharp:Verse.ThingOwner`1.NotifyRemoved" />
+		<!-- Social opinion fast path calls the raw worker query itself so the duplicate
+		     CanGetThought inside ThoughtWorker.FailState is skipped. Never overridden here. -->
+		<Publicize Include="Assembly-CSharp:RimWorld.ThoughtWorker.CurrentSocialStateInternal" />
 	</ItemGroup>
 
 	</Project>

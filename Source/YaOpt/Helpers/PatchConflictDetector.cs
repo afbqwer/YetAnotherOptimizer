@@ -184,8 +184,30 @@ namespace YaOpt.Helpers
 			if (!ModsConfig.OdysseyActive)
 				return;
 
-			Check(nameof(YaOptSettings.OptGravshipJobFastExit), includeAll: false,
-				AccessTools.Method(typeof(JobGiver_BoardOrLeaveGravship), "TryGiveJob"));
+			var target = AccessTools.Method(typeof(JobGiver_BoardOrLeaveGravship), "TryGiveJob");
+			var reasons = new List<string>();
+			if (target == null)
+			{
+				reasons.Add("目标方法缺失：" + nameof(YaOptSettings.OptGravshipJobFastExit));
+			}
+			else
+			{
+				PatchConflictGuard.CollectForeignConflicts(target, includeAll: false, reasons,
+					IsCompatibleVveGravshipPatch);
+			}
+
+			if (reasons.Count > 0)
+				CompatibilityDefines.PatchConflict(nameof(YaOptSettings.OptGravshipJobFastExit), reasons);
+		}
+
+		private static bool IsCompatibleVveGravshipPatch(MethodBase target, Patch patch)
+		{
+			// VVE only replaces the engine-list provider; FirstOrDefault and job control flow stay intact.
+			return target.Name == "TryGiveJob" &&
+				patch.owner == "vanillaexpanded.gravship" &&
+				patch.PatchMethod?.DeclaringType?.FullName ==
+					"VanillaGravshipExpanded.JobGiver_BoardOrLeaveGravship_TryGiveJob_Patch" &&
+				patch.PatchMethod.Name == "Transpiler";
 		}
 
 		private static void CheckOxygenJobFastExit()

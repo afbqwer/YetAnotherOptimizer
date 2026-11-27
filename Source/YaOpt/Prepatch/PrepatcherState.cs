@@ -21,10 +21,18 @@ namespace YaOpt.Prepatch
 		internal static bool ListerPatched;
 		internal static bool ImmunityPatched;
 		internal static bool RefuelPatched;
+		internal static bool SocialOpinionPatched;
 
 		internal static bool ListerBuildingsActive;
 		internal static bool ImmunityActive;
 		internal static bool RefuelCandidatesActive;
+
+		/// <summary>
+		/// True when both social opinion bodies (<c>TotalOpinionOffset</c> and
+		/// <c>TryCreateSocialThought</c>) were replaced. They share one flag because they are one
+		/// option: the first removes the duplicate group scan, the second the duplicate state query.
+		/// </summary>
+		internal static bool SocialOpinionActive;
 
 		/// <summary>
 		/// True when the packed invisibility field is injected and the vanilla members the cache
@@ -75,6 +83,11 @@ namespace YaOpt.Prepatch
 			RefuelPatched = true;
 		}
 
+		internal static void MarkSocialOpinionPatched()
+		{
+			SocialOpinionPatched = true;
+		}
+
 		internal static void Refresh()
 		{
 			var settings = YaOptMod.Instance?.Settings;
@@ -83,6 +96,7 @@ namespace YaOpt.Prepatch
 				ListerBuildingsActive = false;
 				ImmunityActive = false;
 				RefuelCandidatesActive = false;
+				SocialOpinionActive = false;
 				InvisibilityActive = false;
 				ShamblerActive = false;
 				ToilGuardActive = false;
@@ -103,6 +117,8 @@ namespace YaOpt.Prepatch
 				HasInjectedAccessorField(nameof(PrepatcherFields.RefuelCandidates), typeof(Map)) &&
 				HasInjectedField(typeof(Map), typeof(RefuelWorkCandidates.State)) &&
 				settings.OptRefuelSearchCache.Enabled;
+
+			SocialOpinionActive = SocialOpinionPatched && settings.OptSocialOpinionFastPath.Enabled;
 
 			ToilGuardActive = settings.OptToilRecursionGuard.Enabled &&
 				HasInjectedAccessorField(nameof(PrepatcherFields.ToilGuard), typeof(JobDriver)) &&
