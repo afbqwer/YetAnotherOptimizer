@@ -2053,32 +2053,6 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Patches cached pathfinder cost grids in place for the changed cells instead of discarding every
-		/// grid whenever any cell delta (a reservation, a haul-enroute, ...) appears.
-		/// </summary>
-		/// <remarks>
-		/// Vanilla seeds the "changed" flag with "any cell delta exists", so unrelated deltas force a
-		/// full-map grid rebuild for every traverse-parameter/area/faction key on the next tick. Only the
-		/// per-cell sources (cost, connectivity, perceptual, water, fence, building, faction, fog, danger)
-		/// change here, and they all write exactly the delta cells, so re-running the grid job for those
-		/// cells yields the identical values without touching the rest of the map. Only keys that recur are
-		/// retained (no build target, avoid grid, customizer or lord); an allowed area is retained and
-		/// liveness-checked, and a retained template is dropped when its requester faction, lord or drafted
-		/// state no longer matches, so the grid is rebuilt with current values. Small deltas are also
-		/// gathered serially to avoid thread-pool fan-out overhead.
-		/// </remarks>
-		/// <seealso cref="Patches.Verse_PathFinderMapData_GatherData"/>
-		/// <seealso cref="Patches.Verse_PathFinder_ScheduleGridJob"/>
-		/// <seealso cref="Helpers.Pathfinding.PathGridIncremental"/>
-		public OptimizationOption OptPathIncrementalGrid { get; } = new OptimizationOption
-		{
-			Name = "YaOpt.Setting.Option.PathIncrementalGrid",
-			Desc = "YaOpt.Setting.Option.PathIncrementalGrid.Desc",
-			Category = OptimizationCategory.Tps,
-			SubCategory = "Pathfinding"
-		};
-
-		/// <summary>
 		/// Completes outstanding path jobs without the per-tick persistent <c>NativeArray&lt;JobHandle&gt;</c>
 		/// allocation.
 		/// </summary>

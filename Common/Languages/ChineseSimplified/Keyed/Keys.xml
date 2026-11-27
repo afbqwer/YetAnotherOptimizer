@@ -358,8 +358,6 @@
 	<YaOpt.Setting.Option.AlertThrottle>警报更新节流</YaOpt.Setting.Option.AlertThrottle>
 	<YaOpt.Setting.Option.AlertThrottle.Desc>统计每个警报重算的耗时，并按成本安排刷新频率：廉价警报保持原版节奏，昂贵的警报最多每 5 秒检查一次（高优先级最多每 2 秒）。关键警报永不被延迟。每次进入游戏后的最初几秒用于学习各警报的耗时。任务、戒律、剧本与延时动作产生的警报不参与节流。</YaOpt.Setting.Option.AlertThrottle.Desc>
 	<YaOpt.Setting.Option.AlertThrottle.Compatibility>警报的显示或消失最多可能延迟一个调度间隔。若已有模组替换了 AlertsReadoutUpdate（性能分析器或其他警报节流模组），本补丁可能无法应用，此时日志中会出现 YaOpt 警告。</YaOpt.Setting.Option.AlertThrottle.Compatibility>
-	<YaOpt.Setting.Option.PathIncrementalGrid>寻路网格增量更新</YaOpt.Setting.Option.PathIncrementalGrid>
-	<YaOpt.Setting.Option.PathIncrementalGrid.Desc>原版只要存在任意格子变化（包括没有任何代价源读取的空地上的预约或搬运），就会重建所有寻路代价网格（整图、每个通行参数）。此优化只重算变化格并原地修补缓存网格，代价与原版完全一致，但不再整图重建。少量变化改为串行收集以省去线程池开销。只对会复用的通行键保留缓存（建造目标、规避网格、自定义网格、领主键仍整图重建）；允许区域保留并做存活检查；当请求方派系、领主或征召状态变化时，对应网格会重建。</YaOpt.Setting.Option.PathIncrementalGrid.Desc>
 	<YaOpt.Setting.Option.PathJobCompletion>寻路任务完成复用</YaOpt.Setting.Option.PathJobCompletion>
 	<YaOpt.Setting.Option.PathJobCompletion.Desc>直接遍历句柄完成所有寻路任务，避免每 tick 分配、填充并释放一个 Persistent 原生数组。</YaOpt.Setting.Option.PathJobCompletion.Desc>
 	<YaOpt.Setting.Option.PathFindNowNoBarrier>同步寻路屏障跳过</YaOpt.Setting.Option.PathFindNowNoBarrier>

@@ -21,13 +21,6 @@ namespace YaOpt.Helpers.Pathfinding
 		internal static bool Refresh()
 		{
 			var changed = false;
-			changed |= Check(nameof(YaOptSettings.OptPathIncrementalGrid), new MethodBase[]
-			{
-				AccessTools.Method(typeof(PathFinderMapData), nameof(PathFinderMapData.GatherData)),
-				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.ScheduleGridJob)),
-				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.RecycleGridJobData)),
-				AccessTools.Method(typeof(PathFinderMapData), nameof(PathFinderMapData.Notify_FactionRemoved))
-			});
 			changed |= Check(nameof(YaOptSettings.OptPathGatherFast), new MethodBase[]
 			{
 				AccessTools.Method(typeof(PathFinderMapData), nameof(PathFinderMapData.GatherData))
