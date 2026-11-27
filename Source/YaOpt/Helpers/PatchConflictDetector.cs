@@ -39,6 +39,9 @@ namespace YaOpt.Helpers
 			CheckDrugPolicyCache();
 			CheckDrugScheduleCache();
 			CheckPrioritySorterSnapshot();
+			CheckGravshipJobFastExit();
+			CheckOxygenJobFastExit();
+			CheckShamblerStateCache();
 			CheckRegionQueryFast();
 			CheckBeautyFastPath();
 			CheckTempTerrainMerge();
@@ -174,6 +177,33 @@ namespace YaOpt.Helpers
 			Check(nameof(YaOptSettings.OptPrioritySorterSnapshot), includeAll: false,
 				AccessTools.Method(typeof(ThinkNode_PrioritySorter),
 					nameof(ThinkNode_PrioritySorter.TryIssueJobPackage)));
+		}
+
+		private static void CheckGravshipJobFastExit()
+		{
+			if (!ModsConfig.OdysseyActive)
+				return;
+
+			Check(nameof(YaOptSettings.OptGravshipJobFastExit), includeAll: false,
+				AccessTools.Method(typeof(JobGiver_BoardOrLeaveGravship), "TryGiveJob"));
+		}
+
+		private static void CheckOxygenJobFastExit()
+		{
+			if (!ModsConfig.OdysseyActive)
+				return;
+
+			Check(nameof(YaOptSettings.OptOxygenJobFastExit), includeAll: false,
+				AccessTools.Method(typeof(JobGiver_FindOxygen), "TryGiveJob"));
+		}
+
+		private static void CheckShamblerStateCache()
+		{
+			if (!ModsConfig.AnomalyActive)
+				return;
+
+			Check(nameof(YaOptSettings.OptShamblerStateCache), includeAll: true,
+				AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.IsShambler)));
 		}
 
 		/// <summary>

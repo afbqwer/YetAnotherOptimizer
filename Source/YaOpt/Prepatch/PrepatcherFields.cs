@@ -35,6 +35,9 @@ namespace YaOpt.Prepatch
 		[PrepatcherField]
 		public static extern ref long Invisibility(this Pawn target);
 
+		[PrepatcherField]
+		public static extern ref bool ShamblerState(this Pawn target);
+
 		/// <summary>
 		/// Per-driver bookkeeping for <see cref="ToilRecursionGuard"/>. All fields are counters for
 		/// the current tick, so a zero default is correct and no initializer is needed.

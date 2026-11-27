@@ -33,6 +33,8 @@ namespace YaOpt.Prepatch
 		/// </summary>
 		internal static bool InvisibilityActive;
 
+		internal static bool ShamblerActive;
+
 		/// <summary>
 		/// True when the per-driver toil guard field is injected. The guard patch checks this in
 		/// <c>Prepare</c>, because calling an uninjected <c>extern</c> accessor would throw.
@@ -55,6 +57,9 @@ namespace YaOpt.Prepatch
 		private static bool _warnedPreparedMaterialInactive;
 
 		private static bool _warnedCorpseRenderInactive;
+
+		private static bool _warnedShamblerInactive;
+
 		internal static void MarkListerPatched()
 		{
 			ListerPatched = true;
@@ -79,6 +84,7 @@ namespace YaOpt.Prepatch
 				ImmunityActive = false;
 				RefuelCandidatesActive = false;
 				InvisibilityActive = false;
+				ShamblerActive = false;
 				ToilGuardActive = false;
 				PreparedMaterialActive = false;
 				CorpseRenderActive = false;
@@ -135,6 +141,14 @@ namespace YaOpt.Prepatch
 				PawnInvisibilityCache.Resolve();
 			if (settings.OptInvisibilityCache.Enabled && !InvisibilityActive)
 				WarnInvisibilityInactive();
+
+			ShamblerActive = settings.OptShamblerStateCache.Enabled &&
+				HasInjectedAccessorField(nameof(PrepatcherFields.ShamblerState), typeof(Pawn));
+			if (settings.OptShamblerStateCache.Enabled && !ShamblerActive && !_warnedShamblerInactive)
+			{
+				_warnedShamblerInactive = true;
+				YaOptMod.Warning("The shambler state cache is enabled but its per-pawn field was not injected; the cache stays inactive.");
+			}
 		}
 
 		/// <summary>

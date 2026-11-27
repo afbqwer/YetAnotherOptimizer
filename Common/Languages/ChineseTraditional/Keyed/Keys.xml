@@ -245,6 +245,12 @@
 	<YaOpt.Setting.Option.InvisibilityCache.Desc>用快取的逐角色狀態回答 IsPsychologicallyInvisible、IsHiddenFromPlayer 和 GetAlpha，不再掃描 Hediff 清單。原版對每個可見角色每幀要執行多次這類掃描。</YaOpt.Setting.Option.InvisibilityCache.Desc>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle>蹣跚者閒置索敵節流</YaOpt.Setting.Option.ShamblerIdleThrottle>
 	<YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>將蹣跚者的閒置週期索敵從 900-1800 幀延長到 9000-12000 幀。已有目標、待觸發的警戒或最近 180 幀內交過戰的蹣跚者保持原版頻率；受傷、Lord 警戒和附近蹣跚者的喚醒仍會立即指定目標。</YaOpt.Setting.Option.ShamblerIdleThrottle.Desc>
+	<YaOpt.Setting.Option.GravshipJobFastExit>飛船上下船任務檢查優化</YaOpt.Setting.Option.GravshipJobFastExit>
+	<YaOpt.Setting.Option.GravshipJobFastExit.Desc>原版在無引力引擎或無需上下船時已經會早退。本項保持原版控制流程，只把引擎清單的 FirstOrDefault LINQ 列舉替換為直接索引，避免額外查詢、列舉器開銷和活動任務重複掃描。</YaOpt.Setting.Option.GravshipJobFastExit.Desc>
+	<YaOpt.Setting.Option.OxygenJobFastExit>氧氣任務早退</YaOpt.Setting.Option.OxygenJobFastExit>
+	<YaOpt.Setting.Option.OxygenJobFastExit.Desc>在非真空地圖直接跳過 JobGiver_FindOxygen，避免每個角色反覆計算真空抗性、檢查真空暴露狀態並查詢所在位置。真空地圖仍執行原版邏輯。</YaOpt.Setting.Option.OxygenJobFastExit.Desc>
+	<YaOpt.Setting.Option.ShamblerStateCache>蹣跚者狀態快取</YaOpt.Setting.Option.ShamblerStateCache>
+	<YaOpt.Setting.Option.ShamblerStateCache.Desc>在每個角色身上注入無分配的布林欄位，由 ShamblerCorpse 的增刪事件維護，避免 ShouldCollideWithPawns 等路徑重複掃描全身 Hediff。清空、讀檔和生成時重新同步；蹣跚者突變體仍直接判定。欄位注入不可用時自動保留原版邏輯。</YaOpt.Setting.Option.ShamblerStateCache.Desc>
 	<YaOpt.Setting.Option.RefuelSearchCache>Refuel搜尋快取</YaOpt.Setting.Option.RefuelSearchCache>
 	<YaOpt.Setting.Option.RefuelSearchCache.Desc>在Refuel工作的可執行檢查與任務建立之間重用一次最佳燃料和全部燃料的搜尋結果，並提供一份地圖Refuel候選清單。候選清單在生成和消失時維護；燃料量、自動Refuel開關、霧、預約等動態條件仍由原版即時檢查。該清單只用於正常局部掃描之後的全域回退。</YaOpt.Setting.Option.RefuelSearchCache.Desc>
 	<YaOpt.Setting.Option.DeathThoughts>死亡想法最佳化</YaOpt.Setting.Option.DeathThoughts>
@@ -261,6 +267,8 @@
 	<YaOpt.Setting.Option.LearningStatCache.Desc>將 GlobalLearningFactor 快取120 tick，使每次 Learn 不再重複執行完整屬性管線。基因、Hediff、特質、服裝、裝備或 Ideo 變化最多需要120 tick（約兩秒）才會影響學習速度。</YaOpt.Setting.Option.LearningStatCache.Desc>
 	<YaOpt.Setting.Option.ImmunityStatCache>免疫獲取速度屬性快取</YaOpt.Setting.Option.ImmunityStatCache>
 	<YaOpt.Setting.Option.ImmunityStatCache.Desc>將 ImmunityGainSpeed 快取20 tick。每條免疫記錄在每個健康間隔都會重新求值一次該屬性，儘管它很少變化。食物、休息、床、休息狀態或年齡變化最多需要20 tick（約三分之一秒）才會反映到免疫獲取速度上。</YaOpt.Setting.Option.ImmunityStatCache.Desc>
+	<YaOpt.Setting.Option.MentalBreakThresholdStatCache>精神崩潰閾值屬性快取</YaOpt.Setting.Option.MentalBreakThresholdStatCache>
+	<YaOpt.Setting.Option.MentalBreakThresholdStatCache.Desc>將原版 MentalBreakThreshold 的快取從5 tick延長到120 tick。殖民者欄每幀都會讀取該屬性，儘管它極少變化。特質、基因或 Hediff 變化最多需要120 tick（約兩秒）才會反映到精神崩潰閾值和殖民者欄情緒警告上。</YaOpt.Setting.Option.MentalBreakThresholdStatCache.Desc>
 	<YaOpt.Setting.Option.NutritionStatCache>食物營養值屬性快取</YaOpt.Setting.Option.NutritionStatCache>
 	<YaOpt.Setting.Option.NutritionStatCache.Desc>在 FoodUtility.NutritionForEater 內將 Nutrition 屬性快取20 tick，所有 AI 尋食都會經過這裡。原版會為每個殖民者的每次掃描重新求值每個候選食物的營養值。進食者的 RawNutritionFactor 仍然每次單獨求值。模組對營養值的動態修改最多需要20 tick 才會影響尋食結果。</YaOpt.Setting.Option.NutritionStatCache.Desc>
 	<YaOpt.Setting.Option.EnumHasFlagBitTest>食物類型標誌位測試</YaOpt.Setting.Option.EnumHasFlagBitTest>

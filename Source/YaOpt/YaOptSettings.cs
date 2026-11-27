@@ -643,6 +643,33 @@ namespace YaOpt
 			}
 		};
 
+		public OptimizationOption OptGravshipJobFastExit { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.GravshipJobFastExit",
+			Desc = "YaOpt.Setting.Option.GravshipJobFastExit.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay",
+			FuncShow = (_) => ModsConfig.OdysseyActive
+		};
+
+		public OptimizationOption OptOxygenJobFastExit { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.OxygenJobFastExit",
+			Desc = "YaOpt.Setting.Option.OxygenJobFastExit.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay",
+			FuncShow = (_) => ModsConfig.OdysseyActive
+		};
+
+		public OptimizationOption OptShamblerStateCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.ShamblerStateCache",
+			Desc = "YaOpt.Setting.Option.ShamblerStateCache.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
+			FuncShow = (_) => ModsConfig.AnomalyActive
+		};
+
 		[field: Unsaved]
 		public bool IdleThrottleGetUpDynamic { get; set; } = true;
 
@@ -775,6 +802,24 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ImmunityStatCache",
 			Desc = "YaOpt.Setting.Option.ImmunityStatCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
+			Default = true,
+		};
+
+		/// <summary>
+		/// Extends the vanilla <see cref="StatDefOf.MentalBreakThreshold"/> temporary cache from
+		/// 5 ticks to 120 ticks at the mental-breaker threshold getters.
+		/// </summary>
+		/// <remarks>
+		/// The colonist bar reads these thresholds every frame even though the stat rarely changes.
+		/// Trait, gene or hediff changes can take up to 120 ticks (about two seconds) to appear.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_StatWorker_GetValue_MentalBreakThresholdCache"/>
+		public OptimizationOption OptMentalBreakThresholdStatCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.MentalBreakThresholdStatCache",
+			Desc = "YaOpt.Setting.Option.MentalBreakThresholdStatCache.Desc",
+			Category = OptimizationCategory.Fps,
 			SubCategory = "StatsAndCaches",
 			Default = true,
 		};
