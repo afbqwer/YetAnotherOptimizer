@@ -143,8 +143,8 @@
 	<YaOpt.Setting.Option.Silhouette.Desc>最佳化剪影（螢幕拉遠後的小圖示）快取的查找效能。</YaOpt.Setting.Option.Silhouette.Desc>
 	<YaOpt.Setting.Option.ToggleTabCheck>標籤頁檢查去重</YaOpt.Setting.Option.ToggleTabCheck>
 	<YaOpt.Setting.Option.ToggleTabCheck.Desc>可隱藏的標籤頁（如機械體頁面）每次都會被反覆詢問「這個標籤頁現在該不該停用」：同一次介面重新整理裡，繪製、可見性統計和快捷鍵檢查會問四到五次，而一幀內又可能重新整理多次。部分Mod的標籤頁沒有快取機制，每次都要掃一遍地圖。此最佳化讓同一幀內的後續詢問直接重用第一次的結果，跨幀必定重新計算，所以畫面不會延遲超過一幀。</YaOpt.Setting.Option.ToggleTabCheck.Desc>
-	<YaOpt.Setting.Option.ComputeMatrixBurst>ComputeMatrix Burst加速</YaOpt.Setting.Option.ComputeMatrixBurst>
-	<YaOpt.Setting.Option.ComputeMatrixBurst.Desc>在物體渲染準備中，ComputeMatrix是一個運算量較大的步驟。遊戲原計畫使用Burst加速此過程，但因編程疏忽未能生效。此最佳化重寫了Burst實現，使其正常工作。</YaOpt.Setting.Option.ComputeMatrixBurst.Desc>
+	<YaOpt.Setting.Option.ComputeMatrixBurst>ComputeMatrix SIMD 加速</YaOpt.Setting.Option.ComputeMatrixBurst>
+	<YaOpt.Setting.Option.ComputeMatrixBurst.Desc>物體渲染準備中，每個節點的矩陣由最多五次單獨建構的 4x4 乘法計算，並對平移矩陣執行完整的矩陣求逆。原版仍標註 [BurstCompile]，但 1.7 的 Burst 執行階段是空實作，實際以一般受控碼執行。此最佳化將整條變換鏈合併為一次仿射乘法，移除矩陣求逆，並讓旋轉路徑使用 SIMD。</YaOpt.Setting.Option.ComputeMatrixBurst.Desc>
 	<YaOpt.Setting.Option.ThingGetComp>物體組件查詢加速</YaOpt.Setting.Option.ThingGetComp>
 	<YaOpt.Setting.Option.ThingGetComp.Desc>原版遊戲在查找存在的組件時很快，但在查找不存在的組件時非常慢。遺憾的是，判斷組件是否存在的唯一辦法就是透過GetComp查詢並等待失敗結果。該最佳化重寫了GetComp的查詢機制，確保當查找不存在的組件時也能迅速返回失敗結果。</YaOpt.Setting.Option.ThingGetComp.Desc>
 	<YaOpt.Setting.Option.ParallelPawnTick>並行角色更新</YaOpt.Setting.Option.ParallelPawnTick>

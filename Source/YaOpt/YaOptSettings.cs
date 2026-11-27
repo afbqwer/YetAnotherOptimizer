@@ -494,8 +494,16 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
+		/// Replaces the per-ancestor matrix chain in render preparation with a fused affine multiply.
 		/// </summary>
+		/// <remarks>
+		/// Vanilla still carries <c>[BurstCompile]</c> on <c>PawnRenderTree.ComputeMatrix</c>, but 1.7
+		/// ships Burst as a no-op stub, so that method runs as ordinary managed code: up to five
+		/// separately built 4x4 multiplies plus a full inversion of a pure translation. The whole chain
+		/// is one affine transform, so the replacement removes the inversion and the intermediate
+		/// matrices and runs the rotation path on SIMD lanes.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_PawnRenderTree_TryGetMatrix"/>
 		public OptimizationOption OptComputeMatrixBurst { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ComputeMatrixBurst",
@@ -2017,8 +2025,8 @@ namespace YaOpt
 		/// </summary>
 		/// <remarks>
 		/// Multithreading and mod-compatibility optimizations are retired. The remaining entries
-		/// duplicate behavior now built into 1.7, depend on the removed Burst runtime, depend on
-		/// the engine texture pipeline that 1.7 replaced, or rely on pre-1.7 IL.
+		/// duplicate behavior now built into 1.7, depend on the engine texture pipeline that 1.7
+		/// replaced, or rely on pre-1.7 IL.
 		/// </remarks>
 		private static readonly HashSet<string> LockedOffOptimizations = new HashSet<string>(StringComparer.Ordinal)
 		{
@@ -2030,9 +2038,6 @@ namespace YaOpt
 			nameof(OptEarlyRenderPrepare),
 			nameof(OptPrepareBatchCount),
 			nameof(OptParallelMaterialUpdate),
-
-			// Unity Burst is a non-functional stub in 1.7.
-			nameof(OptComputeMatrixBurst),
 
 			// Superseded by vanilla 1.7 or incompatible with the 1.7 engine.
 			nameof(OptThingGetComp),

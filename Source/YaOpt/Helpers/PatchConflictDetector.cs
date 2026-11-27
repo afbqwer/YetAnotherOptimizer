@@ -41,6 +41,7 @@ namespace YaOpt.Helpers
 			CheckPrioritySorterSnapshot();
 			CheckRegionQueryFast();
 			CheckTempTerrainMerge();
+			CheckPawnComputeMatrix();
 		}
 
 		/// <summary>
@@ -197,6 +198,19 @@ namespace YaOpt.Helpers
 					nameof(FreezeManager.DoCellSteadyEffects)),
 				AccessTools.Method(typeof(FreezeManager), "DoWaterFreezing"),
 				AccessTools.Method(typeof(FreezeManager), "DoIceMelting"));
+		}
+
+		/// <summary>
+		/// The matrix replacement swaps the <c>ComputeMatrix</c> call site, so any foreign patch on
+		/// that method is bypassed entirely, while only transpilers and short-circuiting prefixes on
+		/// <c>TryGetMatrix</c> would fight over the call.
+		/// </summary>
+		private static void CheckPawnComputeMatrix()
+		{
+			Check(nameof(YaOptSettings.OptComputeMatrixBurst), includeAll: true,
+				AccessTools.Method(typeof(PawnRenderTree), "ComputeMatrix"));
+			Check(nameof(YaOptSettings.OptComputeMatrixBurst), includeAll: false,
+				AccessTools.Method(typeof(PawnRenderTree), nameof(PawnRenderTree.TryGetMatrix)));
 		}
 
 		private static void CheckReplacement(string settingId, params MethodBase[] targets)
