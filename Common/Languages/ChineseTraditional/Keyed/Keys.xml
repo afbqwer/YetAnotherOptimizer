@@ -210,7 +210,13 @@
 	<YaOpt.Setting.Option.TurretTargetPrune.Desc>玩家陣營的砲塔在沒有敵對、狂暴或無派系候選目標時，跳過完整的索敵流程。有人操作的砲塔及其他陣營的砲塔仍交還原版處理。此提前退出只跳過空候選集的搜索，存在目標時不會增加額外掃描。</YaOpt.Setting.Option.TurretTargetPrune.Desc>
 	<YaOpt.Setting.Option.TurretTargetPrune.Compatibility>替換了炮塔索敵邏輯的Mod可能衝突；炮塔不再尋找目標時關閉本項。</YaOpt.Setting.Option.TurretTargetPrune.Compatibility>
 	<YaOpt.Setting.Option.TempTerrainPrune>臨時地形剪枝</YaOpt.Setting.Option.TempTerrainPrune>
-	<YaOpt.Setting.Option.TempTerrainPrune.Desc>當地形不可結冰時，跳過該格的水面結冰處理。原版會先讀取溫度和房間，再檢查地形是否可結冰；對大多數陸地格來說，此檢查避免了這部分工作，可結冰的格子仍走原版邏輯。</YaOpt.Setting.Option.TempTerrainPrune.Desc>
+	<YaOpt.Setting.Option.TempTerrainPrune.Desc>當地形不可結冰時，跳過該格的水面結冰處理。原版會先讀取溫度和房間，再檢查地形是否可結冰；對大多數陸地格來說，此檢查避免了這部分工作，可結冰的格子仍走原版邏輯。僅在關閉「臨時地形合併」時顯示。</YaOpt.Setting.Option.TempTerrainPrune.Desc>
+	<YaOpt.Setting.Option.TempTerrainMerge>臨時地形合併</YaOpt.Setting.Option.TempTerrainMerge>
+	<YaOpt.Setting.Option.TempTerrainMerge.Desc>把每格的結冰與融化處理合併為一次：溫度只讀取一次，房間查詢延遲到對應隨機判定成功之後，徑向掃描先檢查地形再查詢房間。隨機序列、結冰機率與最終生成的冰面均保持不變。</YaOpt.Setting.Option.TempTerrainMerge.Desc>
+	<YaOpt.Setting.Option.TempTerrainMerge.Compatibility>若其他模組修改了 DoCellSteadyEffects、DoWaterFreezing 或 DoIceMelting，本選項可能繞過它們；偵測到此類補丁時會預設關閉。</YaOpt.Setting.Option.TempTerrainMerge.Compatibility>
+	<YaOpt.Setting.Option.RegionQueryFast>區域查詢快速路徑</YaOpt.Setting.Option.RegionQueryFast>
+	<YaOpt.Setting.Option.RegionQueryFast.Desc>當區域網格沒有待重建內容時，直接讀取區域陣列，省去每次區域/房間查詢的重建檢查與重複邊界檢查。區域為髒、更新器停用、網格已釋放或越界時仍走原版邏輯（包含日誌）。不快取任何結果，因此無需失效處理。</YaOpt.Setting.Option.RegionQueryFast.Desc>
+	<YaOpt.Setting.Option.RegionQueryFast.Compatibility>若其他模組修改了 RegionAt 或 GetValidRegionAt，本選項可能繞過它們；偵測到此類補丁時會預設關閉。</YaOpt.Setting.Option.RegionQueryFast.Compatibility>
 	<YaOpt.Setting.Option.CameraUpdateRate>更新速率計算最佳化</YaOpt.Setting.Option.CameraUpdateRate>
 	<YaOpt.Setting.Option.CameraUpdateRate.Desc>遊戲會在每一幀計算物體在螢幕上的可見性，並調低螢幕外物體的更新速率，然而這個計算過於精細了，以至於它本身就有一定的開銷。此最佳化微調了可見性判斷，稍微放寬了判定標準，減少了更新速率計算的開銷，代價是在一些特定條件下可能有少量接近螢幕邊緣但不可見的物體也被誤判為可見，讓系統增加它們的更新速率導致執行開銷。但在大部分情況下，這個最佳化是值得的。</YaOpt.Setting.Option.CameraUpdateRate.Desc>
 	<YaOpt.Setting.Option.GetMapPawns>地圖角色檢索最佳化</YaOpt.Setting.Option.GetMapPawns>

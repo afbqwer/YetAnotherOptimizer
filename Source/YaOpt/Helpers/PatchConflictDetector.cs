@@ -39,6 +39,8 @@ namespace YaOpt.Helpers
 			CheckDrugPolicyCache();
 			CheckDrugScheduleCache();
 			CheckPrioritySorterSnapshot();
+			CheckRegionQueryFast();
+			CheckTempTerrainMerge();
 		}
 
 		/// <summary>
@@ -168,6 +170,33 @@ namespace YaOpt.Helpers
 			Check(nameof(YaOptSettings.OptPrioritySorterSnapshot), includeAll: false,
 				AccessTools.Method(typeof(ThinkNode_PrioritySorter),
 					nameof(ThinkNode_PrioritySorter.TryIssueJobPackage)));
+		}
+
+		/// <summary>
+		/// The region fast path skips vanilla's rebuild check, and <c>RegionAt</c> bypasses
+		/// <c>GetValidRegionAt</c> entirely, so any foreign patch on either method is bypassed.
+		/// </summary>
+		private static void CheckRegionQueryFast()
+		{
+			Check(nameof(YaOptSettings.OptRegionQueryFast), includeAll: true,
+				AccessTools.Method(typeof(RegionAndRoomQuery), nameof(RegionAndRoomQuery.RegionAt)),
+				AccessTools.Method(typeof(RegionGrid), nameof(RegionGrid.GetValidRegionAt)));
+		}
+
+		/// <summary>
+		/// The merged temporary-terrain pass replaces <c>DoCellSteadyEffects</c> and therefore does not
+		/// call the two private passes, so any foreign patch on them is bypassed.
+		/// </summary>
+		private static void CheckTempTerrainMerge()
+		{
+			if (!ModsConfig.OdysseyActive)
+				return;
+
+			Check(nameof(YaOptSettings.OptTempTerrainMerge), includeAll: true,
+				AccessTools.Method(typeof(FreezeManager),
+					nameof(FreezeManager.DoCellSteadyEffects)),
+				AccessTools.Method(typeof(FreezeManager), "DoWaterFreezing"),
+				AccessTools.Method(typeof(FreezeManager), "DoIceMelting"));
 		}
 
 		private static void CheckReplacement(string settingId, params MethodBase[] targets)

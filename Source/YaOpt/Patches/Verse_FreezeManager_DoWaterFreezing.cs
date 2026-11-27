@@ -17,7 +17,9 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return ModsConfig.OdysseyActive && YaOptGlobal.Settings.OptTempTerrainPrune.Enabled;
+			return ModsConfig.OdysseyActive &&
+				!YaOptGlobal.Settings.OptTempTerrainMerge.Enabled &&
+				YaOptGlobal.Settings.OptTempTerrainPrune.Enabled;
 		}
 
 		static bool Prefix(FreezeManager __instance, IntVec3 c)

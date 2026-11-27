@@ -1775,6 +1775,29 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Merges the per-cell freeze and melt passes so one temperature read serves both and room
+		/// lookups only happen after a successful random roll.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla runs <c>DoWaterFreezing</c> and <c>DoIceMelting</c> for every sampled cell, and both
+		/// read the temperature and room before their guards. The merged pass keeps the freezing roll
+		/// first and the melting roll second under the same conditions, so the random stream and the
+		/// resulting ice are unchanged. It also checks terrain before the region lookup inside both
+		/// radial scans.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_FreezeManager_DoCellSteadyEffects"/>
+		/// <seealso cref="Helpers.TempTerrainMergeHelper"/>
+		public OptimizationOption OptTempTerrainMerge { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.TempTerrainMerge",
+			Desc = "YaOpt.Setting.Option.TempTerrainMerge.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.TempTerrainMerge.Compatibility",
+			Category = OptimizationCategory.Tps,
+			FuncShow = (_) => ModsConfig.OdysseyActive,
+			Default = true,
+		};
+
+		/// <summary>
 		/// Skips water freezing on cells whose terrain cannot freeze.
 		/// </summary>
 		/// <remarks>
@@ -1782,6 +1805,7 @@ namespace YaOpt
 		/// checking <c>TerrainDef.canFreeze</c>. Terrain is the cheaper and decisive check, so
 		/// non-freezable cells can skip the rest of the freezing pass. Melting is not pruned
 		/// because its center cell does not need to be ice; melting is driven by the radial scan.
+		/// This option is only shown while the merged temporary-terrain pass is disabled.
 		/// </remarks>
 		/// <seealso cref="Patches.Verse_FreezeManager_DoWaterFreezing"/>
 		public OptimizationOption OptTempTerrainPrune { get; } = new OptimizationOption
@@ -1789,7 +1813,29 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.TempTerrainPrune",
 			Desc = "YaOpt.Setting.Option.TempTerrainPrune.Desc",
 			Category = OptimizationCategory.Tps,
-			FuncShow = (_) => ModsConfig.OdysseyActive,
+			FuncShow = (s) => ModsConfig.OdysseyActive && !s.OptTempTerrainMerge.Enabled,
+		};
+
+		/// <summary>
+		/// Reads the region grid directly when no rebuild is pending, skipping the per-call rebuild
+		/// bookkeeping in <c>RegionAt</c> and <c>GetValidRegionAt</c>.
+		/// </summary>
+		/// <remarks>
+		/// The fast path only applies when <c>AnythingToRebuild</c> is false, which is exactly the
+		/// state in which vanilla's rebuild call returns without doing anything. Dirty grids, an
+		/// uninitialized updater, a disposed grid and out-of-bounds cells keep the vanilla path,
+		/// including its logging. No result is cached, so no invalidation is needed.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_RegionAndRoomQuery_RegionAt"/>
+		/// <seealso cref="Patches.Verse_RegionGrid_GetValidRegionAt"/>
+		/// <seealso cref="Helpers.RegionQueryFast"/>
+		public OptimizationOption OptRegionQueryFast { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.RegionQueryFast",
+			Desc = "YaOpt.Setting.Option.RegionQueryFast.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.RegionQueryFast.Compatibility",
+			Category = OptimizationCategory.Tps,
+			Default = true,
 		};
 
 		/// <seealso cref="Patches.RimWorld_ChildcareUtility_FindAutofeedBaby"/>
