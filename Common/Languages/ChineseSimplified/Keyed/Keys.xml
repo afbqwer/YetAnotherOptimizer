@@ -98,8 +98,10 @@
 	<YaOpt.Setting.Option.PrepareBatchCount.Desc>将动态渲染准备的批次大小固定为 4。当高开销角色聚集时，更小的批次可让空闲线程领取更多尚未处理的工作，降低负载不均造成的帧时间长尾，但也会增加一定的调度开销。</YaOpt.Setting.Option.PrepareBatchCount.Desc>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate>并行材质参数更新</YaOpt.Setting.Option.ParallelMaterialUpdate>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>在并行渲染准备阶段填充每个节点已有的材质属性块。材质颜色、着色器和遮罩由主线程缓存并定期校验，worker 只读取缓存，不读取 Material 的颜色、着色器或遮罩。多绘制请求节点、具有自定义材质路径的 worker 以及仍需延迟解析的材质会回退主线程。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
+	<YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility>与 WOWGAG's Performance Patch 的「复用绘制角色时的材质信息」「复用材质基础颜色属性编号」「绘制时跳过重复的颜色设置」冲突。检测到对应补丁时会自动禁用；关闭对方这些功能后重新打开设置或读档即可解锁。</YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility>
 	<YaOpt.Setting.Option.ReuseCorpseRender>复用尸体渲染准备</YaOpt.Setting.Option.ReuseCorpseRender>
 	<YaOpt.Setting.Option.ReuseCorpseRender.Desc>对死亡角色复用已生成的绘制请求和矩阵。仅当姿势、位置、旋转、染色和重绘标记均未变化时生效，最多连续复用 30 次；存在动画、逐请求材质或重绘请求时回退原版。</YaOpt.Setting.Option.ReuseCorpseRender.Desc>
+	<YaOpt.Setting.Option.ReuseCorpseRender.Compatibility>与 WOWGAG's Performance Patch 的「复用尸体渲染」冲突。检测到对应补丁时会自动禁用；关闭对方该项后重新打开设置或读档即可解锁。</YaOpt.Setting.Option.ReuseCorpseRender.Compatibility>
 	<YaOpt.Setting.Option.FastRecacheRequested>内联缓存更新检查</YaOpt.Setting.Option.FastRecacheRequested>
 	<YaOpt.Setting.Option.FastRecacheRequested.Desc>优化物体是否需要重新生成渲染参数的检查。原版游戏通过递归调用渲染树上的每一个子节点来检查是否有子节点要求更新。统计发现97%的物体渲染树不超过4层，此优化将前4层节点的检查内联到一个函数中，省去了虚函数调用的开销。注：性能监测显示提升很小，未来版本可能移除。</YaOpt.Setting.Option.FastRecacheRequested.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad>延迟纹理加载</YaOpt.Setting.Option.LazyTextureLoad>

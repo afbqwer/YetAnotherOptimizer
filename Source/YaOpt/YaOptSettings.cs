@@ -333,6 +333,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ReuseCorpseRender",
 			Desc = "YaOpt.Setting.Option.ReuseCorpseRender.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.ReuseCorpseRender.Compatibility",
 			Category = OptimizationCategory.Fps,
 			SubCategory = "Graphics",
 			Default = true
