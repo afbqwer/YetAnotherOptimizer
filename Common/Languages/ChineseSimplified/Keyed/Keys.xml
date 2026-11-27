@@ -354,6 +354,18 @@
 	<YaOpt.Setting.Option.AlertThrottle>警报更新节流</YaOpt.Setting.Option.AlertThrottle>
 	<YaOpt.Setting.Option.AlertThrottle.Desc>统计每个警报重算的耗时，并按成本安排刷新频率：廉价警报保持原版节奏，昂贵的警报最多每 5 秒检查一次（高优先级最多每 2 秒）。关键警报永不被延迟。每次进入游戏后的最初几秒用于学习各警报的耗时。任务、戒律、剧本与延时动作产生的警报不参与节流。</YaOpt.Setting.Option.AlertThrottle.Desc>
 	<YaOpt.Setting.Option.AlertThrottle.Compatibility>警报的显示或消失最多可能延迟一个调度间隔。若已有模组替换了 AlertsReadoutUpdate（性能分析器或其他警报节流模组），本补丁可能无法应用，此时日志中会出现 YaOpt 警告。</YaOpt.Setting.Option.AlertThrottle.Compatibility>
+	<YaOpt.Setting.Option.PathIncrementalGrid>寻路网格增量更新</YaOpt.Setting.Option.PathIncrementalGrid>
+	<YaOpt.Setting.Option.PathIncrementalGrid.Desc>原版只要存在任意格子变化（包括没有任何代价源读取的空地上的预约或搬运），就会重建所有寻路代价网格（整图、每个通行参数）。此优化只重算变化格并原地修补缓存网格，代价与原版完全一致，但不再整图重建。少量变化改为串行收集以省去线程池开销。依赖自定义网格、规避网格、允许区域或领主行走网格的网格仍会像原版一样整图重建。</YaOpt.Setting.Option.PathIncrementalGrid.Desc>
+	<YaOpt.Setting.Option.PathJobCompletion>寻路任务完成复用</YaOpt.Setting.Option.PathJobCompletion>
+	<YaOpt.Setting.Option.PathJobCompletion.Desc>直接遍历句柄完成所有寻路任务，避免每 tick 分配、填充并释放一个 Persistent 原生数组。</YaOpt.Setting.Option.PathJobCompletion.Desc>
+	<YaOpt.Setting.Option.PathMoveTicksCache>移动耗时缓存</YaOpt.Setting.Option.PathMoveTicksCache>
+	<YaOpt.Setting.Option.PathMoveTicksCache.Desc>在当前 tick 内缓存 Pawn.TicksPerMove。原版在每个 pawn 走入每一格时、以及参数化路径时都会重新求值，而其输入只在 tick 之间变化。缓存仅维持一个 tick，行走途中属性变化会在一个 tick 内生效。</YaOpt.Setting.Option.PathMoveTicksCache.Desc>
+	<YaOpt.Setting.Option.PathFindNowNoBarrier>同步寻路屏障跳过</YaOpt.Setting.Option.PathFindNowNoBarrier>
+	<YaOpt.Setting.Option.PathFindNowNoBarrier.Desc>FindPathNow 开头会等待全部在飞寻路任务。该等待只为保护随后的数据收集，而本 tick 若已收集过则收集是空操作。此优化在常见情况下跳过该等待，消除袭击与地图生成中同步寻路造成的停顿；真正需要收集时仍会等待。</YaOpt.Setting.Option.PathFindNowNoBarrier.Desc>
+	<YaOpt.Setting.Option.PathNodeReset>寻路节点复位</YaOpt.Setting.Option.PathNodeReset>
+	<YaOpt.Setting.Option.PathNodeReset.Desc>只复位 A* 实际访问过的节点，而不是清空整个节点网格（250x250 地图每条约 1.25 MB）。搜索逻辑不变，路径完全一致。</YaOpt.Setting.Option.PathNodeReset.Desc>
+	<YaOpt.Setting.Option.PathOverlaySparse>门覆盖层稀疏清零</YaOpt.Setting.Option.PathOverlaySparse>
+	<YaOpt.Setting.Option.PathOverlaySparse.Desc>只清零本路径写入的门/代价提供者/pawn 覆盖格，而不是每条约路径都清空两个整图数组（250x250 地图约 187 KB）。代价与阻挡结果不变。</YaOpt.Setting.Option.PathOverlaySparse.Desc>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

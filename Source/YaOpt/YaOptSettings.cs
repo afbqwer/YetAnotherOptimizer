@@ -2032,6 +2032,97 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Patches cached pathfinder cost grids in place for the changed cells instead of discarding every
+		/// grid whenever any cell delta (a reservation, a haul-enroute, ...) appears.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla seeds the "changed" flag with "any cell delta exists", so unrelated deltas force a
+		/// full-map grid rebuild for every traverse-parameter/area/faction key on the next tick. Only the
+		/// per-cell sources (cost, connectivity, perceptual, water, fence, building, faction, fog, danger)
+		/// change here, and they all write exactly the delta cells, so re-running the grid job for those
+		/// cells yields the identical values without touching the rest of the map. Keys whose grid also
+		/// depends on a customizer, an avoid grid, an allowed area or a lord walk grid are not patched and
+		/// fall back to a full rebuild, exactly like vanilla. Small deltas are also gathered serially to
+		/// avoid thread-pool fan-out overhead.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_PathFinderMapData_GatherData"/>
+		/// <seealso cref="Patches.Verse_PathFinder_ScheduleGridJob"/>
+		/// <seealso cref="Helpers.Pathfinding.PathGridIncremental"/>
+		public OptimizationOption OptPathIncrementalGrid { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathIncrementalGrid",
+			Desc = "YaOpt.Setting.Option.PathIncrementalGrid.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
+		/// Completes outstanding path jobs without the per-tick persistent <c>NativeArray&lt;JobHandle&gt;</c>
+		/// allocation.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_PathFinder_ForceCompleteScheduledJobs"/>
+		public OptimizationOption OptPathJobCompletion { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathJobCompletion",
+			Desc = "YaOpt.Setting.Option.PathJobCompletion.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
+		/// Caches <see cref="Pawn.TicksPerMove"/> for the current tick.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_Pawn_TicksPerMove"/>
+		/// <seealso cref="Helpers.Pathfinding.TicksPerMoveCache"/>
+		public OptimizationOption OptPathMoveTicksCache { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathMoveTicksCache",
+			Desc = "YaOpt.Setting.Option.PathMoveTicksCache.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
+		/// Skips the global job barrier in synchronous <see cref="PathFinder.FindPathNow"/> unless it still
+		/// needs to gather path data.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_PathFinder_FindPathNow"/>
+		/// <seealso cref="Helpers.Pathfinding.PathFindNowBarrier"/>
+		public OptimizationOption OptPathFindNowNoBarrier { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathFindNowNoBarrier",
+			Desc = "YaOpt.Setting.Option.PathFindNowNoBarrier.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
+		/// Resets only the A* scratch cells a path actually touched instead of clearing the whole node grid.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_PathFinderJob_Execute"/>
+		/// <seealso cref="Helpers.Pathfinding.OptimizedPathFinderJob"/>
+		public OptimizationOption OptPathNodeReset { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathNodeReset",
+			Desc = "YaOpt.Setting.Option.PathNodeReset.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
+		/// Clears only the door/pawn overlay cells a path wrote instead of clearing the two whole-map arrays.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_PathGridDoorsBlockedJob_Execute"/>
+		/// <seealso cref="Helpers.Pathfinding.OptimizedDoorsJob"/>
+		public OptimizationOption OptPathOverlaySparse { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathOverlaySparse",
+			Desc = "YaOpt.Setting.Option.PathOverlaySparse.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
 		/// Optimizations that are unavailable in RimWorld 1.7.
 		/// </summary>
 		/// <remarks>

@@ -3,6 +3,7 @@ using System;
 using System.Reflection;
 using Verse;
 using YaOpt.Helpers;
+using YaOpt.Helpers.Pathfinding;
 using YaOpt.Prepatch;
 
 namespace YaOpt.Patches
@@ -57,12 +58,13 @@ namespace YaOpt.Patches
 		{
 			PrepatcherState.Refresh();
 			var gridCompatibilityChanged = GridOptimizationCompat.Refresh();
+			var pathfindingCompatibilityChanged = PathfindingOptimizationCompat.Refresh();
 			GenerationOptimizationCompat.Refresh();
 			QuestGenerationOptimizationCompat.Refresh();
 			PawnGenerationIndexCompat.Refresh();
 			PawnGearRebuildCompat.Refresh();
 			PatchConflictDetector.Refresh();
-			if (!force && !gridCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())
+			if (!force && !gridCompatibilityChanged && !pathfindingCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())
 				return;
 
 			if (changeLongEventTitle)
