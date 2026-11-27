@@ -98,10 +98,8 @@
 	<YaOpt.Setting.Option.PrepareBatchCount.Desc>將動態渲染準備的批次大小固定為 4。當高開銷角色聚集時，更小的批次可讓空閒執行緒領取更多尚未處理的工作，降低負載不均造成的影格時間長尾，但也會增加一定的排程開銷。</YaOpt.Setting.Option.PrepareBatchCount.Desc>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate>並行材質參數更新</YaOpt.Setting.Option.ParallelMaterialUpdate>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>在並行渲染準備階段填充每個節點已有的材質屬性區塊。材質顏色、著色器與遮罩由主執行緒快取並定期校驗，worker 只讀取快取，不讀取材質的顏色、著色器或遮罩。多繪製請求節點、具有自訂材質路徑的 worker 以及仍需延遲解析的材質會回退主執行緒。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
-	<YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility>與 WOWGAG's Performance Patch 的材質與角色繪製最佳化衝突。請關閉其中的「重複使用繪製角色時的材質資訊」「重複使用材質基礎顏色屬性編號」「繪製時略過重複的顏色設定」。</YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility>
 	<YaOpt.Setting.Option.ReuseCorpseRender>重複使用屍體渲染準備</YaOpt.Setting.Option.ReuseCorpseRender>
 	<YaOpt.Setting.Option.ReuseCorpseRender.Desc>對死亡角色重複使用已產生的繪製請求與矩陣。僅當姿勢、位置、旋轉、染色與重繪標記均未變化時生效，最多連續重複使用 30 次；存在動畫、逐請求材質或重繪請求時回退原版。</YaOpt.Setting.Option.ReuseCorpseRender.Desc>
-	<YaOpt.Setting.Option.ReuseCorpseRender.Compatibility>與 WOWGAG's Performance Patch 的「重複使用屍體渲染」衝突，請關閉對方該項。</YaOpt.Setting.Option.ReuseCorpseRender.Compatibility>
 	<YaOpt.Setting.Option.FastRecacheRequested>內聯快取更新檢查</YaOpt.Setting.Option.FastRecacheRequested>
 	<YaOpt.Setting.Option.FastRecacheRequested.Desc>最佳化物體是否需要重新生成渲染參數的檢查。原版遊戲透過遞迴呼叫渲染樹上的每一個子節點來檢查是否有子節點要求更新。統計發現97%的物體渲染樹不超過4層，此最佳化將前4層節點的檢查內聯到一個函式中，省去了虛擬函式呼叫的開銷。註：效能監測顯示提升很小，未來版本可能移除。</YaOpt.Setting.Option.FastRecacheRequested.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad>延遲紋理載入</YaOpt.Setting.Option.LazyTextureLoad>

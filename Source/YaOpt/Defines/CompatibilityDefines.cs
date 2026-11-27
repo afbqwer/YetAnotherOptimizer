@@ -55,6 +55,17 @@ namespace YaOpt.Defines
 		}
 
 		/// <summary>
+		/// Clears a hard ban after the external conflict disappears.
+		/// </summary>
+		/// <returns>True when the option was actually banned.</returns>
+		public static bool Unban(string settingId)
+		{
+			var removed = CachedBannedOptimizations.Remove(settingId);
+			CachedBannedBy.Remove(settingId);
+			return removed;
+		}
+
+		/// <summary>
 		/// Disables an option by default because a foreign patch was detected. The player can still
 		/// enable it; the settings remember that decision.
 		/// </summary>

@@ -317,7 +317,6 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ParallelMaterialUpdate",
 			Desc = "YaOpt.Setting.Option.ParallelMaterialUpdate.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.ParallelMaterialUpdate.Compatibility",
 			Category = OptimizationCategory.Fps,
 			SubCategory = "Graphics"
 		};
@@ -334,7 +333,6 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ReuseCorpseRender",
 			Desc = "YaOpt.Setting.Option.ReuseCorpseRender.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.ReuseCorpseRender.Compatibility",
 			Category = OptimizationCategory.Fps,
 			SubCategory = "Graphics",
 			Default = true
@@ -2304,6 +2302,7 @@ namespace YaOpt
 
 		public void DoSettingsWindowContents(Rect inRect)
 		{
+			GppCompatibility.RefreshFromSettingsWindow();
 			_settingsPanel.Draw(inRect);
 		}
 	}

@@ -56,6 +56,7 @@ namespace YaOpt.Patches
 		/// </summary>
 		public static void TryPatch(bool force, bool changeLongEventTitle, bool updateOptionSnapshot = true)
 		{
+			var gppCompatibilityChanged = GppCompatibility.Refresh();
 			PrepatcherState.Refresh();
 			var gridCompatibilityChanged = GridOptimizationCompat.Refresh();
 			var pathfindingCompatibilityChanged = PathfindingOptimizationCompat.Refresh();
@@ -64,7 +65,8 @@ namespace YaOpt.Patches
 			PawnGenerationIndexCompat.Refresh();
 			PawnGearRebuildCompat.Refresh();
 			PatchConflictDetector.Refresh();
-			if (!force && !gridCompatibilityChanged && !pathfindingCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())
+			if (!force && !gppCompatibilityChanged && !gridCompatibilityChanged &&
+				!pathfindingCompatibilityChanged && !YaOptGlobal.AnyOptionChanged())
 				return;
 
 			if (changeLongEventTitle)
