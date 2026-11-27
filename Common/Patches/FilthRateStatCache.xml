@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Patch>
+	<!--
+		FilthRate is not cacheable in vanilla, so StatWorker never creates its temporary cache
+		dictionary and the 60-tick interval set by MultiTargets_FilthRate is silently ignored.
+		Turn cacheability on so the interval takes effect. The xpath predicate keeps this
+		idempotent if another mod already added the element.
+	-->
+	<Operation Class="YaOpt.Patches.Xml.PatchOperationSettingGate">
+		<setting>OptStatCache</setting>
+		<match Class="PatchOperationAdd">
+			<xpath>/Defs/StatDef[defName="FilthRate" and not(cacheable)]</xpath>
+			<value>
+				<cacheable>true</cacheable>
+			</value>
+		</match>
+	</Operation>
+</Patch>

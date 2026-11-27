@@ -10,6 +10,12 @@ namespace YaOpt.Patches
 	/// <summary>
 	/// Caches filth rate stat lookups with 60-tick intervals.
 	/// </summary>
+	/// <remarks>
+	/// FilthRate is not cacheable in vanilla, so <c>StatWorker</c> never creates its temporary cache
+	/// dictionary and the interval is ignored. The matching XML patch turns cacheability on; without
+	/// it this transpiler would be a no-op.
+	/// </remarks>
+	/// <seealso cref="Patches.Xml.PatchOperationSettingGate"/>
 	/// <seealso cref="YaOptSettings.OptStatCache"/>
 	[HarmonyPatch]
 	internal static class MultiTargets_FilthRate
