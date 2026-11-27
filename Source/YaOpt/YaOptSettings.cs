@@ -2125,6 +2125,49 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Deduplicates the expanded cell deltas with a per-cell stamp array instead of hashing every
+		/// <see cref="IntVec3"/> into a <c>HashSet</c>.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_PathFinderMapData_GatherData"/>
+		/// <seealso cref="Helpers.Pathfinding.CellDeltaStamp"/>
+		public OptimizationOption OptPathGatherFast { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathGatherFast",
+			Desc = "YaOpt.Setting.Option.PathGatherFast.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
+		/// Allocates recycled path-grid buffers with <c>UninitializedMemory</c>; the grid job writes every
+		/// cell, so the whole-map zero-fill is redundant.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_PathFinder_GetOrCreateGridJobOutput"/>
+		public OptimizationOption OptPathGridOutputUninit { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathGridOutputUninit",
+			Desc = "YaOpt.Setting.Option.PathGridOutputUninit.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
+		/// Schedules the door/pawn overlay as a single by-value struct job instead of a class wrapped in a
+		/// <c> ManagedJob</c> plus a dispose job, and prefilters the per-tick pawn snapshot to pawns that can
+		/// collide.
+		/// </summary>
+		/// <seealso cref="Patches.Verse_PathFinder_ScheduleBatchedPathJobs"/>
+		/// <seealso cref="Patches.Verse_PathFinder_EnsureDoorsPawnsCached"/>
+		/// <seealso cref="Helpers.Pathfinding.DoorsOverlayScheduler"/>
+		public OptimizationOption OptPathDoorsJobFast { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.PathDoorsJobFast",
+			Desc = "YaOpt.Setting.Option.PathDoorsJobFast.Desc",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Pathfinding"
+		};
+
+		/// <summary>
 		/// Optimizations that are unavailable in RimWorld 1.7.
 		/// </summary>
 		/// <remarks>

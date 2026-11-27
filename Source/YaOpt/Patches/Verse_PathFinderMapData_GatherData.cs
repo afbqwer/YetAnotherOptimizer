@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using HarmonyLib;
 using LudeonTK;
@@ -30,9 +31,15 @@ namespace YaOpt.Patches
 	{
 		private const int SerialThreshold = 512;
 
+		private static readonly ConditionalWeakTable<PathFinderMapData, CellDeltaStamp> _stamps =
+			new ConditionalWeakTable<PathFinderMapData, CellDeltaStamp>();
+
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptPathIncrementalGrid.Enabled;
+			var incremental = YaOptGlobal.Settings.OptPathIncrementalGrid.Enabled;
+			if (!incremental)
+				PathGridIncremental.TemplatesReady = false;
+			return incremental || YaOptGlobal.Settings.OptPathGatherFast.Enabled;
 		}
 
 		static bool Prefix(PathFinderMapData __instance, IEnumerable<PathRequest> requests, ref bool __result)
@@ -49,17 +56,34 @@ namespace YaOpt.Patches
 			if (mapData.lastGatherTick == GenTicks.TicksGame)
 				return false;
 
+			var indices = mapData.map.cellIndices;
+			var stamp = _stamps.GetOrCreateValue(mapData);
+			stamp.Begin(indices.NumGridCells);
+
+			// Cells queued directly by Notify_CellDelta(IntVec3) are already in cellDeltas; mark them first
+			// so the rect expansion below does not add them a second time.
+			for (var i = 0; i < mapData.cellDeltas.Count; i++)
+				stamp.Mark(indices.CellToIndex(mapData.cellDeltas[i]));
+
 			foreach (var rect in mapData.cellRectDeltas)
 			{
 				foreach (var cell in rect.Cells)
 				{
-					if (cell.InBounds(mapData.map) && mapData.cellDeltaSet.Add(cell))
+					if (!cell.InBounds(mapData.map))
+						continue;
+					if (stamp.Mark(indices.CellToIndex(cell)))
 						mapData.cellDeltas.Add(cell);
 				}
 			}
 			mapData.cellRectDeltas.Clear();
 
 			var sourceChanged = false;
+			var requestCount = 0;
+			if (YaOptGlobal.IsDebug && requests != null)
+			{
+				foreach (var _ in requests)
+					requestCount++;
+			}
 			if (mapData.lastGatherTick >= 0)
 			{
 				using (ProfilerBlock.Scope("incremental"))
@@ -97,12 +121,30 @@ namespace YaOpt.Patches
 			{
 				var pathFinder = mapData.map.pathFinder;
 				var forceFull = PathGridIncremental.ConsumeForceFullRecycle(pathFinder);
-				if (forceFull || sourceChanged)
+				if (forceFull)
+				{
 					recycle = true;
+					PathGridDiagnostics.RecycledForce();
+				}
+				else if (sourceChanged)
+				{
+					recycle = true;
+					PathGridDiagnostics.RecycledStructural();
+				}
 				else if (mapData.cellDeltas.Count == 0)
+				{
 					recycle = false;
+				}
 				else
+				{
 					recycle = !PathGridIncremental.TryPatch(pathFinder, mapData.cellDeltas);
+				}
+
+				if (YaOptGlobal.IsDebug)
+				{
+					PathGridIncremental.Snapshot(pathFinder, out var lookupCount, out var templateCount);
+					PathGridDiagnostics.Gather(requestCount, mapData.cellDeltas.Count, lookupCount, templateCount);
+				}
 			}
 			else
 			{

@@ -28,6 +28,26 @@ namespace YaOpt.Helpers.Pathfinding
 				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.RecycleGridJobData)),
 				AccessTools.Method(typeof(PathFinderMapData), nameof(PathFinderMapData.Notify_FactionRemoved))
 			});
+			changed |= Check(nameof(YaOptSettings.OptPathGatherFast), new MethodBase[]
+			{
+				AccessTools.Method(typeof(PathFinderMapData), nameof(PathFinderMapData.GatherData))
+			});
+			changed |= Check(nameof(YaOptSettings.OptPathGridOutputUninit), new MethodBase[]
+			{
+				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.GetOrCreateGridJobOutput))
+			});
+			changed |= Check(nameof(YaOptSettings.OptPathDoorsJobFast), new MethodBase[]
+			{
+				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.ScheduleBatchedPathJobs)),
+				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.GetDoorBlockedJob)),
+				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.EnsureDoorsPawnsCached)),
+				AccessTools.Method(typeof(PathGridDoorsBlockedJob), nameof(PathGridDoorsBlockedJob.Execute)),
+				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPathNow), new[]
+				{
+					typeof(IntVec3), typeof(LocalTargetInfo), typeof(TraverseParms),
+					typeof(PathFinderCostTuning?), typeof(PathEndMode), typeof(PathRequest.IPathGridCustomizer)
+				})
+			});
 			changed |= Check(nameof(YaOptSettings.OptPathJobCompletion), new MethodBase[]
 			{
 				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.ForceCompleteScheduledJobs))

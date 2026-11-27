@@ -30,6 +30,14 @@ namespace YaOpt.Helpers.Pathfinding
 		/// <summary>Changed-cell x cached-key work above which a full rebuild is cheaper than patching.</summary>
 		internal const int MaxPatchWork = 4096;
 
+		/// <summary>
+		/// Upper bound on retained keys. Each key holds one full-map <see cref="NativeArray{T}"/>, and unlike
+		/// vanilla (which returns every grid to the output pool on each delta tick) a retained key keeps its
+		/// array alive, so a churning key space must not grow without limit. Exceeding this forces one vanilla
+		/// recycle, which returns the arrays to the pool.
+		/// </summary>
+		internal const int MaxCachedKeys = 128;
+
 		/// <summary>Set by the ScheduleGridJob postfix's Prepare. When false every patch falls back to vanilla.</summary>
 		internal static bool TemplatesReady;
 
@@ -45,13 +53,25 @@ namespace YaOpt.Helpers.Pathfinding
 			TemplatesReady = false;
 		}
 
+		/// <summary>
+		/// Whether a grid may be kept across ticks for this key. This is a <em>retention</em> test, not a
+		/// correctness one: a non-retained key (or its template) is dropped on the next delta tick and simply
+		/// rebuilt, exactly like vanilla.
+		/// </summary>
+		/// <remarks>
+		/// Only keys that actually recur are worth retaining. <c>targetBuildable</c> is part of the key and is
+		/// the build target rect, so a build job produces a fresh key for each target; retaining those would
+		/// inflate the cached set, push it into the size/work caps, and evict the genuinely shared base keys.
+		/// Area, avoid-grid, customizer and lord keys are either unsafe to keep (their source data is not
+		/// delta-tracked and can be disposed) or per-request, so they are dropped the same way.
+		/// </remarks>
 		internal static bool IsPatchable(PathFinder.MapGridRequest query, PathRequest request)
 		{
 			if (query.customizer != null)
 				return false;
 			if (query.avoidGrid != null)
 				return false;
-			if (query.allowedArea != null)
+			if (query.traverseParams.targetBuildable.Area != 0)
 				return false;
 			if (request != null && request.RequesterLord != null)
 				return false;
@@ -104,17 +124,37 @@ namespace YaOpt.Helpers.Pathfinding
 			if (lookup == null || lookup.Count == 0)
 				return true;
 
-			if ((long)cellDeltas.Count * lookup.Count > MaxPatchWork)
+			if (lookup.Count > MaxCachedKeys)
+			{
+				PathGridDiagnostics.RecycledKeys();
 				return false;
+			}
 
 			_templates.TryGetValue(pathFinder, out var templates);
+			var templateCount = templates?.Count ?? 0;
+
+			// Work is only done for keys that have a template; lookup.Count also counts non-patchable keys
+			// (area / avoid grid / customizer / lord) that are never patched and are simply dropped below.
+			// Basing the cap on lookup.Count made a stale build/area key population trigger a full recycle.
+			if ((long)cellDeltas.Count * templateCount > MaxPatchWork)
+			{
+				PathGridDiagnostics.RecycledWork();
+				return false;
+			}
 
 			var indices = pathFinder.map.cellIndices;
 			List<PathFinder.MapGridRequest> toDrop = null;
+			var patchedKeys = 0;
 
 			foreach (var pair in lookup)
 			{
 				if (templates == null || !templates.TryGetValue(pair.Key, out var template))
+				{
+					(toDrop ??= new List<PathFinder.MapGridRequest>()).Add(pair.Key);
+					continue;
+				}
+
+				if (pair.Key.allowedArea != null && !pathFinder.map.areaManager.AllAreas.Contains(pair.Key.allowedArea))
 				{
 					(toDrop ??= new List<PathFinder.MapGridRequest>()).Add(pair.Key);
 					continue;
@@ -125,10 +165,14 @@ namespace YaOpt.Helpers.Pathfinding
 					var index = indices.CellToIndex(cellDeltas[i]);
 					template.Execute(index);
 				}
+				patchedKeys++;
 			}
+
+			PathGridDiagnostics.Patched(patchedKeys, patchedKeys * cellDeltas.Count);
 
 			if (toDrop != null)
 			{
+				PathGridDiagnostics.Dropped(toDrop.Count);
 				for (var i = 0; i < toDrop.Count; i++)
 				{
 					var key = toDrop[i];
@@ -143,6 +187,15 @@ namespace YaOpt.Helpers.Pathfinding
 			}
 
 			return true;
+		}
+
+		/// <summary>Current retained key and template counts, for the debug report.</summary>
+		internal static void Snapshot(PathFinder pathFinder, out int lookup, out int templates)
+		{
+			lookup = pathFinder?.gridJobLookup?.Count ?? 0;
+			templates = 0;
+			if (pathFinder != null && _templates.TryGetValue(pathFinder, out var map))
+				templates = map.Count;
 		}
 
 		private static unsafe void PruneScheduledGridJobs(PathFinder pathFinder)

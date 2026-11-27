@@ -366,6 +366,12 @@
 	<YaOpt.Setting.Option.PathNodeReset.Desc>Resets only the A* scratch cells a path touched instead of clearing the whole node grid (about 1.25 MB per path on a 250x250 map). The search is unchanged, so paths are identical.</YaOpt.Setting.Option.PathNodeReset.Desc>
 	<YaOpt.Setting.Option.PathOverlaySparse>Door Overlay Sparse Clear</YaOpt.Setting.Option.PathOverlaySparse>
 	<YaOpt.Setting.Option.PathOverlaySparse.Desc>Clears only the door/cost-provider/pawn overlay cells a path wrote instead of clearing two whole-map arrays (~187 KB on a 250x250 map) for every path. Costs and blocking are unchanged.</YaOpt.Setting.Option.PathOverlaySparse.Desc>
+	<YaOpt.Setting.Option.PathGatherFast>Fast Cell Delta Gather</YaOpt.Setting.Option.PathGatherFast>
+	<YaOpt.Setting.Option.PathGatherFast.Desc>Deduplicates expanded cell deltas with a per-cell stamp array instead of hashing every cell into a set. Delta results are unchanged.</YaOpt.Setting.Option.PathGatherFast.Desc>
+	<YaOpt.Setting.Option.PathGridOutputUninit>Uninitialized Grid Buffer</YaOpt.Setting.Option.PathGridOutputUninit>
+	<YaOpt.Setting.Option.PathGridOutputUninit.Desc>Allocates a path-grid buffer without zero-filling it; the grid job writes every cell, so values are unchanged. Saves a whole-map clear (~0.5 MB on a 350x350 map) for each new grid key.</YaOpt.Setting.Option.PathGridOutputUninit.Desc>
+	<YaOpt.Setting.Option.PathDoorsJobFast>Fast Door Overlay Job</YaOpt.Setting.Option.PathDoorsJobFast>
+	<YaOpt.Setting.Option.PathDoorsJobFast.Desc>Schedules the door/pawn overlay as one by-value job instead of a managed wrapper plus a dispose job, and snapshots only pawns that can block. Costs and blocking are unchanged.</YaOpt.Setting.Option.PathDoorsJobFast.Desc>
 	<YaOpt.Setting.Tab.Main>All</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

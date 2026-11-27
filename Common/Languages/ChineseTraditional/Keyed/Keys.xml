@@ -366,6 +366,12 @@
 	<YaOpt.Setting.Option.PathNodeReset.Desc>只復位 A* 實際存取過的節點，而不是清空整個節點網格（250x250 地圖每條約 1.25 MB）。搜尋邏輯不變，路徑完全一致。</YaOpt.Setting.Option.PathNodeReset.Desc>
 	<YaOpt.Setting.Option.PathOverlaySparse>門覆蓋層稀疏清零</YaOpt.Setting.Option.PathOverlaySparse>
 	<YaOpt.Setting.Option.PathOverlaySparse.Desc>只清零本路徑寫入的門/代價提供者/pawn 覆蓋格，而不是每條路徑都清空兩個整圖陣列（250x250 地圖約 187 KB）。代價與阻擋結果不變。</YaOpt.Setting.Option.PathOverlaySparse.Desc>
+	<YaOpt.Setting.Option.PathGatherFast>儲存格增量快速去重</YaOpt.Setting.Option.PathGatherFast>
+	<YaOpt.Setting.Option.PathGatherFast.Desc>用逐格標記陣列去重，而不是把每個格子雜湊進集合。增量處理結果不變。</YaOpt.Setting.Option.PathGatherFast.Desc>
+	<YaOpt.Setting.Option.PathGridOutputUninit>網格緩衝區免清零</YaOpt.Setting.Option.PathGridOutputUninit>
+	<YaOpt.Setting.Option.PathGridOutputUninit.Desc>配置尋路網格緩衝區時不做整圖清零；網格任務會寫滿每個格子，數值不變。每個新網格鍵省一次整圖清零（350x350 地圖約 0.5 MB）。</YaOpt.Setting.Option.PathGridOutputUninit.Desc>
+	<YaOpt.Setting.Option.PathDoorsJobFast>門覆蓋層快速排程</YaOpt.Setting.Option.PathDoorsJobFast>
+	<YaOpt.Setting.Option.PathDoorsJobFast.Desc>把門/pawn 覆蓋層作為單一值類型任務排程，取代受控包裝加一個釋放任務，並只快照能阻擋的 pawn。代價與阻擋結果不變。</YaOpt.Setting.Option.PathDoorsJobFast.Desc>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

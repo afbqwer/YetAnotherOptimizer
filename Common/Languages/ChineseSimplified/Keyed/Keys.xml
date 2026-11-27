@@ -366,6 +366,12 @@
 	<YaOpt.Setting.Option.PathNodeReset.Desc>只复位 A* 实际访问过的节点，而不是清空整个节点网格（250x250 地图每条约 1.25 MB）。搜索逻辑不变，路径完全一致。</YaOpt.Setting.Option.PathNodeReset.Desc>
 	<YaOpt.Setting.Option.PathOverlaySparse>门覆盖层稀疏清零</YaOpt.Setting.Option.PathOverlaySparse>
 	<YaOpt.Setting.Option.PathOverlaySparse.Desc>只清零本路径写入的门/代价提供者/pawn 覆盖格，而不是每条约路径都清空两个整图数组（250x250 地图约 187 KB）。代价与阻挡结果不变。</YaOpt.Setting.Option.PathOverlaySparse.Desc>
+	<YaOpt.Setting.Option.PathGatherFast>单元格增量快速去重</YaOpt.Setting.Option.PathGatherFast>
+	<YaOpt.Setting.Option.PathGatherFast.Desc>用逐格标记数组去重，而不是把每个格子哈希进集合。增量处理结果不变。</YaOpt.Setting.Option.PathGatherFast.Desc>
+	<YaOpt.Setting.Option.PathGridOutputUninit>网格缓冲区免清零</YaOpt.Setting.Option.PathGridOutputUninit>
+	<YaOpt.Setting.Option.PathGridOutputUninit.Desc>分配寻路网格缓冲区时不做整图清零；网格任务会写满每个格子，数值不变。每个新网格键省一次整图清零（350x350 地图约 0.5 MB）。</YaOpt.Setting.Option.PathGridOutputUninit.Desc>
+	<YaOpt.Setting.Option.PathDoorsJobFast>门覆盖层快速调度</YaOpt.Setting.Option.PathDoorsJobFast>
+	<YaOpt.Setting.Option.PathDoorsJobFast.Desc>把门/pawn 覆盖层作为单个值类型任务调度，取代托管包装加一个释放任务，并只快照能阻挡的 pawn。代价与阻挡结果不变。</YaOpt.Setting.Option.PathDoorsJobFast.Desc>
 	<YaOpt.Setting.Tab.Main>全部</YaOpt.Setting.Tab.Main>
 	<YaOpt.Setting.Tab.Fps>FPS</YaOpt.Setting.Tab.Fps>
 	<YaOpt.Setting.Tab.Tps>TPS</YaOpt.Setting.Tab.Tps>

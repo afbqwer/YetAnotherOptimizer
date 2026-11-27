@@ -23,8 +23,15 @@ namespace YaOpt.Helpers.Pathfinding
 
 		internal static void Execute(PathGridDoorsBlockedJob job)
 		{
-			var providerCost = job.providerCost;
-			var blocked = job.blocked;
+			ExecuteCore(job.map, job.pawn, job.start, job.dest, job.traverseParams, job.tuning,
+				job.doors, job.providers, job.pawns, job.providerCost, job.blocked);
+		}
+
+		internal static void ExecuteCore(Map map, Pawn pawn, IntVec3 start, IntVec3 dest,
+			TraverseParms traverseParams, PathFinderCostTuning tuning,
+			IReadOnlyList<Thing> doors, IReadOnlyList<IPathFindCostProvider> providers, IReadOnlyList<Pawn> pawns,
+			NativeArray<ushort> providerCost, NativeArray<bool> blocked)
+		{
 			var touch = ScratchTouchRegistry.Get(providerCost, out var fullClear);
 			if (fullClear)
 			{
@@ -46,10 +53,7 @@ namespace YaOpt.Helpers.Pathfinding
 			var touched = touch.Indices;
 			touched.Clear();
 
-			var map = job.map;
 			var cellIndices = map.cellIndices;
-			var doors = job.doors;
-			var pawn = job.pawn;
 
 			if (doors != null)
 			{
@@ -60,13 +64,12 @@ namespace YaOpt.Helpers.Pathfinding
 					foreach (var cell in door.OccupiedRect())
 					{
 						var index = cellIndices.CellToIndex(cell);
-						providerCost[index] = PathUtility.GetDoorCost(door, job.traverseParams, pawn, job.tuning);
+						providerCost[index] = PathUtility.GetDoorCost(door, traverseParams, pawn, tuning);
 						touched.Add(index);
 					}
 				}
 			}
 
-			var providers = job.providers;
 			if (pawn != null && providers != null)
 			{
 				for (var p = 0; p < providers.Count; p++)
@@ -84,7 +87,6 @@ namespace YaOpt.Helpers.Pathfinding
 			if (!PawnUtility.ShouldCollideWithPawns(pawn))
 				return;
 
-			var pawns = job.pawns;
 			if (pawns == null)
 				return;
 
@@ -93,7 +95,7 @@ namespace YaOpt.Helpers.Pathfinding
 			for (var i = 0; i < pawns.Count; i++)
 			{
 				var other = pawns[i];
-				if (other == pawn || !CanBlockEver(job, other, cellIndices, blocked))
+				if (other == pawn || !CanBlockEver(pawn, start, dest, other, cellIndices, blocked))
 					continue;
 				if (PawnUtility.PawnBlockedBy(pawn, other, collideOnlyWithStandingPawns: false, collideWithNonHostile, forPathFinder: true))
 				{
@@ -104,17 +106,17 @@ namespace YaOpt.Helpers.Pathfinding
 			}
 		}
 
-		private static bool CanBlockEver(PathGridDoorsBlockedJob job, Pawn other, CellIndices cellIndices,
+		private static bool CanBlockEver(Pawn pawn, IntVec3 start, IntVec3 dest, Pawn other, CellIndices cellIndices,
 			NativeArray<bool> blocked)
 		{
 			if (other.Destroyed || other.Discarded || !other.Spawned)
 				return false;
 			if (blocked[cellIndices.CellToIndex(other.Position)])
 				return false;
-			if (!job.pawn.pather.BestPathHadPawnsInTheWayRecently())
+			if (!pawn.pather.BestPathHadPawnsInTheWayRecently())
 			{
-				var toStart = (other.Position - job.start).LengthManhattan;
-				var toDest = (other.Position - job.dest).LengthManhattan;
+				var toStart = (other.Position - start).LengthManhattan;
+				var toDest = (other.Position - dest).LengthManhattan;
 				if (Mathf.Min(toStart, toDest) > MinDistToCheckBlocked)
 					return false;
 			}

@@ -31,6 +31,7 @@ namespace YaOpt.Patches
 		static void Postfix(PathFinder __instance, PathRequest request)
 		{
 			var query = PathFinder.MapGridRequest.For(request);
+			PathGridDiagnostics.Scheduled(query, request);
 			if (!PathGridIncremental.IsPatchable(query, request))
 			{
 				PathGridIncremental.Forget(__instance, query);
