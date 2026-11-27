@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using Verse;
 using YaOpt.Helpers;
-using YaOpt.Prepatch;
 
 namespace YaOpt.Patches
 {
 	/// <summary>
-	/// Skips the base pre-draw color write when the parallel preparation already supplied it.
+	/// Skips the base color write when parallel preparation already filled the node block.
 	/// </summary>
 	/// <seealso cref="YaOptSettings.OptParallelMaterialUpdate"/>
 	[HarmonyPatch(typeof(PawnRenderNodeWorker))]
@@ -17,15 +16,17 @@ namespace YaOpt.Patches
 	{
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled && PrepatcherState.ParallelMaterialUpdateActive;
+			return YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled;
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
 		{
 			var label = generator.DefineLabel();
-			yield return CodeInstruction.LoadArgument(0);
 			yield return CodeInstruction.LoadArgument(1);
-			yield return CodeInstruction.Call(typeof(ParallelPreDrawHelper), nameof(ParallelPreDrawHelper.IsMaterialPrepared));
+			yield return CodeInstruction.LoadArgument(2);
+			yield return CodeInstruction.LoadArgument(3);
+			yield return CodeInstruction.Call(typeof(ParallelPreDrawHelper),
+				nameof(ParallelPreDrawHelper.CanUsePreparedBlock));
 			yield return new CodeInstruction(OpCodes.Brfalse_S, label);
 			yield return new CodeInstruction(OpCodes.Ret);
 			yield return new CodeInstruction(OpCodes.Nop).WithLabels(label);

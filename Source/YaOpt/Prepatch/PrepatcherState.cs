@@ -39,11 +39,7 @@ namespace YaOpt.Prepatch
 		/// </summary>
 		internal static bool ToilGuardActive;
 
-		internal static bool ParallelMaterialUpdateActive;
-
 		private static bool _warnedToilGuardInactive;
-		private static bool _warnedParallelMaterialInactive;
-
 		internal static void MarkListerPatched()
 		{
 			ListerPatched = true;
@@ -69,7 +65,6 @@ namespace YaOpt.Prepatch
 				RefuelCandidatesActive = false;
 				InvisibilityActive = false;
 				ToilGuardActive = false;
-				ParallelMaterialUpdateActive = false;
 				return;
 			}
 
@@ -93,14 +88,6 @@ namespace YaOpt.Prepatch
 			{
 				_warnedToilGuardInactive = true;
 				YaOptMod.Warning("The toil recursion guard is enabled but its per-driver field was not injected; the guard stays inactive.");
-			}
-
-			ParallelMaterialUpdateActive = settings.OptParallelMaterialUpdate.Enabled &&
-				HasInjectedAccessorField(nameof(PrepatcherFields.MaterialPrepared), typeof(PawnRenderNode));
-			if (settings.OptParallelMaterialUpdate.Enabled && !ParallelMaterialUpdateActive && !_warnedParallelMaterialInactive)
-			{
-				_warnedParallelMaterialInactive = true;
-				YaOptMod.Warning("Parallel material update is enabled but its per-node state field was not injected; the optimization stays inactive.");
 			}
 
 			// A field-name match is the reliable gate here: Pawn already has other long fields,

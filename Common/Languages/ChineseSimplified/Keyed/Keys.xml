@@ -97,7 +97,7 @@
 	<YaOpt.Setting.Option.PrepareBatchCount>微调渲染准备批次数量</YaOpt.Setting.Option.PrepareBatchCount>
 	<YaOpt.Setting.Option.PrepareBatchCount.Desc>将动态渲染准备的批次大小固定为 4。当高开销角色聚集时，更小的批次可让空闲线程领取更多尚未处理的工作，降低负载不均造成的帧时间长尾，但也会增加一定的调度开销。</YaOpt.Setting.Option.PrepareBatchCount.Desc>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate>并行材质参数更新</YaOpt.Setting.Option.ParallelMaterialUpdate>
-	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>将原版 pawn 的材质属性块准备移入并行渲染准备阶段。自定义渲染请求或材质逻辑的 worker，以及仍需延迟解析的材质，会继续在主线程更新。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
+	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>在并行渲染准备阶段填充每个节点已有的材质属性块。具有自定义渲染请求或材质逻辑的 worker，以及仍需延迟解析的材质，会继续在主线程处理。此优化假定原版每个节点只生成一个绘制请求；若 Mod 在未覆盖该路径的情况下为同一节点生成多个使用不同材质的请求，可能出现颜色错误。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
 	<YaOpt.Setting.Option.FastRecacheRequested>内联缓存更新检查</YaOpt.Setting.Option.FastRecacheRequested>
 	<YaOpt.Setting.Option.FastRecacheRequested.Desc>优化物体是否需要重新生成渲染参数的检查。原版游戏通过递归调用渲染树上的每一个子节点来检查是否有子节点要求更新。统计发现97%的物体渲染树不超过4层，此优化将前4层节点的检查内联到一个函数中，省去了虚函数调用的开销。注：性能监测显示提升很小，未来版本可能移除。</YaOpt.Setting.Option.FastRecacheRequested.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad>延迟纹理加载</YaOpt.Setting.Option.LazyTextureLoad>

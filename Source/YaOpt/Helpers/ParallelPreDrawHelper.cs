@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
+using RimWorld;
 using UnityEngine;
 using Verse;
-using YaOpt.Prepatch;
 
 namespace YaOpt.Helpers
 {
 	/// <summary>
 	/// Provides compatibility-aware pawn render-tree checks and parallel material preparation.
 	/// </summary>
+	/// <remarks>
+	/// Material preparation writes the node's own <see cref="PawnRenderNode.MatPropBlock"/>, which
+	/// matches the vanilla one-request-per-node render path. See
+	/// <see cref="YaOptSettings.OptParallelMaterialUpdate"/> for the documented limitations.
+	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptFastRecacheRequested"/>
 	/// <seealso cref="YaOptSettings.OptParallelMaterialUpdate"/>
 	[StaticConstructorOnStartup]
@@ -53,13 +57,20 @@ namespace YaOpt.Helpers
 			if (type == typeof(PawnRenderNodeWorker))
 				return;
 
-			if (type.IsMethodOverriden(nameof(PawnRenderNodeWorker.PreDraw)) ||
-				type.IsMethodOverriden(nameof(PawnRenderNodeWorker.GetMaterialPropertyBlock)) ||
-				type.IsMethodOverriden(nameof(PawnRenderNodeWorker.AppendDrawRequests)))
+			if (IsMethodOverridden(type, nameof(PawnRenderNodeWorker.PreDraw)) ||
+				IsMethodOverridden(type, nameof(PawnRenderNodeWorker.GetMaterialPropertyBlock)) ||
+				IsMethodOverridden(type, nameof(PawnRenderNodeWorker.AppendDrawRequests)) ||
+				IsMethodOverridden(type, nameof(PawnRenderNodeWorker.GetFinalizedMaterial)))
 			{
 				CustomMaterialPathWorkers.Add(type);
 				YaOptMod.Debug($"Keeping {type.FullName} material updates on the main thread because it customizes the render request or material path.");
 			}
+		}
+
+		private static bool IsMethodOverridden(Type type, string name)
+		{
+			return type.GetMethod(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+				?.IsOverriden() == true;
 		}
 
 		public static bool CanParallelMaterialUpdate(PawnRenderNodeWorker worker)
@@ -67,24 +78,55 @@ namespace YaOpt.Helpers
 			return worker != null && !CustomMaterialPathWorkers.Contains(worker.GetType());
 		}
 
-		public static void PrepareMaterialPropertyBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
+		/// <summary>
+		/// Initializes lazy faction colors before material preparation runs on worker threads.
+		/// </summary>
+		public static void PrepareFactionColors()
 		{
-			if (node == null)
-				return;
+			var factions = Find.FactionManager.AllFactionsListForReading;
+			for (var i = 0; i < factions.Count; i++)
+			{
+				_ = factions[i].AllegianceColor;
+			}
+		}
 
-			ref bool prepared = ref PrepatcherFields.MaterialPrepared(node);
-			prepared = false;
-			if (material == null || material.IsDeferredMaterial || !CanParallelMaterialUpdate(node.Worker))
+		/// <summary>
+		/// Returns whether <see cref="PrepareMaterialPropertyBlock"/> can fill the block for this draw.
+		/// </summary>
+		/// <remarks>
+		/// The draw patches use the same check before returning the pre-filled block. This keeps
+		/// deferred materials and custom worker paths on the vanilla main-thread path.
+		/// </remarks>
+		public static bool CanUsePreparedBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
+		{
+			return node != null && material != null && !material.IsDeferredMaterial &&
+				(!parms.Statue || parms.statueColor.HasValue) &&
+				CanParallelMaterialUpdate(node.Worker);
+		}
+
+		public static void PrepareMaterialPropertyBlocks(List<PawnGraphicDrawRequest> requests, PawnDrawParms parms)
+		{
+			for (var i = 0; i < requests.Count; i++)
+			{
+				var request = requests[i];
+				PrepareMaterialPropertyBlock(request.node, request.material, parms);
+			}
+		}
+
+		private static void PrepareMaterialPropertyBlock(PawnRenderNode node, Material material, PawnDrawParms parms)
+		{
+			if (!CanUsePreparedBlock(node, material, parms))
 				return;
 
 			var block = node.MatPropBlock;
-			if (block == null)
-				return;
-
 			if (parms.Statue)
+			{
 				block.SetColor(ShaderPropertyIDs.Color, parms.statueColor.Value);
+			}
 			else
+			{
 				block.SetColor(ShaderPropertyIDs.Color, parms.tint * material.color);
+			}
 
 			if (material.shader == ShaderDatabase.CutoutWithOverlay)
 			{
@@ -93,20 +135,6 @@ namespace YaOpt.Helpers
 				else
 					PawnRenderUtility.SetMatPropBlockOverlay(block, Color.white, 0f);
 			}
-
-			prepared = true;
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static bool IsMaterialPrepared(PawnRenderNode node)
-		{
-			return PrepatcherFields.MaterialPrepared(node);
-		}
-
-		[MethodImpl(MethodImplOptions.NoInlining)]
-		public static void ClearMaterialPrepared(PawnRenderNode node)
-		{
-			PrepatcherFields.MaterialPrepared(node) = false;
 		}
 
 		/// <summary>

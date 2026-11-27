@@ -19,6 +19,12 @@ namespace YaOpt.Patches
 			return YaOptGlobal.Settings.OptPrepareBatchCount.Enabled;
 		}
 
+		// Preserve the argument-consuming call shape so the scheduling stack stays balanced.
+		public static int GetPreparationBatchCount(int items)
+		{
+			return 4;
+		}
+
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
 		{
 			var codes = new List<CodeInstruction>(instructions);
@@ -47,7 +53,8 @@ namespace YaOpt.Patches
 				if (instruction.opcode == OpCodes.Call && instruction.operand is MethodInfo method &&
 					method == getIdealBatchCount)
 				{
-					yield return new CodeInstruction(OpCodes.Ldc_I4_4);
+					yield return new CodeInstruction(OpCodes.Call,
+						AccessTools.Method(typeof(Verse_DynamicDrawManager_PreDrawVisibleThings), nameof(GetPreparationBatchCount)));
 					continue;
 				}
 				yield return instruction;

@@ -97,7 +97,7 @@
 	<YaOpt.Setting.Option.PrepareBatchCount>微調渲染準備批次數量</YaOpt.Setting.Option.PrepareBatchCount>
 	<YaOpt.Setting.Option.PrepareBatchCount.Desc>將動態渲染準備的批次大小固定為 4。當高開銷角色聚集時，更小的批次可讓空閒執行緒領取更多尚未處理的工作，降低負載不均造成的影格時間長尾，但也會增加一定的排程開銷。</YaOpt.Setting.Option.PrepareBatchCount.Desc>
 	<YaOpt.Setting.Option.ParallelMaterialUpdate>並行材質參數更新</YaOpt.Setting.Option.ParallelMaterialUpdate>
-	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>將原版 pawn 的材質屬性區塊準備移入並行渲染準備階段。自訂渲染請求或材質邏輯的 worker，以及仍需延遲解析的材質，會繼續在主執行緒更新。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
+	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>在並行渲染準備階段填充每個節點已有的材質屬性區塊。具有自訂渲染請求或材質邏輯的 worker，以及仍需延遲解析的材質，會繼續在主執行緒處理。此最佳化假定原版每個節點只產生一個繪製請求；若 Mod 在未覆寫該路徑的情況下為同一節點產生多個使用不同材質的請求，可能出現顏色錯誤。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
 	<YaOpt.Setting.Option.FastRecacheRequested>內聯快取更新檢查</YaOpt.Setting.Option.FastRecacheRequested>
 	<YaOpt.Setting.Option.FastRecacheRequested.Desc>最佳化物體是否需要重新生成渲染參數的檢查。原版遊戲透過遞迴呼叫渲染樹上的每一個子節點來檢查是否有子節點要求更新。統計發現97%的物體渲染樹不超過4層，此最佳化將前4層節點的檢查內聯到一個函式中，省去了虛擬函式呼叫的開銷。註：效能監測顯示提升很小，未來版本可能移除。</YaOpt.Setting.Option.FastRecacheRequested.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad>延遲紋理載入</YaOpt.Setting.Option.LazyTextureLoad>

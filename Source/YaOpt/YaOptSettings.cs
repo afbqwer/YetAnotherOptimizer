@@ -301,9 +301,16 @@ namespace YaOpt
 		/// <summary>
 		/// Prepares vanilla pawn material property blocks during parallel render preparation.
 		/// </summary>
-		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_GetMaterialPropertyBlock"/>
-		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_PreDraw"/>
+		/// <remarks>
+		/// Writes each node's own <see cref="Verse.PawnRenderNode.MatPropBlock"/>, which matches the
+		/// vanilla one-request-per-node render path. Workers with custom render or material logic and
+		/// deferred materials stay on the main thread. Mods that create multiple different-material
+		/// requests for one node without overriding the detected render path are not supported.
+		/// </remarks>
 		/// <seealso cref="Patches.Verse_PawnRenderTree_ParallelPreDraw"/>
+		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_PreDraw"/>
+		/// <seealso cref="Patches.Verse_PawnRenderNodeWorker_GetMaterialPropertyBlock"/>
+		/// <seealso cref="Patches.Verse_DynamicDrawManager_DrawDynamicThings_ParallelMaterialUpdate"/>
 		public OptimizationOption OptParallelMaterialUpdate { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.ParallelMaterialUpdate",

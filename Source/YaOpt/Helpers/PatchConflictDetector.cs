@@ -229,8 +229,6 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(PawnRenderTree), nameof(PawnRenderTree.ParallelPreDraw)),
 				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.PreDraw)),
 				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.GetMaterialPropertyBlock)));
-			Check(nameof(YaOptSettings.OptParallelMaterialUpdate), includeAll: true,
-				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.AppendDrawRequests)));
 		}
 
 		private static void CheckReplacement(string settingId, params MethodBase[] targets)
