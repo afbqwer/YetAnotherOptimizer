@@ -275,8 +275,10 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Legacy setting retained for save compatibility; its 1.6 implementation has been removed.
+		/// Starts dynamic culling and pawn render preparation before the map mesh is drawn so worker
+		/// threads can process them while the main thread renders terrain.
 		/// </summary>
+		/// <seealso cref="Patches.EarlyRenderPrepare"/>
 		public OptimizationOption OptEarlyRenderPrepare { get; } = new OptimizationOption
 		{
 			Name = "YaOpt.Setting.Option.EarlyRenderPrepare",
@@ -2137,7 +2139,6 @@ namespace YaOpt
 			nameof(OptParallelWorkGiver),
 			nameof(OptParallelThoughtUpdate),
 			nameof(OptParallelPostMapTick),
-			nameof(OptEarlyRenderPrepare),
 
 			// Superseded by vanilla 1.7 or incompatible with the 1.7 engine.
 			nameof(OptThingGetComp),

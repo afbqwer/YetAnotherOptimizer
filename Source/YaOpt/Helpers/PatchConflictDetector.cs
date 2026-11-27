@@ -43,6 +43,7 @@ namespace YaOpt.Helpers
 			CheckTempTerrainMerge();
 			CheckPawnComputeMatrix();
 			CheckPawnRenderPreparation();
+			CheckEarlyRenderPrepare();
 		}
 
 		/// <summary>
@@ -229,6 +230,19 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(PawnRenderTree), nameof(PawnRenderTree.ParallelPreDraw)),
 				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.PreDraw)),
 				AccessTools.Method(typeof(PawnRenderNodeWorker), nameof(PawnRenderNodeWorker.GetMaterialPropertyBlock)));
+		}
+
+		/// <summary>
+		/// The early preparation rewrites the draw method body and defers the job completions, so any
+		/// foreign transpiler or short-circuiting prefix on the four targets is incompatible.
+		/// </summary>
+		private static void CheckEarlyRenderPrepare()
+		{
+			Check(nameof(YaOptSettings.OptEarlyRenderPrepare), includeAll: false,
+				AccessTools.Method(typeof(DynamicDrawManager), nameof(DynamicDrawManager.DrawDynamicThings)),
+				AccessTools.Method(typeof(DynamicDrawManager), "ComputeCulledThings"),
+				AccessTools.Method(typeof(DynamicDrawManager), "PreDrawVisibleThings"),
+				AccessTools.Method(typeof(Map), nameof(Map.MapUpdate)));
 		}
 
 		private static void CheckReplacement(string settingId, params MethodBase[] targets)

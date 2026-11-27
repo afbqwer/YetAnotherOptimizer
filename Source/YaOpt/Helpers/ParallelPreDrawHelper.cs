@@ -2,13 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using RimWorld;
+using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 using Verse;
 
 namespace YaOpt.Helpers
 {
 	/// <summary>
-	/// Provides compatibility-aware pawn render-tree checks and parallel material preparation.
+	/// Provides compatibility-aware pawn render-tree checks, early render preparation and parallel
+	/// material preparation.
 	/// </summary>
 	/// <remarks>
 	/// Material preparation writes the node's own <see cref="PawnRenderNode.MatPropBlock"/>, which
@@ -17,6 +20,7 @@ namespace YaOpt.Helpers
 	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptFastRecacheRequested"/>
 	/// <seealso cref="YaOptSettings.OptParallelMaterialUpdate"/>
+	/// <seealso cref="YaOptSettings.OptEarlyRenderPrepare"/>
 	[StaticConstructorOnStartup]
 	internal static class ParallelPreDrawHelper
 	{
@@ -35,6 +39,327 @@ namespace YaOpt.Helpers
 		{
 			TypeSearcher.RegisterSearchingType(typeof(PawnRenderNode), PawnRenderNode_RecacheRequested_Checker);
 			TypeSearcher.RegisterSearchingType(typeof(PawnRenderNodeWorker), PawnRenderNodeWorker_MaterialPath_Checker);
+			UpdateCallbackHelper.RegisterClearCacheCallback(AbortEarlyRenderPrepare);
+		}
+
+		/// <summary>
+		/// Indicates whether the early render preparation transpilers are installed.
+		/// </summary>
+		public static bool EarlyRenderPrepareActive { get; set; }
+
+		private static NativeArray<DynamicDrawManager.ThingCullDetails> _earlyDetails;
+
+		private static Map _earlyDetailsMap;
+
+		private static JobHandle _cullJobHandle;
+
+		private static JobHandle _preDrawJobHandle;
+
+		private static bool _hasEarlyDetails;
+
+		private static bool _earlyPreDrawPrepared;
+
+		private static bool _awaitingEarlyCull;
+
+		private static bool _awaitingEarlyPreDraw;
+
+		private static bool _cullJobPending;
+
+		private static bool _preDrawJobPending;
+
+		/// <summary>
+		/// Starts culling dynamic drawables before the map mesh is updated and drawn.
+		/// </summary>
+		/// <remarks>
+		/// The allocated details array is handed to <see cref="DynamicDrawManager.DrawDynamicThings"/>
+		/// later in the same frame. If the draw phase is skipped, the next start (or a game load)
+		/// disposes the leftover array.
+		/// </remarks>
+		public static void StartCullingJob(Map map)
+		{
+			if (!EarlyRenderPrepareActive)
+				return;
+
+			AbortEarlyRenderPrepare();
+
+			if (map == null || map.Disposed || !DebugViewSettings.drawThingsDynamic)
+				return;
+
+			var manager = map.dynamicDrawManager;
+			var count = manager.drawThings.Count;
+			if (count == 0)
+				return;
+
+			_earlyDetails = new NativeArray<DynamicDrawManager.ThingCullDetails>(
+				count, Allocator.TempJob, NativeArrayOptions.ClearMemory);
+			_earlyDetailsMap = map;
+			_hasEarlyDetails = true;
+			_earlyPreDrawPrepared = false;
+
+			try
+			{
+				_awaitingEarlyCull = true;
+				manager.ComputeCulledThings(_earlyDetails);
+			}
+			catch (Exception ex)
+			{
+				YaOptMod.Error($"Early render preparation failed while starting the cull job: {ex}");
+				AbortEarlyRenderPrepare();
+			}
+			finally
+			{
+				_awaitingEarlyCull = false;
+			}
+		}
+
+		/// <summary>
+		/// Runs the main-thread part of dynamic render preparation and starts the parallel pre-draw job
+		/// before the map mesh is drawn.
+		/// </summary>
+		public static void StartPreDrawJob(Map map)
+		{
+			if (!EarlyRenderPrepareActive || !_hasEarlyDetails)
+				return;
+
+			if (map == null || map.Disposed || _earlyDetailsMap != map || !DebugViewSettings.drawThingsDynamic)
+			{
+				AbortEarlyRenderPrepare();
+				return;
+			}
+
+			WaitUntilCullJobComplete();
+
+			var manager = map.dynamicDrawManager;
+			if (manager.drawThings.Count != _earlyDetails.Length)
+			{
+				RebuildEarlyDetails(manager);
+				if (!_hasEarlyDetails)
+					return;
+				WaitUntilCullJobComplete();
+			}
+
+			if (!DebugViewSettings.singleThreadedDrawing)
+			{
+				if (YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled)
+					PrepareFactionColors();
+
+				var details = _earlyDetails;
+				var drawThings = manager.drawThings;
+				for (var i = 0; i < details.Length; i++)
+				{
+					if (details[i].shouldDraw)
+						drawThings[i].DynamicDrawPhase(DrawPhase.EnsureInitialized);
+				}
+
+				try
+				{
+					_awaitingEarlyPreDraw = true;
+					manager.PreDrawVisibleThings(details);
+				}
+				catch (Exception ex)
+				{
+					YaOptMod.Error($"Early render preparation failed while starting the pre-draw job: {ex}");
+					AbortEarlyRenderPrepare();
+					return;
+				}
+				finally
+				{
+					_awaitingEarlyPreDraw = false;
+				}
+			}
+
+			_earlyPreDrawPrepared = true;
+		}
+
+		/// <summary>
+		/// Returns the early-prepared cull details, preparing them synchronously when the early start
+		/// did not run (for example when another mod calls <see cref="DynamicDrawManager.DrawDynamicThings"/>
+		/// outside <see cref="Verse.Map.MapUpdate"/>).
+		/// </summary>
+		public static NativeArray<DynamicDrawManager.ThingCullDetails> TakeOrPrepareDetails(DynamicDrawManager manager)
+		{
+			if (_hasEarlyDetails && _earlyDetailsMap == manager.map && _earlyPreDrawPrepared)
+			{
+				WaitUntilCullJobComplete();
+				WaitUntilPreDrawJobComplete();
+
+				if (manager.drawThings.Count == _earlyDetails.Length)
+				{
+					var details = _earlyDetails;
+					_earlyDetails = default;
+					_earlyDetailsMap = null;
+					_hasEarlyDetails = false;
+					_earlyPreDrawPrepared = false;
+					return details;
+				}
+			}
+
+			AbortEarlyRenderPrepare();
+			return PrepareDetailsNow(manager);
+		}
+
+		/// <summary>
+		/// Stores a deferred cull job handle; called from the transpiled
+		/// <see cref="DynamicDrawManager.ComputeCulledThings"/>.
+		/// </summary>
+		public static void CompleteCullingJob(ref JobHandle handle)
+		{
+			if (EarlyRenderPrepareActive && _awaitingEarlyCull)
+			{
+				_awaitingEarlyCull = false;
+				_cullJobHandle = handle;
+				_cullJobPending = true;
+				return;
+			}
+
+			handle.Complete();
+		}
+
+		/// <summary>
+		/// Stores a deferred pre-draw job handle; called from the transpiled
+		/// <see cref="DynamicDrawManager.PreDrawVisibleThings"/>.
+		/// </summary>
+		public static void CompletePreDrawJob(ref JobHandle handle)
+		{
+			if (EarlyRenderPrepareActive && _awaitingEarlyPreDraw)
+			{
+				_awaitingEarlyPreDraw = false;
+				_preDrawJobHandle = handle;
+				_preDrawJobPending = true;
+				return;
+			}
+
+			handle.Complete();
+		}
+
+		/// <summary>
+		/// Completes any outstanding early render preparation work and releases its details array.
+		/// </summary>
+		public static void AbortEarlyRenderPrepare()
+		{
+			try
+			{
+				WaitUntilCullJobComplete();
+			}
+			catch (Exception ex)
+			{
+				YaOptMod.Error($"Early render preparation cull job failed: {ex}");
+			}
+
+			try
+			{
+				WaitUntilPreDrawJobComplete();
+			}
+			catch (Exception ex)
+			{
+				YaOptMod.Error($"Early render preparation pre-draw job failed: {ex}");
+			}
+
+			DisposeEarlyDetails();
+
+			_earlyDetailsMap = null;
+			_earlyPreDrawPrepared = false;
+			_awaitingEarlyCull = false;
+			_awaitingEarlyPreDraw = false;
+		}
+
+		private static void RebuildEarlyDetails(DynamicDrawManager manager)
+		{
+			WaitUntilCullJobComplete();
+			DisposeEarlyDetails();
+
+			_earlyDetailsMap = manager.map;
+			_earlyPreDrawPrepared = false;
+
+			var count = manager.drawThings.Count;
+			if (count == 0)
+				return;
+
+			_earlyDetails = new NativeArray<DynamicDrawManager.ThingCullDetails>(
+				count, Allocator.TempJob, NativeArrayOptions.ClearMemory);
+			_hasEarlyDetails = true;
+
+			try
+			{
+				_awaitingEarlyCull = true;
+				manager.ComputeCulledThings(_earlyDetails);
+			}
+			catch (Exception ex)
+			{
+				YaOptMod.Error($"Early render preparation failed while rebuilding the cull details: {ex}");
+				AbortEarlyRenderPrepare();
+			}
+			finally
+			{
+				_awaitingEarlyCull = false;
+			}
+		}
+
+		private static NativeArray<DynamicDrawManager.ThingCullDetails> PrepareDetailsNow(DynamicDrawManager manager)
+		{
+			var details = new NativeArray<DynamicDrawManager.ThingCullDetails>(
+				manager.drawThings.Count, Allocator.TempJob, NativeArrayOptions.ClearMemory);
+
+			_awaitingEarlyCull = false;
+			_awaitingEarlyPreDraw = false;
+
+			manager.ComputeCulledThings(details);
+
+			if (!DebugViewSettings.singleThreadedDrawing)
+			{
+				if (YaOptGlobal.Settings.OptParallelMaterialUpdate.Enabled)
+					PrepareFactionColors();
+
+				var drawThings = manager.drawThings;
+				for (var i = 0; i < details.Length; i++)
+				{
+					if (details[i].shouldDraw)
+						drawThings[i].DynamicDrawPhase(DrawPhase.EnsureInitialized);
+				}
+
+				manager.PreDrawVisibleThings(details);
+			}
+
+			return details;
+		}
+
+		private static void WaitUntilCullJobComplete()
+		{
+			if (!_cullJobPending)
+				return;
+
+			_cullJobPending = false;
+			_cullJobHandle.Complete();
+		}
+
+		private static void WaitUntilPreDrawJobComplete()
+		{
+			if (!_preDrawJobPending)
+				return;
+
+			_preDrawJobPending = false;
+			_preDrawJobHandle.Complete();
+		}
+
+		private static void DisposeEarlyDetails()
+		{
+			if (!_hasEarlyDetails)
+				return;
+
+			_hasEarlyDetails = false;
+			if (_earlyDetails.IsCreated)
+			{
+				try
+				{
+					_earlyDetails.Dispose();
+				}
+				catch (Exception ex)
+				{
+					YaOptMod.Error($"Early render preparation details could not be disposed: {ex}");
+				}
+			}
+
+			_earlyDetails = default;
 		}
 
 		private static void PawnRenderNode_RecacheRequested_Checker(Type type)

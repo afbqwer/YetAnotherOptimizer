@@ -230,6 +230,12 @@ namespace YaOpt
 		{
 			var type = patchObj.GetType();
 			var name = type.FullName;
+			if (name == "PerformanceFish.Rendering.DynamicDrawManagerPatches+DrawDynamicThingsPatch" &&
+				YaOptGlobal.Settings.OptEarlyRenderPrepare.Enabled)
+			{
+				error = "YaOpt.Message.PerformanceFish.EarlyRenderPrepare".Translate();
+				return false;
+			}
 			if ((name == "PerformanceFish.Listers.ThingsPrepatches+GetThingsOfTypeIntoListPatch" ||
 				 name == "PerformanceFish.Listers.ThingsPrepatches+AddPatch" ||
 				 name == "PerformanceFish.Listers.ThingsPrepatches+ContainsPatch" ||
