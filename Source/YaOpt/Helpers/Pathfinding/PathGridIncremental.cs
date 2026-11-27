@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using RimWorld;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Verse;
+using Verse.AI.Group;
 
 namespace YaOpt.Helpers.Pathfinding
 {
@@ -17,9 +19,16 @@ namespace YaOpt.Helpers.Pathfinding
 	/// for the changed cells yields exactly the values a full rebuild would produce, without touching the
 	/// rest of the map.
 	/// <para/>
-	/// Keys that read data which is not delta-tracked (a customizer grid, an <see cref="AvoidGrid"/>, an
-	/// allowed <see cref="Area"/>, or a lord walk grid) are not patched; they are dropped so they are
-	/// rebuilt in full the next time they are requested, matching vanilla's recycle behaviour.
+	/// A <see cref="PathFinder.MapGridRequest"/> omits three inputs that <c>ParameterizeGridJob</c> reads:
+	/// the requester faction, the requester lord and whether the pawn is drafted. Vanilla tolerates this
+	/// because any delta recycles every grid, so the grid is re-parameterized from a current request soon
+	/// after. A retained template would keep the first request's values indefinitely, so the signature is
+	/// stored and re-checked against the first request for the key each gather; a mismatch drops the key.
+	/// <para/>
+	/// Keys that read per-request data which is not delta-tracked (a customizer grid, an
+	/// <see cref="AvoidGrid"/>, or a lord walk grid) are not retained at all. An allowed <see cref="Area"/>
+	/// is kept, but its area is liveness-checked on every patch because <see cref="AreaSource.Prune"/>
+	/// disposes a removed area's bit array without reporting a source change.
 	/// <para/>
 	/// Templates are scoped per <see cref="PathFinder"/> (weakly), because a <c>MapGridRequest</c> does not
 	/// identify the map and two loaded maps can produce equal keys. Keying globally would let one map's
@@ -41,14 +50,28 @@ namespace YaOpt.Helpers.Pathfinding
 		/// <summary>Set by the ScheduleGridJob postfix's Prepare. When false every patch falls back to vanilla.</summary>
 		internal static bool TemplatesReady;
 
+		private struct Template
+		{
+			public PathGridJob Job;
+
+			public Faction Faction;
+
+			public Lord Lord;
+
+			public bool Drafted;
+		}
+
 		private static readonly HashSet<PathFinder> _forceFull = new HashSet<PathFinder>();
 
-		private static ConditionalWeakTable<PathFinder, Dictionary<PathFinder.MapGridRequest, PathGridJob>> _templates =
-			new ConditionalWeakTable<PathFinder, Dictionary<PathFinder.MapGridRequest, PathGridJob>>();
+		private static ConditionalWeakTable<PathFinder, Dictionary<PathFinder.MapGridRequest, Template>> _templates =
+			new ConditionalWeakTable<PathFinder, Dictionary<PathFinder.MapGridRequest, Template>>();
+
+		private static readonly HashSet<PathFinder.MapGridRequest> _validatedKeys = new HashSet<PathFinder.MapGridRequest>();
+		private static readonly List<PathFinder.MapGridRequest> _staleKeys = new List<PathFinder.MapGridRequest>();
 
 		internal static void Reset()
 		{
-			_templates = new ConditionalWeakTable<PathFinder, Dictionary<PathFinder.MapGridRequest, PathGridJob>>();
+			_templates = new ConditionalWeakTable<PathFinder, Dictionary<PathFinder.MapGridRequest, Template>>();
 			_forceFull.Clear();
 			TemplatesReady = false;
 		}
@@ -62,8 +85,9 @@ namespace YaOpt.Helpers.Pathfinding
 		/// Only keys that actually recur are worth retaining. <c>targetBuildable</c> is part of the key and is
 		/// the build target rect, so a build job produces a fresh key for each target; retaining those would
 		/// inflate the cached set, push it into the size/work caps, and evict the genuinely shared base keys.
-		/// Area, avoid-grid, customizer and lord keys are either unsafe to keep (their source data is not
-		/// delta-tracked and can be disposed) or per-request, so they are dropped the same way.
+		/// Avoid-grid, customizer and lord keys are either per-request or read non-delta-tracked data, so they
+		/// are dropped the same way. An allowed area is retained and liveness-checked separately in
+		/// <see cref="TryPatch"/>.
 		/// </remarks>
 		internal static bool IsPatchable(PathFinder.MapGridRequest query, PathRequest request)
 		{
@@ -78,9 +102,19 @@ namespace YaOpt.Helpers.Pathfinding
 			return true;
 		}
 
-		internal static void Store(PathFinder pathFinder, in PathFinder.MapGridRequest query, in PathGridJob job)
+		internal static void Store(PathFinder pathFinder, in PathFinder.MapGridRequest query, in PathGridJob job,
+			PathRequest request)
 		{
-			_templates.GetOrCreateValue(pathFinder)[query] = job;
+			var faction = request?.RequesterFaction;
+			var lord = request?.RequesterLord;
+			var drafted = request != null && request.pawn != null && request.pawn.Drafted;
+			_templates.GetOrCreateValue(pathFinder)[query] = new Template
+			{
+				Job = job,
+				Faction = faction,
+				Lord = lord,
+				Drafted = drafted
+			};
 		}
 
 		internal static void Forget(PathFinder pathFinder, in PathFinder.MapGridRequest query)
@@ -105,6 +139,59 @@ namespace YaOpt.Helpers.Pathfinding
 		internal static bool ConsumeForceFullRecycle(PathFinder pathFinder)
 		{
 			return pathFinder != null && _forceFull.Remove(pathFinder);
+		}
+
+		/// <summary>
+		/// Drops any retained template whose stored request context no longer matches the first request for
+		/// that key in this gather. The caller then reschedules the key, so the grid is rebuilt with the
+		/// current faction/lord/drafted values, as vanilla would after a recycle.
+		/// </summary>
+		/// <remarks>
+		/// Only the first request per key is compared, matching which request wins when
+		/// <c>ScheduleGridJobs</c> builds a missing grid, so minority contexts do not cause rebuild thrash.
+		/// </remarks>
+		internal static void ValidateContexts(PathFinder pathFinder, IEnumerable<PathRequest> requests)
+		{
+			if (pathFinder == null || requests == null)
+				return;
+			if (!_templates.TryGetValue(pathFinder, out var templates) || templates.Count == 0)
+				return;
+
+			_validatedKeys.Clear();
+			_staleKeys.Clear();
+
+			foreach (var request in requests)
+			{
+				var key = PathFinder.MapGridRequest.For(request);
+				if (!_validatedKeys.Add(key))
+					continue;
+				if (!templates.TryGetValue(key, out var entry))
+					continue;
+
+				var faction = request.RequesterFaction;
+				var lord = request.RequesterLord;
+				var drafted = request.pawn != null && request.pawn.Drafted;
+				if (ReferenceEquals(entry.Faction, faction) && ReferenceEquals(entry.Lord, lord) &&
+					entry.Drafted == drafted)
+				{
+					continue;
+				}
+
+				_staleKeys.Add(key);
+			}
+
+			if (_staleKeys.Count == 0)
+				return;
+
+			var lookup = pathFinder.gridJobLookup;
+			for (var i = 0; i < _staleKeys.Count; i++)
+			{
+				var key = _staleKeys[i];
+				templates.Remove(key);
+				lookup.Remove(key);
+			}
+			PruneScheduledGridJobs(pathFinder);
+			_staleKeys.Clear();
 		}
 
 		/// <summary>
@@ -133,9 +220,8 @@ namespace YaOpt.Helpers.Pathfinding
 			_templates.TryGetValue(pathFinder, out var templates);
 			var templateCount = templates?.Count ?? 0;
 
-			// Work is only done for keys that have a template; lookup.Count also counts non-patchable keys
-			// (area / avoid grid / customizer / lord) that are never patched and are simply dropped below.
-			// Basing the cap on lookup.Count made a stale build/area key population trigger a full recycle.
+			// Work is only done for keys that have a template; lookup.Count also counts non-retained keys
+			// (build / avoid grid / customizer / lord) that are never patched and are simply dropped below.
 			if ((long)cellDeltas.Count * templateCount > MaxPatchWork)
 			{
 				PathGridDiagnostics.RecycledWork();
@@ -163,7 +249,7 @@ namespace YaOpt.Helpers.Pathfinding
 				for (var i = 0; i < cellDeltas.Count; i++)
 				{
 					var index = indices.CellToIndex(cellDeltas[i]);
-					template.Execute(index);
+					template.Job.Execute(index);
 				}
 				patchedKeys++;
 			}

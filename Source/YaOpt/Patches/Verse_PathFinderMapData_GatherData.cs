@@ -56,6 +56,10 @@ namespace YaOpt.Patches
 			if (mapData.lastGatherTick == GenTicks.TicksGame)
 				return false;
 
+			var pathFinder = mapData.map.pathFinder;
+			if (PathGridIncremental.TemplatesReady)
+				PathGridIncremental.ValidateContexts(pathFinder, requests);
+
 			var indices = mapData.map.cellIndices;
 			var stamp = _stamps.GetOrCreateValue(mapData);
 			stamp.Begin(indices.NumGridCells);
@@ -119,7 +123,6 @@ namespace YaOpt.Patches
 			bool recycle;
 			if (PathGridIncremental.TemplatesReady)
 			{
-				var pathFinder = mapData.map.pathFinder;
 				var forceFull = PathGridIncremental.ConsumeForceFullRecycle(pathFinder);
 				if (forceFull)
 				{

@@ -40,7 +40,6 @@ namespace YaOpt.Helpers.Pathfinding
 			{
 				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.ScheduleBatchedPathJobs)),
 				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.GetDoorBlockedJob)),
-				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.EnsureDoorsPawnsCached)),
 				AccessTools.Method(typeof(PathGridDoorsBlockedJob), nameof(PathGridDoorsBlockedJob.Execute)),
 				AccessTools.Method(typeof(PathFinder), nameof(PathFinder.FindPathNow), new[]
 				{

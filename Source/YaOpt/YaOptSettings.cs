@@ -2061,10 +2061,11 @@ namespace YaOpt
 		/// full-map grid rebuild for every traverse-parameter/area/faction key on the next tick. Only the
 		/// per-cell sources (cost, connectivity, perceptual, water, fence, building, faction, fog, danger)
 		/// change here, and they all write exactly the delta cells, so re-running the grid job for those
-		/// cells yields the identical values without touching the rest of the map. Keys whose grid also
-		/// depends on a customizer, an avoid grid, an allowed area or a lord walk grid are not patched and
-		/// fall back to a full rebuild, exactly like vanilla. Small deltas are also gathered serially to
-		/// avoid thread-pool fan-out overhead.
+		/// cells yields the identical values without touching the rest of the map. Only keys that recur are
+		/// retained (no build target, avoid grid, customizer or lord); an allowed area is retained and
+		/// liveness-checked, and a retained template is dropped when its requester faction, lord or drafted
+		/// state no longer matches, so the grid is rebuilt with current values. Small deltas are also
+		/// gathered serially to avoid thread-pool fan-out overhead.
 		/// </remarks>
 		/// <seealso cref="Patches.Verse_PathFinderMapData_GatherData"/>
 		/// <seealso cref="Patches.Verse_PathFinder_ScheduleGridJob"/>
@@ -2159,11 +2160,10 @@ namespace YaOpt
 
 		/// <summary>
 		/// Schedules the door/pawn overlay as a single by-value struct job instead of a class wrapped in a
-		/// <c> ManagedJob</c> plus a dispose job, and prefilters the per-tick pawn snapshot to pawns that can
-		/// collide.
+		/// <c>ManagedJob</c> plus a dispose job, on both the batched and synchronous paths.
 		/// </summary>
 		/// <seealso cref="Patches.Verse_PathFinder_ScheduleBatchedPathJobs"/>
-		/// <seealso cref="Patches.Verse_PathFinder_EnsureDoorsPawnsCached"/>
+		/// <seealso cref="Patches.Verse_PathFinder_FindPathNow_DoorsJob"/>
 		/// <seealso cref="Helpers.Pathfinding.DoorsOverlayScheduler"/>
 		public OptimizationOption OptPathDoorsJobFast { get; } = new OptimizationOption
 		{

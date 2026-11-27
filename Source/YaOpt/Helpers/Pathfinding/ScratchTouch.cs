@@ -52,5 +52,19 @@ namespace YaOpt.Helpers.Pathfinding
 			}
 			return touch;
 		}
+
+		/// <summary>
+		/// Drops every entry, e.g. when a <see cref="PathFinder"/> is disposed and its buffers are freed.
+		/// </summary>
+		/// <remarks>
+		/// Safe to call while jobs run on other maps: a buffer is only ever used by one in-flight job at a
+		/// time, and a entry created after the clear starts with <c>Initialized == false</c>, so the first
+		/// run following the clear still performs a full clear and cannot inherit stale values from a write
+		/// whose bookkeeping was discarded.
+		/// </remarks>
+		internal static void Clear()
+		{
+			_map.Clear();
+		}
 	}
 }

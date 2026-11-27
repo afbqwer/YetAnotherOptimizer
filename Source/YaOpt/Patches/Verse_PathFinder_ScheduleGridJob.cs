@@ -46,7 +46,7 @@ namespace YaOpt.Patches
 			var job = default(PathGridJob);
 			var output = scheduled.output;
 			__instance.MapData.ParameterizeGridJob(request, ref query, ref job, ref output);
-			PathGridIncremental.Store(__instance, query, job);
+			PathGridIncremental.Store(__instance, query, job, request);
 		}
 	}
 }
