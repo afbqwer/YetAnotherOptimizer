@@ -192,6 +192,7 @@ namespace YaOpt.Settings
 						lastSubCategory = subCateText;
 						if (!string.IsNullOrWhiteSpace(subCateText))
 						{
+							listing.Gap(listing.verticalSpacing);
 							listing.Label($"<b>{subCateText}</b>");
 						}
 					}

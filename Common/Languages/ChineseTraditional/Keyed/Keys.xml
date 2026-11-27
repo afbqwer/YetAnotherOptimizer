@@ -33,6 +33,23 @@
 	<YaOpt.Setting.Category.Fps>FPS最佳化</YaOpt.Setting.Category.Fps>
 	<YaOpt.Setting.Category.Tps>TPS最佳化</YaOpt.Setting.Category.Tps>
 	<YaOpt.Setting.Category.Misc>其他最佳化</YaOpt.Setting.Category.Misc>
+	<YaOpt.Setting.SubCategory.Audio>音訊</YaOpt.Setting.SubCategory.Audio>
+	<YaOpt.Setting.SubCategory.Combat>戰鬥</YaOpt.Setting.SubCategory.Combat>
+	<YaOpt.Setting.SubCategory.Diagnostics>診斷與日誌</YaOpt.Setting.SubCategory.Diagnostics>
+	<YaOpt.Setting.SubCategory.Flecks>粒子特效</YaOpt.Setting.SubCategory.Flecks>
+	<YaOpt.Setting.SubCategory.Gameplay>玩法調整</YaOpt.Setting.SubCategory.Gameplay>
+	<YaOpt.Setting.SubCategory.Graphics>圖形渲染</YaOpt.Setting.SubCategory.Graphics>
+	<YaOpt.Setting.SubCategory.Interface>介面與文字</YaOpt.Setting.SubCategory.Interface>
+	<YaOpt.Setting.SubCategory.ItemGeneration>物品生成</YaOpt.Setting.SubCategory.ItemGeneration>
+	<YaOpt.Setting.SubCategory.MapAndWorld>地圖與環境</YaOpt.Setting.SubCategory.MapAndWorld>
+	<YaOpt.Setting.SubCategory.ModIntegration>模組聯動</YaOpt.Setting.SubCategory.ModIntegration>
+	<YaOpt.Setting.SubCategory.PawnGeneration>殖民者生成</YaOpt.Setting.SubCategory.PawnGeneration>
+	<YaOpt.Setting.SubCategory.Quests>任務</YaOpt.Setting.SubCategory.Quests>
+	<YaOpt.Setting.SubCategory.Stability>穩定性與防護</YaOpt.Setting.SubCategory.Stability>
+	<YaOpt.Setting.SubCategory.Startup>啟動加速</YaOpt.Setting.SubCategory.Startup>
+	<YaOpt.Setting.SubCategory.StatsAndCaches>屬性與快取</YaOpt.Setting.SubCategory.StatsAndCaches>
+	<YaOpt.Setting.SubCategory.ThingsAndRooms>物品與房間</YaOpt.Setting.SubCategory.ThingsAndRooms>
+	<YaOpt.Setting.SubCategory.WorldMap>世界地圖</YaOpt.Setting.SubCategory.WorldMap>
 	<YaOpt.Setting.InvalidOption>無法啟用該最佳化：</YaOpt.Setting.InvalidOption>
 	<YaOpt.Setting.InvalidOption.RequireBurst>需要正常載入的Burst庫。</YaOpt.Setting.InvalidOption.RequireBurst>
 	<YaOpt.Setting.Message.RequireReload>更改的設定將在載入存檔或重啟遊戲後生效。</YaOpt.Setting.Message.RequireReload>
@@ -63,18 +80,15 @@
 	<YaOpt.Setting.Option.GasGridTick.Desc>用每格一位的佔用位圖跳過氣體消散與擴散掃描中的空 64 格分組，取代原版每 tick 固定探測一批格子（無論氣體在哪裡）。每格的處理速率保持不變，因此氣體模擬結果不變。</YaOpt.Setting.Option.GasGridTick.Desc>
 	<YaOpt.Setting.Option.FleckTickLoop>Fleck Tick 迴圈最佳化</YaOpt.Setting.Option.FleckTickLoop>
 	<YaOpt.Setting.Option.FleckTickLoop.Desc>原地更新每個 fleck 的 game tick 狀態，省去把整個結構體從清單中複製出來再寫回的開銷。Fleck 的運動、生命週期與移除行為保持不變。</YaOpt.Setting.Option.FleckTickLoop.Desc>
-	<YaOpt.Setting.Option.FleckTickLoop.Compatibility>當其它 mod 修改 FleckManagerTick 時自動停用。</YaOpt.Setting.Option.FleckTickLoop.Compatibility>
 	<YaOpt.Setting.Option.FleckFastDraw>Fleck 繪製旋轉快路徑</YaOpt.Setting.Option.FleckFastDraw>
 	<YaOpt.Setting.Option.FleckFastDraw.Desc>對旋轉角為 0 的 fleck 直接使用單位旋轉，跳過四元數建構。渲染結果完全一致。</YaOpt.Setting.Option.FleckFastDraw.Desc>
 	<YaOpt.Setting.Option.FleckCreateInPlace>Fleck 原地建立</YaOpt.Setting.Option.FleckCreateInPlace>
 	<YaOpt.Setting.Option.FleckCreateInPlace.Desc>在所屬系統的清單內直接建構新 fleck，省去先建構結構體再整體複製進清單的開銷。Fleck 資料與順序不變。</YaOpt.Setting.Option.FleckCreateInPlace.Desc>
-	<YaOpt.Setting.Option.FleckCreateInPlace.Compatibility>當其它 mod 修改 FleckManager.CreateFleck 或任一 FleckSystem 的 CreateFleck 時自動停用。</YaOpt.Setting.Option.FleckCreateInPlace.Compatibility>
 	<YaOpt.Setting.Option.FleckAutoInstancing>Fleck 合批能力偵測</YaOpt.Setting.Option.FleckAutoInstancing>
 	<YaOpt.Setting.Option.FleckAutoInstancing.Desc>掃描全部 fleck def，對著色器宣告了實例變換與顏色緩衝的按 GPU 實例化合批繪製；使用逐 fleck 屬性塊的 fleck 不受影響。渲染結果不變，需讀檔或重新啟動後生效。</YaOpt.Setting.Option.FleckAutoInstancing.Desc>
-	<YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>著色器未宣告實例緩衝的 fleck 保持原版逐 fleck 提交。預設關閉；使用大量自訂 fleck 的存檔請自行目視確認。</YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>
+	<YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>著色器未宣告實例緩衝的 fleck 保持原版逐 fleck 提交。預設關閉。</YaOpt.Setting.Option.FleckAutoInstancing.Compatibility>
 	<YaOpt.Setting.Option.SoundOneShotManager>單次音效管理器最佳化</YaOpt.Setting.Option.SoundOneShotManager>
 	<YaOpt.Setting.Option.SoundOneShotManager.Desc>把單次音效管理器裡每次播放的 LINQ 計數與每幀的清理掃描換成直接走訪與原地壓縮。播放哪些音效、聲部優先級與順序皆不變。</YaOpt.Setting.Option.SoundOneShotManager.Desc>
-	<YaOpt.Setting.Option.SoundOneShotManager.Compatibility>當其它 mod 修改相關的單次音效管理器方法時自動停用。</YaOpt.Setting.Option.SoundOneShotManager.Compatibility>
 	<YaOpt.Setting.Option.ColoredText>富文本最佳化</YaOpt.Setting.Option.ColoredText>
 	<YaOpt.Setting.Option.ColoredText.Desc>最佳化富文本（如彩色文字）的解析效能。原版遊戲在尋找標籤位置時使用了效能較低的IndexOf多載（涉及區域性相關檢查），此最佳化將其替換為效能更高、只進行直接位元組比較的多載。</YaOpt.Setting.Option.ColoredText.Desc>
 	<YaOpt.Setting.Option.EarlyRenderPrepare>提前準備物體渲染</YaOpt.Setting.Option.EarlyRenderPrepare>
@@ -86,7 +100,6 @@
 	<YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>將材質參數更新放入並行的物體渲染準備中進行。原版遊戲僅在主執行緒中執行此操作，但通常並不需要。如果檢測到有Mod多載了特定物體的材質參數更新邏輯（可能包含非執行緒安全的操作），本Mod會自動將這些物體的更新退化回主執行緒執行。</YaOpt.Setting.Option.ParallelMaterialUpdate.Desc>
 	<YaOpt.Setting.Option.FastRecacheRequested>內聯快取更新檢查</YaOpt.Setting.Option.FastRecacheRequested>
 	<YaOpt.Setting.Option.FastRecacheRequested.Desc>最佳化物體是否需要重新生成渲染參數的檢查。原版遊戲透過遞迴呼叫渲染樹上的每一個子節點來檢查是否有子節點要求更新。統計發現97%的物體渲染樹不超過4層，此最佳化將前4層節點的檢查內聯到一個函式中，省去了虛擬函式呼叫的開銷。註：效能監測顯示提升很小，未來版本可能移除。</YaOpt.Setting.Option.FastRecacheRequested.Desc>
-	<YaOpt.Setting.Option.FastRecacheRequested.Compatibility>有其他Mod改寫渲染節點的快取更新檢查時會自動停用，無需處理。</YaOpt.Setting.Option.FastRecacheRequested.Compatibility>
 	<YaOpt.Setting.Option.LazyTextureLoad>延遲紋理載入</YaOpt.Setting.Option.LazyTextureLoad>
 	<YaOpt.Setting.Option.LazyTextureLoad.Desc>原版遊戲會在啟動時將所有Mod紋理載入顯示卡記憶體中。這個最佳化會讓紋理僅在被首次呼叫時載入，能降低啟動耗時和顯示卡記憶體佔用，但會讓遊戲內首次載入紋理時頓卡。需要注意的是，目前尚未實現紋理卸載機制，當你一次遊戲玩得足夠久時，顯示卡記憶體佔用仍可能會逐漸增加至巔峰。此最佳化以及它的所有子選項在更改後都需要重啟遊戲才生效。</YaOpt.Setting.Option.LazyTextureLoad.Desc>
 	<YaOpt.Setting.Option.LazyTextureLoad.Compatibility>會導致Graphics Settings+和ImageOpt的統計資料不準。</YaOpt.Setting.Option.LazyTextureLoad.Compatibility>
@@ -112,13 +125,11 @@
 	<YaOpt.Setting.Option.PRNRWorker.Compatibility>不兼容會動態修改PawnRenderNodeProperties.workerClass的Mod。</YaOpt.Setting.Option.PRNRWorker.Compatibility>
 	<YaOpt.Setting.Option.GraphicTextureCache>紋理索引快取</YaOpt.Setting.Option.GraphicTextureCache>
 	<YaOpt.Setting.Option.GraphicTextureCache.Desc>快取Graphic_Multi初始化所需的紋理。原版遊戲每次初始化時都需要透過字串拼接構建東西南北四個朝向的紋理路徑並進行資源查找。此最佳化快取了這些紋理，消除了重複的字串拼接和資源查找開銷。本最佳化最初為外星人框架開發，現已整合入本體，供任何頻繁重建Graphic_Multi的物體受益。註：這個最佳化可能會導致開發者選項中的紋理熱重載失效。</YaOpt.Setting.Option.GraphicTextureCache.Desc>
-	<YaOpt.Setting.SubCategory.WorldMap>世界地圖</YaOpt.Setting.SubCategory.WorldMap>
 	<YaOpt.Setting.Option.WorldMapTextureCache>世界地圖紋理查找快取</YaOpt.Setting.Option.WorldMapTextureCache>
 	<YaOpt.Setting.Option.WorldMapTextureCache.Desc>快取紋理路徑的重複解析，對所有ContentFinder&lt;Texture2D&gt;.Get呼叫生效（世界地圖圖層逐地塊查詢時收益最大）。原版每次查找都會遍歷全部已載入Mod，必要時再呼叫Resources.Load；此最佳化將重複查詢變為字典命中，並在Mod內容重載時清空快取。</YaOpt.Setting.Option.WorldMapTextureCache.Desc>
-	<YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>如果其他Mod也修改ContentFinder&lt;Texture2D&gt;.Get，本項會自動停用；啟動後才出現的衝突也會回退原版，避免快取覆蓋對方的結果。</YaOpt.Setting.Option.WorldMapTextureCache.Compatibility>
 	<YaOpt.Setting.Option.WorldMapSubMeshCache>世界地圖子網格查找快取</YaOpt.Setting.Option.WorldMapSubMeshCache>
 	<YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>世界繪製層每處理一個地塊都會線性掃描子網格列表以查找材質。此最佳化按圖層快取「材質→下標」，並在子網格填滿、重設或銷毀時正確失效，保持原版的分網格順序。</YaOpt.Setting.Option.WorldMapSubMeshCache.Desc>
-	<YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>與WOWGAG's Performance Patch的同類功能重複；偵測到該Mod或其他子網格修補程式時，本項會自動停用。</YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>
+	<YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>與WOWGAG's Performance Patch的同類功能重複。</YaOpt.Setting.Option.WorldMapSubMeshCache.Compatibility>
 	<YaOpt.Setting.Option.WorldMapInsectLayer>昆蟲領地層短路</YaOpt.Setting.Option.WorldMapInsectLayer>
 	<YaOpt.Setting.Option.WorldMapInsectLayer.Desc>VFE Insectoids的昆蟲圖層會為每個世界地塊遍歷全部定居點。此最佳化將昆蟲領地展開為集合，讓非領地地塊直接跳過，顯著減少大型Mod列表下的世界地圖重建耗時。</YaOpt.Setting.Option.WorldMapInsectLayer.Desc>
 	<YaOpt.Setting.Option.WorldMapRegrowth>ReGrowth美化層路徑烘焙</YaOpt.Setting.Option.WorldMapRegrowth>
@@ -126,7 +137,7 @@
 	<YaOpt.Setting.Option.WorldMapRegrowth.Stability>實驗性選項。它會替換ReGrowth美化層的重建方法；如果世界地圖紋理異常，請手動關閉本項。版本不相容、所需欄位或方法不符時會自動停用。</YaOpt.Setting.Option.WorldMapRegrowth.Stability>
 	<YaOpt.Setting.Option.WorldMapLandformsParallel>Geological Landforms並行快取填充</YaOpt.Setting.Option.WorldMapLandformsParallel>
 	<YaOpt.Setting.Option.WorldMapLandformsParallel.Desc>讀檔後首次重建世界地圖時，用最多16個工作執行緒並行填充Geological Landforms的世界地塊快取，再按原版順序繪製。每個地塊獨立計算並寫入自己的快取槽，不改變生成邏輯或繪製結果。</YaOpt.Setting.Option.WorldMapLandformsParallel.Desc>
-	<YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>如果Geological Landforms已經內建WarmCache並行填充，或偵測到其他地質地形修補程式，本項會自動停用，避免重複執行。僅對缺少該實作的版本生效。</YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>
+	<YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>僅對未內建 WarmCache 並行填充的 Geological Landforms 版本生效。</YaOpt.Setting.Option.WorldMapLandformsParallel.Compatibility>
 	<YaOpt.Setting.Option.WorldMapLandformsParallel.Multithread>使用最多16個工作執行緒；偵測到衝突時自動停用，啟用連線Mod時也會自動停用。</YaOpt.Setting.Option.WorldMapLandformsParallel.Multithread>
 	<YaOpt.Setting.Option.Silhouette>剪影快取最佳化</YaOpt.Setting.Option.Silhouette>
 	<YaOpt.Setting.Option.Silhouette.Desc>最佳化剪影（螢幕拉遠後的小圖示）快取的查找效能。</YaOpt.Setting.Option.Silhouette.Desc>
@@ -196,7 +207,7 @@
 	<YaOpt.Setting.Option.WindUpdate.Desc>遊戲會在每一個邏輯幀中為所有植物材質更新風力強度參數，這是沒必要的。最佳化後將僅在渲染幀中更新風力強度。</YaOpt.Setting.Option.WindUpdate.Desc>
 	<YaOpt.Setting.Option.FastListerRemove>物體移除最佳化</YaOpt.Setting.Option.FastListerRemove>
 	<YaOpt.Setting.Option.FastListerRemove.Desc>最佳化從遊戲中移除物體時的效率。原版遊戲在移除物體時，需要在多個檢索列表中進行線性搜索以找到並刪除物體。此最佳化為每個物體添加了索引記錄，移除時可直接定位並使用“交換移除”策略（將末尾物體移至空位）。</YaOpt.Setting.Option.FastListerRemove.Desc>
-	<YaOpt.Setting.Option.FastListerRemove.Compatibility>與[WG] WOWGAG's Performance Patch、GUIPerformancePatch的「加快物品清單移除」（Tick標籤頁）重複，對方生效時本項會整體停用。本項的索引查找快於對方的清單末尾掃描，建議關掉對方那項並重新啟動以啟用本項。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
+	<YaOpt.Setting.Option.FastListerRemove.Compatibility>與[WG] WOWGAG's Performance Patch、GUIPerformancePatch的「加快物品清單移除」（Tick標籤頁）重複。本項的索引查找快於對方的清單末尾掃描，建議關掉對方那項並重新啟動以啟用本項。</YaOpt.Setting.Option.FastListerRemove.Compatibility>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove>已生成物體快速移除</YaOpt.Setting.Option.FastSpawnedThingsRemove>
 	<YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>為地圖的已生成物體容器建立索引，使 DeSpawn 時的移除從「線性查找 + 列表搬移」變為 O(1) 的字典查找與交換移除。索引按需構建，若檢測到索引與列表不一致會自動回退原版邏輯。</YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc>
 	<YaOpt.Setting.Option.GenTypesLockFree>直接密封類型檢查</YaOpt.Setting.Option.GenTypesLockFree>
@@ -205,23 +216,21 @@
 	<YaOpt.Setting.Option.InfoLogNoStack.Desc>Info 級日誌不再抓取和格式化堆疊。原版會為每條日誌抓取帶檔案資訊的完整堆疊，單條耗時數微秒並配置數 KB 記憶體；因此 Info 條目在 Player.log 和遊戲日誌視窗中將不再包含堆疊。Warning、Error 及其主控台堆疊幀保持不變。變更此選項後需要重新啟動遊戲來生效。</YaOpt.Setting.Option.InfoLogNoStack.Desc>
 	<YaOpt.Setting.Option.PawnLabelCache>角色標籤快取</YaOpt.Setting.Option.PawnLabelCache>
 	<YaOpt.Setting.Option.PawnLabelCache.Desc>短時間快取角色的名字標籤及其測量寬度。原版對每個正在渲染的角色每幀至少構造兩次標籤字串並重新量寬；快取每 60 幀刷新一次，改名最多只會有很小的延遲。</YaOpt.Setting.Option.PawnLabelCache.Desc>
-	<YaOpt.Setting.Option.PawnLabelCache.Compatibility>有其他Mod改寫角色標籤（文字或寬度）時可能出現顯示異常，此時關閉本項。</YaOpt.Setting.Option.PawnLabelCache.Compatibility>
 	<YaOpt.Setting.Option.TurretTargetPrune>砲塔索敵剪枝</YaOpt.Setting.Option.TurretTargetPrune>
 	<YaOpt.Setting.Option.TurretTargetPrune.Desc>玩家陣營的砲塔在沒有敵對、狂暴或無派系候選目標時，跳過完整的索敵流程。有人操作的砲塔及其他陣營的砲塔仍交還原版處理。此提前退出只跳過空候選集的搜索，存在目標時不會增加額外掃描。</YaOpt.Setting.Option.TurretTargetPrune.Desc>
-	<YaOpt.Setting.Option.TurretTargetPrune.Compatibility>替換了炮塔索敵邏輯的Mod可能衝突；炮塔不再尋找目標時關閉本項。</YaOpt.Setting.Option.TurretTargetPrune.Compatibility>
+	<YaOpt.Setting.Option.TurretTargetPrune.Compatibility>替換了炮塔索敵邏輯的Mod可能衝突。</YaOpt.Setting.Option.TurretTargetPrune.Compatibility>
 	<YaOpt.Setting.Option.TempTerrainPrune>臨時地形剪枝</YaOpt.Setting.Option.TempTerrainPrune>
 	<YaOpt.Setting.Option.TempTerrainPrune.Desc>當地形不可結冰時，跳過該格的水面結冰處理。原版會先讀取溫度和房間，再檢查地形是否可結冰；對大多數陸地格來說，此檢查避免了這部分工作，可結冰的格子仍走原版邏輯。僅在關閉「臨時地形合併」時顯示。</YaOpt.Setting.Option.TempTerrainPrune.Desc>
 	<YaOpt.Setting.Option.TempTerrainMerge>臨時地形合併</YaOpt.Setting.Option.TempTerrainMerge>
 	<YaOpt.Setting.Option.TempTerrainMerge.Desc>把每格的結冰與融化處理合併為一次：溫度只讀取一次，房間查詢延遲到對應隨機判定成功之後，徑向掃描先檢查地形再查詢房間。隨機序列、結冰機率與最終生成的冰面均保持不變。</YaOpt.Setting.Option.TempTerrainMerge.Desc>
-	<YaOpt.Setting.Option.TempTerrainMerge.Compatibility>若其他模組修改了 DoCellSteadyEffects、DoWaterFreezing 或 DoIceMelting，本選項可能繞過它們；偵測到此類補丁時會預設關閉。</YaOpt.Setting.Option.TempTerrainMerge.Compatibility>
+	<YaOpt.Setting.Option.TempTerrainMerge.Compatibility>若其他模組修改了 DoCellSteadyEffects、DoWaterFreezing 或 DoIceMelting，本選項可能繞過它們。</YaOpt.Setting.Option.TempTerrainMerge.Compatibility>
 	<YaOpt.Setting.Option.RegionQueryFast>區域查詢快速路徑</YaOpt.Setting.Option.RegionQueryFast>
 	<YaOpt.Setting.Option.RegionQueryFast.Desc>當區域網格沒有待重建內容時，直接讀取區域陣列，省去每次區域/房間查詢的重建檢查與重複邊界檢查。區域為髒、更新器停用、網格已釋放或越界時仍走原版邏輯（包含日誌）。不快取任何結果，因此無需失效處理。</YaOpt.Setting.Option.RegionQueryFast.Desc>
-	<YaOpt.Setting.Option.RegionQueryFast.Compatibility>若其他模組修改了 RegionAt 或 GetValidRegionAt，本選項可能繞過它們；偵測到此類補丁時會預設關閉。</YaOpt.Setting.Option.RegionQueryFast.Compatibility>
+	<YaOpt.Setting.Option.RegionQueryFast.Compatibility>若其他模組修改了 RegionAt 或 GetValidRegionAt，本選項可能繞過它們。</YaOpt.Setting.Option.RegionQueryFast.Compatibility>
 	<YaOpt.Setting.Option.CameraUpdateRate>更新速率計算最佳化</YaOpt.Setting.Option.CameraUpdateRate>
 	<YaOpt.Setting.Option.CameraUpdateRate.Desc>遊戲會在每一幀計算物體在螢幕上的可見性，並調低螢幕外物體的更新速率，然而這個計算過於精細了，以至於它本身就有一定的開銷。此最佳化微調了可見性判斷，稍微放寬了判定標準，減少了更新速率計算的開銷，代價是在一些特定條件下可能有少量接近螢幕邊緣但不可見的物體也被誤判為可見，讓系統增加它們的更新速率導致執行開銷。但在大部分情況下，這個最佳化是值得的。</YaOpt.Setting.Option.CameraUpdateRate.Desc>
 	<YaOpt.Setting.Option.GetMapPawns>地圖角色檢索最佳化</YaOpt.Setting.Option.GetMapPawns>
 	<YaOpt.Setting.Option.GetMapPawns.Desc>最佳化了遊戲中檢索地圖上角色的程式碼，消除了一些重複計算。此外還對照料嬰兒的工作判定做了一定的節流，原版在檢索飢餓的嬰兒時除了會搜索待在地圖上的嬰兒外，還會檢查載人容器（如空投艙），這一步驟佔了運算大頭，因此最佳化後每三次判定才會做一次全圖容器搜索，另外兩次只會檢查容器外的嬰兒。</YaOpt.Setting.Option.GetMapPawns.Desc>
-	<YaOpt.Setting.Option.GetMapPawns.Compatibility>裝了頭像欄類Mod且其功能失效時，關閉本項。</YaOpt.Setting.Option.GetMapPawns.Compatibility>
 	<YaOpt.Setting.Option.AttackTargetFinder>索敵最佳化</YaOpt.Setting.Option.AttackTargetFinder>
 	<YaOpt.Setting.Option.AttackTargetFinder.Desc>最佳化戰鬥時的索敵計算，消除了一些重複計算。</YaOpt.Setting.Option.AttackTargetFinder.Desc>
 	<YaOpt.Setting.Option.ListerBuildingsCache>建築查詢快取</YaOpt.Setting.Option.ListerBuildingsCache>
@@ -236,7 +245,7 @@
 	<YaOpt.Setting.Option.RefuelSearchCache.Desc>在Refuel工作的可執行檢查與任務建立之間重用一次最佳燃料和全部燃料的搜尋結果，並提供一份地圖Refuel候選清單。候選清單在生成和消失時維護；燃料量、自動Refuel開關、霧、預約等動態條件仍由原版即時檢查。該清單只用於正常局部掃描之後的全域回退。</YaOpt.Setting.Option.RefuelSearchCache.Desc>
 	<YaOpt.Setting.Option.DeathThoughts>死亡想法最佳化</YaOpt.Setting.Option.DeathThoughts>
 	<YaOpt.Setting.Option.DeathThoughts.Desc>只在死者周圍 12 格尋找見證者，而不是掃描所有存活角色；對多格角色去重，避免重複疊加見證想法；關係專屬想法只掃描關係候選。通用 lost 想法仍涵蓋地圖、世界和臨時角色；跨地圖見證會被省略。</YaOpt.Setting.Option.DeathThoughts.Desc>
-	<YaOpt.Setting.Option.DeathThoughts.Compatibility>改寫了死亡或救援想法邏輯的 Mod 可能被繞過。死亡相關記憶出現異常時關閉本項。</YaOpt.Setting.Option.DeathThoughts.Compatibility>
+	<YaOpt.Setting.Option.DeathThoughts.Compatibility>改寫了死亡或救援想法邏輯的 Mod 可能被繞過。</YaOpt.Setting.Option.DeathThoughts.Compatibility>
 	<YaOpt.Setting.Option.AppendThingHolders>物體容器檢索最佳化</YaOpt.Setting.Option.AppendThingHolders>
 	<YaOpt.Setting.Option.AppendThingHolders.Desc>最佳化對物體容器的遞迴搜索，減少了對非容器的內容物的檢查開銷。</YaOpt.Setting.Option.AppendThingHolders.Desc>
 	<YaOpt.Setting.Option.MeditationTick>冥想更新節流</YaOpt.Setting.Option.MeditationTick>
@@ -248,49 +257,42 @@
 	<YaOpt.Setting.Option.LearningStatCache.Desc>將 GlobalLearningFactor 快取120 tick，使每次 Learn 不再重複執行完整屬性管線。基因、Hediff、特質、服裝、裝備或 Ideo 變化最多需要120 tick（約兩秒）才會影響學習速度。</YaOpt.Setting.Option.LearningStatCache.Desc>
 	<YaOpt.Setting.Option.ImmunityStatCache>免疫獲取速度屬性快取</YaOpt.Setting.Option.ImmunityStatCache>
 	<YaOpt.Setting.Option.ImmunityStatCache.Desc>將 ImmunityGainSpeed 快取20 tick。每條免疫記錄在每個健康間隔都會重新求值一次該屬性，儘管它很少變化。食物、休息、床、休息狀態或年齡變化最多需要20 tick（約三分之一秒）才會反映到免疫獲取速度上。</YaOpt.Setting.Option.ImmunityStatCache.Desc>
-	<YaOpt.Setting.Option.ImmunityStatCache.Compatibility>如果某個模組要求食物、休息、床、休息狀態或年齡變化後免疫獲取速度立即更新，請關閉此項。</YaOpt.Setting.Option.ImmunityStatCache.Compatibility>
 	<YaOpt.Setting.Option.NutritionStatCache>食物營養值屬性快取</YaOpt.Setting.Option.NutritionStatCache>
 	<YaOpt.Setting.Option.NutritionStatCache.Desc>在 FoodUtility.NutritionForEater 內將 Nutrition 屬性快取20 tick，所有 AI 尋食都會經過這裡。原版會為每個殖民者的每次掃描重新求值每個候選食物的營養值。進食者的 RawNutritionFactor 仍然每次單獨求值。模組對營養值的動態修改最多需要20 tick 才會影響尋食結果。</YaOpt.Setting.Option.NutritionStatCache.Desc>
-	<YaOpt.Setting.Option.NutritionStatCache.Compatibility>如果某個模組會在遊戲過程中改變食物營養值並要求尋食立即看到變化，請關閉此項。</YaOpt.Setting.Option.NutritionStatCache.Compatibility>
 	<YaOpt.Setting.Option.DrugPolicyCache>藥物策略快取</YaOpt.Setting.Option.DrugPolicyCache>
 	<YaOpt.Setting.Option.DrugPolicyCache.Desc>將藥物策略條目的線性查找改為索引查找，並在同一 tick 內重用排程用藥 JobGiver 的優先級結果。藥物定義較多時，原版每次選 job 都會讓這兩個 JobGiver 反覆掃描整張策略表。命中時會驗證策略是否被修改，因此藥物策略介面的改動立即生效。</YaOpt.Setting.Option.DrugPolicyCache.Desc>
-	<YaOpt.Setting.Option.DrugPolicyCache.Compatibility>如果有模組改寫藥物策略條目查找或這兩個 JobGiver 的優先級邏輯，請關閉此項。</YaOpt.Setting.Option.DrugPolicyCache.Compatibility>
 	<YaOpt.Setting.Option.DrugScheduleCache>藥物計畫判定快取</YaOpt.Setting.Option.DrugScheduleCache>
 	<YaOpt.Setting.Option.DrugScheduleCache.Desc>在同一 tick 內重用排程用藥判定。用藥 JobGiver 會為優先級求值一遍整張策略表，生成 job 時再求值一遍。服用藥物或結束休眠後會立即失效；暫停時不做快取，以免策略修改被快取吞掉。</YaOpt.Setting.Option.DrugScheduleCache.Desc>
-	<YaOpt.Setting.Option.DrugScheduleCache.Compatibility>如果有模組會在同一 tick 內修改用藥記錄、基因、情緒或意識形態狀態並期望排程用藥立即隨之變化，請關閉此項。</YaOpt.Setting.Option.DrugScheduleCache.Compatibility>
 	<YaOpt.Setting.Option.PrioritySorterSnapshot>工作優先級快照</YaOpt.Setting.Option.PrioritySorterSnapshot>
 	<YaOpt.Setting.Option.PrioritySorterSnapshot.Desc>每次選擇只計算一次各候選工作的優先級。原版在每個候選失敗後都會重算剩餘全部候選的優先級，空閒角色一次選 job 大約要做上百次優先級求值。選擇順序與平局規則保持不變。</YaOpt.Setting.Option.PrioritySorterSnapshot.Desc>
-	<YaOpt.Setting.Option.PrioritySorterSnapshot.Compatibility>如果有其他模組補丁了優先級排序器，此項會預設關閉（替換實作會繞過其 transpiler），但仍可手動開啟。</YaOpt.Setting.Option.PrioritySorterSnapshot.Compatibility>
 	<YaOpt.Setting.Option.MoodThoughtDedup>情緒想法更新去重</YaOpt.Setting.Option.MoodThoughtDedup>
 	<YaOpt.Setting.Option.MoodThoughtDedup.Desc>同一 tick 內若第一次重建已經取得新鮮資料，則跳過第二次 situational 想法重建。只移除重複的同 tick 計算，不改變結果。</YaOpt.Setting.Option.MoodThoughtDedup.Desc>
 	<YaOpt.Setting.Option.MoveSpeedStatCache>移動速度屬性快取</YaOpt.Setting.Option.MoveSpeedStatCache>
 	<YaOpt.Setting.Option.MoveSpeedStatCache.Desc>在移動呼叫點為移動速度屬性快取20 tick。原版每走一格都會重新求值一次移動速度，而它極少變化。啟用後同一數值最多沿用20 tick（約三分之一秒）。亡靈被排除，因為其速度隨可見時間曲線變化。剛發生的裝備、健康或光照變化最多需20 tick 才會反映到移動速度上。</YaOpt.Setting.Option.MoveSpeedStatCache.Desc>
 	<YaOpt.Setting.Option.PsychicEntropyCache>Entropy屬性快取</YaOpt.Setting.Option.PsychicEntropyCache>
 	<YaOpt.Setting.Option.PsychicEntropyCache.Desc>在 MaxEntropy 和 MaxPotentialEntropy 讀取處快取Entropy上限 20 tick，避免Entropy Gizmo 和施法路徑重複進行完整屬性計算。預設關閉，因為裝備、基因或 Hediff 的變化最多可能需要 20 tick 才會反映。</YaOpt.Setting.Option.PsychicEntropyCache.Desc>
-	<YaOpt.Setting.Option.PsychicEntropyCache.Compatibility>如果某個 Mod 要求裝備、基因或 Hediff 改變後Entropy上限立即更新，請關閉此項。</YaOpt.Setting.Option.PsychicEntropyCache.Compatibility>
 	<YaOpt.Setting.Option.CelestialSunGlowCache>太陽光照快取</YaOpt.Setting.Option.CelestialSunGlowCache>
 	<YaOpt.Setting.Option.CelestialSunGlowCache.Desc>在同一個 tick 內重用目前地圖的太陽光照值。天空、光照、陰影和天氣程式碼經常重複請求完全相同的結果。快取以地圖物件和絕對 tick 為鍵，不產生延遲，重力船移動也無需額外檢查 Tile。</YaOpt.Setting.Option.CelestialSunGlowCache.Desc>
 	<YaOpt.Setting.Option.FrameWorkToBuildCache>施工框架工作量快取</YaOpt.Setting.Option.FrameWorkToBuildCache>
 	<YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>按建築 Def 和材料快取 Frame.WorkToBuild，不再在每次施工 tick 和進度讀取時重算抽象屬性。無材料場景使用按 Def 索引的平鋪陣列，有材料時使用按 Def 分桶的延遲快取。預設關閉，讀檔和透過原版 API 改寫屬性基礎值時會清空。</YaOpt.Setting.Option.FrameWorkToBuildCache.Desc>
 	<YaOpt.Setting.Option.ThingSetMakerSampleCache>物品生成取樣復用</YaOpt.Setting.Option.ThingSetMakerSampleCache>
 	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>當合併後的參數、隨機種子和遊戲 tick 都相同時，復用物品集合的取樣結果。任務獎勵與事件物品生成會先為每個選項跑同一份確定性取樣來構建權重表，再對選中項重新跑一次；取樣用種子隔離，因此產出物品和隨機數序列都不變。取樣還會讀取殖民者頭銜、科技進度等世界狀態，所以快取按 tick 失效，並在讀檔時清空。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc>
-	<YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility>若其它模組 patch 了被快取的取樣方法，本項會自動停用，因為回放快取會讓其補丁效果重複生效。</YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility>
 	<YaOpt.Setting.Option.ThingSetMakerStatCache>物品生成屬性記憶</YaOpt.Setting.Option.ThingSetMakerStatCache>
 	<YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>在一次物品集合取樣內，記住每個候選的最小值、最大值和單件價值，不再反覆向屬性系統求值最多三次。只包裝原版的取值回調，取樣結束即丟棄快取。</YaOpt.Setting.Option.ThingSetMakerStatCache.Desc>
 	<YaOpt.Setting.Option.GenerationDefCache>生成 Def 快取</YaOpt.Setting.Option.GenerationDefCache>
 	<YaOpt.Setting.Option.GenerationDefCache.Desc>快取生成物品時三個只依賴 Def 的查詢：近戰武器材料是否為「廢柴」組合、每個 Def 的可用材料清單、以及沒有顯式市場價值時用於定價的配方。讀檔時刷新；若某個方法被其它模組 patch，則僅停用對應部分而不是繞過它。</YaOpt.Setting.Option.GenerationDefCache.Desc>
 	<YaOpt.Setting.Option.PawnGenerationIndex>Pawn 生成索引化</YaOpt.Setting.Option.PawnGenerationIndex>
 	<YaOpt.Setting.Option.PawnGenerationIndex.Desc>在 pawn 生成期間使用單執行緒索引與快取：必選裝備查找、服裝篩選權重單遍、關係樣本權重單遍、Rosaline 出生父母查詢和基因通知批次處理。裝備索引需要開啟裝備重寫。任一子路徑遇到不相容補丁或方法缺失時獨立回退，不會把生成工作移到其它執行緒。</YaOpt.Setting.Option.PawnGenerationIndex.Desc>
-	<YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>已知 HAR、Rosaline 與 RPEF 關係補丁已明確識別；未知關係機率補丁、被其它模組 patch 的 Rosaline 查詢或批次處理通知方法只停用對應子路徑。</YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>
+	<YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>已知 HAR、Rosaline 與 RPEF 關係補丁已明確識別。</YaOpt.Setting.Option.PawnGenerationIndex.Compatibility>
 	<YaOpt.Setting.Option.PawnGenerationFailureGuard>Pawn 生成失敗保護</YaOpt.Setting.Option.PawnGenerationFailureGuard>
 	<YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc>阻止退化的生成資料中斷 Pawn 生成。候選植入體總價值為 0 時原版會取到 null 再讀取其市場價值；techHediffsRequired 中的空條目會進入安裝流程；120 次生成嘗試全部失敗的派系領袖會被直接解引用。保護只跳過該條目或返回「無領袖」，隨機數序列與正常結果不變。預設開啟。</YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc>
 	<YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility>以 transpiler 實作，同一方法上的其它補丁仍會執行；原版方法形狀變化時自動跳過保護，保持原版行為。</YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility>
 	<YaOpt.Setting.Option.PawnGearSessionCache>Pawn 裝備生成會話快取</YaOpt.Setting.Option.PawnGearSessionCache>
 	<YaOpt.Setting.Option.PawnGearSessionCache.Desc>在一次服裝或武器生成呼叫內復用不會變化的結果。服裝生成最多會重試 80 次候選組合，每次重試都重新檢查相同的材料限制與溫度屬性；武器選擇則會對每個候選權重求值兩次。快取只存活一次呼叫，隨機數序列與最終產物都與原版一致。</YaOpt.Setting.Option.PawnGearSessionCache.Desc>
-	<YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>與 HAR 等種族模組共存；僅當其它模組直接 patch 被快取的方法時，對應部分自動停用。</YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>
+	<YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>與 HAR 等種族模組共存。</YaOpt.Setting.Option.PawnGearSessionCache.Compatibility>
 	<YaOpt.Setting.Option.PawnGearRebuild>Pawn 裝備生成重寫</YaOpt.Setting.Option.PawnGearRebuild>
 	<YaOpt.Setting.Option.PawnGearRebuild.Desc>用構造式選取替代服裝與武器的「整套隨機重試」。服裝生成不再把整個候選集重建並驗收最多 80 次：候選只過濾一次，先保證軀幹與腿部覆蓋，再按權重在預算內填充，且不會互斥疊穿或超預算。武器選擇對每個候選權重只求值一次。互斥、預算、必要項、種族限制與裸體規則都會保留，但隨機序列不再與原版逐位一致。預設關閉。</YaOpt.Setting.Option.PawnGearRebuild.Desc>
-	<YaOpt.Setting.Option.PawnGearRebuild.Compatibility>安裝 HAR 時會中和其池補丁並按種族過濾候選；Passer Race 的服裝限制上下文會先於重構執行，已知裝備後處理補丁仍會執行。HAR 補丁不完整或遇到未知裝備生成補丁時，本項預設關閉。</YaOpt.Setting.Option.PawnGearRebuild.Compatibility>
+	<YaOpt.Setting.Option.PawnGearRebuild.Compatibility>安裝 HAR 時會中和其池補丁並按種族過濾候選；Passer Race 的服裝限制上下文會先於重構執行，已知裝備後處理補丁仍會執行。</YaOpt.Setting.Option.PawnGearRebuild.Compatibility>
 	<YaOpt.Setting.Option.PawnGearEnvironment>Pawn 裝備環境精確計算</YaOpt.Setting.Option.PawnGearEnvironment>
 	<YaOpt.Setting.Option.PawnGearEnvironment.Desc>在可用時使用 Pawn 目標地圖的即時環境，而不是地塊季節平均溫度：溫度取目前室外溫度，污染取地圖目前污染並識別毒塵，真空取目標地圖的生物群系。每名 Pawn 只解析一次地圖並讀取常數時間欄位，不產生新增分配；無法解析地圖時完全回退原版判定。僅在 Pawn 裝備生成重寫啟用時生效，預設關閉。</YaOpt.Setting.Option.PawnGearEnvironment.Desc>
 	<YaOpt.Setting.Option.PawnGearHarFastPath>HAR 裝備限制快速路徑</YaOpt.Setting.Option.PawnGearHarFastPath>
@@ -298,21 +300,17 @@
 	<YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility>僅在安裝 HAR 時生效。HAR 方法缺失或變更時跳過補丁，保留 HAR 原有行為。</YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility>
 	<YaOpt.Setting.Option.PawnApparelPairCache>裝備候選判定快取</YaOpt.Setting.Option.PawnApparelPairCache>
 	<YaOpt.Setting.Option.PawnApparelPairCache.Desc>在一名 Pawn、頭飾開關與固定種子都相同時，按裝備 def 復用頭飾判定、可穿戴判定、kindDef 標籤和按種子生成的允許機率；這在整個候選掃描期間成立。預算不入快取，價格仍逐 pair 檢查。Pawn 或快取參數變化時清空快取，結果與原版判定一致。</YaOpt.Setting.Option.PawnApparelPairCache.Desc>
-	<YaOpt.Setting.Option.PawnApparelPairCache.Compatibility>若其它模組改動了此判定所替換的方法，本項會自動停用。</YaOpt.Setting.Option.PawnApparelPairCache.Compatibility>
 	<YaOpt.Setting.Option.PawnBackstoryMatchCache>背景匹配快取</YaOpt.Setting.Option.PawnBackstoryMatchCache>
 	<YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc>用零分配實作替換會分配委派的背景類別匹配，並按過濾器把匹配結果快取為位圖。每次打亂背景槽都會用同一個過濾器掃描全部背景，而結果只取決於過濾器和 def 資料。def 數量變化或讀檔時重建快取。</YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc>
-	<YaOpt.Setting.Option.PawnBackstoryMatchCache.Compatibility>若其它模組改動了此匹配所替換的方法，本項會自動停用。</YaOpt.Setting.Option.PawnBackstoryMatchCache.Compatibility>
 	<YaOpt.Setting.Option.PawnTraitsHarFastPath>HAR 特質候選項快取</YaOpt.Setting.Option.PawnTraitsHarFastPath>
 	<YaOpt.Setting.Option.PawnTraitsHarFastPath.Desc>在單次特質生成內，對每個特質 def 只做一次 HAR 種族限制校驗，而不是在加權取樣的每一遍和每次抽取時重複。HAR 的校驗每次都會構建 Pawn 的背景限制清單並抽取機率；物化候選清單可消除大部分開銷。特質數量、衝突、工作標籤與黑白名單仍由原版邏輯保證。</YaOpt.Setting.Option.PawnTraitsHarFastPath.Desc>
 	<YaOpt.Setting.Option.PawnTraitsHarFastPath.Compatibility>僅在安裝 HAR 時生效。HAR 的機率抽取由「每次取樣巡覽一次」變為「每個候選一次」，因此不保證隨機序列一致。</YaOpt.Setting.Option.PawnTraitsHarFastPath.Compatibility>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>物品生成可生成判定加速</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath>
 	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>用第一次取樣迭代的結果回答物品集合選項的「能否生成」，不再為判定而跑完整取樣。選項表在挑選前會詢問每個選項能否生成，以前這會讓完整取樣跑好幾遍而最終只生成其中一個。第一次迭代已經決定結果是否非空；材料池和數值仍按原版方式構建，隨機數序列不變。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc>
-	<YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>若其它模組改動了此判定所復刻的取樣方法，本項會自動停用。</YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility>
 	<YaOpt.Setting.Option.QuestLodgerFastPath>任務訪客快速路徑</YaOpt.Setting.Option.QuestLodgerFastPath>
 	<YaOpt.Setting.Option.QuestLodgerFastPath.Desc>只掃描一次額外陣營任務部件，直接判斷是否存在本地陣營或迷你陣營，不再收集、去重完整清單兩次。不快取結果，並保留原版的任務、難民和受影響 pawn 條件。多個額外陣營任務部件活躍時收益最明顯。</YaOpt.Setting.Option.QuestLodgerFastPath.Desc>
 	<YaOpt.Setting.Option.QuestSelectionFastPath>任務選擇快速路徑</YaOpt.Setting.Option.QuestSelectionFastPath>
 	<YaOpt.Setting.Option.QuestSelectionFastPath.Desc>先用低成本的自然任務根權重生成加權隨機順序，再按該順序執行 CanRun，遇到第一個可執行任務即停止。選擇機率仍與自然權重成正比，但首個有效任務之後的根不再執行昂貴的 CanRun。優先選擇當前星球圖層也接受的任務；若沒有，則使用加權回退順序。關閉可恢復原版選擇。</YaOpt.Setting.Option.QuestSelectionFastPath.Desc>
-	<YaOpt.Setting.Option.QuestSelectionFastPath.Compatibility>若其它模組已接管 NaturalRandomQuestChooser.ChooseNaturalRandomQuest，本項會自動停用，避免覆蓋對方結果。</YaOpt.Setting.Option.QuestSelectionFastPath.Compatibility>
 	<YaOpt.Setting.Option.QuestAncientComplexFallback>任務選擇遠古遺跡兜底</YaOpt.Setting.Option.QuestAncientComplexFallback>
 	<YaOpt.Setting.Option.QuestAncientComplexFallback.Desc>加權掃描找不到任務時，再嘗試遠古遺跡任務根，最後才返回無任務。僅在「任務選擇快速路徑」啟用時生效。</YaOpt.Setting.Option.QuestAncientComplexFallback.Desc>
 	<YaOpt.Setting.Option.QuestPointsNormalize>零點任務獎勵點數歸一</YaOpt.Setting.Option.QuestPointsNormalize>
@@ -331,23 +329,19 @@
 	<YaOpt.Setting.Option.LocalDateCache.Desc>在同一個 tick 內重用每張地圖的當日 tick、小時、日進度和季節。原版每次查詢都要從行星網格重算地塊中心來取得經度，而天空、天氣和天象程式碼每 tick 會為同一張地圖請求十幾次。結果與原版完全一致，只是跳過重複計算。</YaOpt.Setting.Option.LocalDateCache.Desc>
 	<YaOpt.Setting.Option.RecipeUsersCache>配方使用者清單快取</YaOpt.Setting.Option.RecipeUsersCache>
 	<YaOpt.Setting.Option.RecipeUsersCache.Desc>快取能夠執行某個配方的建築清單，不再每次都走訪全部物品 Def。原版每次呼叫都會全量掃描整個 Def 資料庫。Def 清單或該配方自身的使用者清單變化時快取會失效，並且定期失效，以涵蓋模組直接改寫物品配方清單的情況。</YaOpt.Setting.Option.RecipeUsersCache.Desc>
-	<YaOpt.Setting.SubCategory.Startup>啟動加速</YaOpt.Setting.SubCategory.Startup>
 	<YaOpt.Setting.Option.DefLookupCache>Def 查找索引</YaOpt.Setting.Option.DefLookupCache>
 	<YaOpt.Setting.Option.DefLookupCache.Desc>在所有 Def 載入完成後，為跨 Def 的配方與研究查詢建立一次索引。物品的配方清單、配方的使用者清單、研究專案的解鎖清單以及研究前置對應都從索引直接回傳，不再每次掃描整個 Def 資料庫；其他模組的啟動建構子也能受益。索引會在每次載入時重建，並在 Def 資料銷毀時丟棄。</YaOpt.Setting.Option.DefLookupCache.Desc>
-	<YaOpt.Setting.Option.DefLookupCache.Compatibility>已確認的配方與研究結果補丁會納入索引；未知查詢補丁預設關閉本項，研究工具方法的外來補丁則逐方法回退原版；存在重複 Def 索引提供者時鎖定關閉。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
+	<YaOpt.Setting.Option.DefLookupCache.Compatibility>已確認的配方與研究結果補丁會納入索引。</YaOpt.Setting.Option.DefLookupCache.Compatibility>
 	<YaOpt.Setting.Option.BiomeAnimalIndex>生物群系動物索引</YaOpt.Setting.Option.BiomeAnimalIndex>
 	<YaOpt.Setting.Option.BiomeAnimalIndex.Desc>在所有 Def 載入完成後一次建構每個生物群系的野生動物清單與常見度表。原版每次存取都會全量掃描全部動物種類，而且惰性建構常見度表時遇到重複項目會拋出例外並留下不完整的表；此最佳化會合併重複項目並保留較高的常見度。</YaOpt.Setting.Option.BiomeAnimalIndex.Desc>
-	<YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>可能改變野生動物成員資格的補丁預設關閉本項；已確認的純權重縮放保持相容；存在重複 Def 索引提供者時鎖定關閉。</YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility>
 	<YaOpt.Setting.Option.GiddyUpOffsetCache>GiddyUp 繪製偏移快取</YaOpt.Setting.Option.GiddyUpOffsetCache>
 	<YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>持久化 GiddyUp 每次啟動都會重新計算的繪製偏移。GiddyUp 每次啟動都會渲染並逐像素掃描每個生命階段的貼圖；本項會從校驗過的檔案恢復其工作階段快取，只丟棄貼圖發生變化的項目。</YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>
 	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>
 	<YaOpt.Setting.Option.ExosuitXmlFast.Desc>用一次只走訪取值的查表取代 Exosuit 的全文件類名取代補丁操作，XML 補丁階段不再為每個節點重建類名字典。</YaOpt.Setting.Option.ExosuitXmlFast.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基礎屬性快取</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在遊戲開始後記住每個物品 Def 的基礎質量、基礎易燃性和基礎耐久。原版每次讀取都要走完整屬性系統重算一遍。主要幫助在批次讀取這些值的模組，原版自身很少用到。讀檔時會重新計算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
-	<YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>如果某個模組會在遊戲過程中改寫屬性基礎值而改動沒有生效，請關閉此項。</YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility>
 	<YaOpt.Setting.Option.TerrainBeautyCache>地板美觀屬性快取</YaOpt.Setting.Option.TerrainBeautyCache>
 	<YaOpt.Setting.Option.TerrainBeautyCache.Desc>在遊戲開始後記住每個地形 Def 的 Beauty 和 BeautyOutdoors。BeautyUtility 會為每個取樣格讀取一次地形美觀值，而抽象屬性請求沒有 Thing 可供原版屬性快取使用。讀檔時會重新計算。</YaOpt.Setting.Option.TerrainBeautyCache.Desc>
-	<YaOpt.Setting.Option.TerrainBeautyCache.Compatibility>如果某個模組會在遊戲過程中改寫地形屬性的基礎值而改動沒有生效，請關閉此項。</YaOpt.Setting.Option.TerrainBeautyCache.Compatibility>
 	<YaOpt.Setting.Option.WorldPawnsListCache>世界 pawn 清單快取</YaOpt.Setting.Option.WorldPawnsListCache>
 	<YaOpt.Setting.Option.WorldPawnsListCache.Desc>重用世界 pawn 清單，不再每次存取都重建。原版每次都會清空並從存活、封存、死亡三個集合重新填充，即使內容沒有變化。只要有 pawn 增刪清單就會正常重建，呼叫方拿到的內容與原版一致。</YaOpt.Setting.Option.WorldPawnsListCache.Desc>
 	<YaOpt.Setting.Option.StorableDefsCache>可儲存物品清單快取</YaOpt.Setting.Option.StorableDefsCache>
@@ -356,7 +350,7 @@
 	<YaOpt.Setting.Option.RoomThingsCache.Desc>記住房間內的物品清單，不再每次讀取都重建一遍並用雜湊集合去重。每次計算房間屬性時這份清單會被讀取十幾次。房間內只要有物品增刪或換位就會正常重建。</YaOpt.Setting.Option.RoomThingsCache.Desc>
 	<YaOpt.Setting.Option.RoomStatsThrottle>房間屬性更新間隔</YaOpt.Setting.Option.RoomStatsThrottle>
 	<YaOpt.Setting.Option.RoomStatsThrottle.Desc>每個房間最多每 128 tick 重算一次屬性與用途。原版只要房間內有物品生成或消失，之後任何一次讀取都會觸發重算，而每次重算要跑完所有房間屬性與房間用途評分，繁忙的倉庫每秒可能觸發多次。間隔內的讀取回傳上一次的結果。</YaOpt.Setting.Option.RoomStatsThrottle.Desc>
-	<YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>房間屬性、房間用途名稱以及基於房間屬性的心情最多會延遲約兩秒。如果某個模組依賴房間屬性立即變化（例如囚室轉換），請關閉此項。</YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>
+	<YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>房間屬性、房間用途名稱以及基於房間屬性的心情最多會延遲約兩秒。</YaOpt.Setting.Option.RoomStatsThrottle.Compatibility>
 	<YaOpt.Setting.Option.AlertThrottle>警報更新節流</YaOpt.Setting.Option.AlertThrottle>
 	<YaOpt.Setting.Option.AlertThrottle.Desc>統計每個警報重算的耗時，並依成本安排更新頻率：廉價警報保持原版節奏，昂貴的警報最多每 5 秒檢查一次（高優先級最多每 2 秒）。關鍵警報永不延遲。每次進入遊戲後的最初幾秒用於學習各警報的耗時。任務、戒律、劇本與延時動作產生的警報不參與節流。</YaOpt.Setting.Option.AlertThrottle.Desc>
 	<YaOpt.Setting.Option.AlertThrottle.Compatibility>警報的顯示或消失最多可能延遲一個調度間隔。若已有模組替換了 AlertsReadoutUpdate（效能分析器或其他警報節流模組），本補丁可能無法套用，此時日誌中會出現 YaOpt 警告。</YaOpt.Setting.Option.AlertThrottle.Compatibility>

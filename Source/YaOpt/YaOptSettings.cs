@@ -20,6 +20,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.DebugOutput",
 			Desc = "YaOpt.Setting.Option.DebugOutput.Desc",
 			Category = OptimizationCategory.Main,
+			SubCategory = "Diagnostics",
 			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll | OptimizationFlags.NoSnapshot,
 			Default = false
 		};
@@ -43,6 +44,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.VectoredExceptionHandler",
 			Desc = "YaOpt.Setting.Option.VectoredExceptionHandler.Desc",
 			Category = OptimizationCategory.Main,
+			SubCategory = "Diagnostics",
 			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll,
 			FuncShow = (_) => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
 		};
@@ -56,6 +58,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.EnhancedCrashLog",
 			Desc = "YaOpt.Setting.Option.EnhancedCrashLog.Desc",
 			Category = OptimizationCategory.Main,
+			SubCategory = "Diagnostics",
 			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll
 		};
 
@@ -68,6 +71,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.FatalStderrCapture",
 			Desc = "YaOpt.Setting.Option.FatalStderrCapture.Desc",
 			Category = OptimizationCategory.Main,
+			SubCategory = "Diagnostics",
 			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll,
 			FuncShow = (_) => RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
 		};
@@ -90,7 +94,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ToilRecursionGuard",
 			Desc = "YaOpt.Setting.Option.ToilRecursionGuard.Desc",
-			Category = OptimizationCategory.Main,
+			Category = OptimizationCategory.Misc,
+			SubCategory = "Stability",
 			Flags = OptimizationFlags.IgnoreEnableAll | OptimizationFlags.IgnoreDisableAll
 		};
 
@@ -101,7 +106,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.MaterialGetColor",
 			Desc = "YaOpt.Setting.Option.MaterialGetColor.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -119,7 +125,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.GlowGridCombine",
 			Desc = "YaOpt.Setting.Option.GlowGridCombine.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -138,7 +145,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.GasGridTick",
 			Desc = "YaOpt.Setting.Option.GasGridTick.Desc",
-			Category = OptimizationCategory.Tps
+			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld"
 		};
 
 		/// <summary>
@@ -156,8 +164,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FleckTickLoop",
 			Desc = "YaOpt.Setting.Option.FleckTickLoop.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.FleckTickLoop.Compatibility",
-			Category = OptimizationCategory.Tps
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Flecks"
 		};
 
 		/// <summary>
@@ -173,7 +181,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FleckFastDraw",
 			Desc = "YaOpt.Setting.Option.FleckFastDraw.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Flecks"
 		};
 
 		/// <summary>
@@ -189,8 +198,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FleckCreateInPlace",
 			Desc = "YaOpt.Setting.Option.FleckCreateInPlace.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.FleckCreateInPlace.Compatibility",
-			Category = OptimizationCategory.Tps
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Flecks"
 		};
 
 		/// <summary>
@@ -212,6 +221,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.FleckAutoInstancing.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.FleckAutoInstancing.Compatibility",
 			Category = OptimizationCategory.Fps,
+			SubCategory = "Flecks",
 			Default = false
 		};
 
@@ -232,8 +242,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.SoundOneShotManager",
 			Desc = "YaOpt.Setting.Option.SoundOneShotManager.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.SoundOneShotManager.Compatibility",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Audio"
 		};
 
 		/// <summary>
@@ -246,7 +256,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ColoredText",
 			Desc = "YaOpt.Setting.Option.ColoredText.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Interface"
 		};
 
 		/// <summary>
@@ -259,8 +270,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.PawnLabelCache",
 			Desc = "YaOpt.Setting.Option.PawnLabelCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.PawnLabelCache.Compatibility",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Interface"
 		};
 
 		/// <summary>
@@ -271,7 +282,8 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.EarlyRenderPrepare",
 			Desc = "YaOpt.Setting.Option.EarlyRenderPrepare.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.EarlyRenderPrepare.Compatibility",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -281,7 +293,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.PrepareBatchCount",
 			Desc = "YaOpt.Setting.Option.PrepareBatchCount.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -291,7 +304,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ParallelMaterialUpdate",
 			Desc = "YaOpt.Setting.Option.ParallelMaterialUpdate.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -307,8 +321,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FastRecacheRequested",
 			Desc = "YaOpt.Setting.Option.FastRecacheRequested.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.FastRecacheRequested.Compatibility",
 			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics",
 			FuncShow = (_) => ParallelPreDrawHelper.FastRecacheRequestedAvailable
 		};
 
@@ -324,6 +338,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.MapMeshUpdateThrottle",
 			Desc = "YaOpt.Setting.Option.MapMeshUpdateThrottle.Desc",
 			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics",
 			FuncPostDraw = SettingsPanel.MapMeshUpdateThrottlePostDraw,
 			FuncExposeData = (settings) =>
 			{
@@ -352,7 +367,8 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.PRNRWorker",
 			Desc = "YaOpt.Setting.Option.PRNRWorker.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.PRNRWorker.Compatibility",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -368,7 +384,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.GraphicTextureCache",
 			Desc = "YaOpt.Setting.Option.GraphicTextureCache.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -379,7 +396,6 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.WorldMapTextureCache",
 			Desc = "YaOpt.Setting.Option.WorldMapTextureCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.WorldMapTextureCache.Compatibility",
 			SubCategory = "WorldMap",
 			Category = OptimizationCategory.Misc,
 		};
@@ -456,7 +472,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.Silhouette",
 			Desc = "YaOpt.Setting.Option.Silhouette.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -472,7 +489,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ToggleTabCheck",
 			Desc = "YaOpt.Setting.Option.ToggleTabCheck.Desc",
-			Category = OptimizationCategory.Fps
+			Category = OptimizationCategory.Fps,
+			SubCategory = "Interface"
 		};
 
 		/// <summary>
@@ -483,6 +501,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ComputeMatrixBurst",
 			Desc = "YaOpt.Setting.Option.ComputeMatrixBurst.Desc",
 			Category = OptimizationCategory.Fps,
+			SubCategory = "Graphics"
 		};
 
 		/// <summary>
@@ -492,7 +511,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ThingGetComp",
 			Desc = "YaOpt.Setting.Option.ThingGetComp.Desc",
-			Category = OptimizationCategory.Tps
+			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -509,7 +529,8 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.MeditationTick",
 			Desc = "YaOpt.Setting.Option.MeditationTick.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.MeditationTick.Compatibility",
-			Category = OptimizationCategory.Tps
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay"
 		};
 
 		/// <summary>
@@ -526,7 +547,8 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.BedThrottle",
 			Desc = "YaOpt.Setting.Option.BedThrottle.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.BedThrottle.Compatibility",
-			Category = OptimizationCategory.Tps
+			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay"
 		};
 
 		/// <summary>
@@ -544,6 +566,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.IdleThrottle.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.IdleThrottle.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay",
 			FuncPostDraw = SettingsPanel.IdleThrottlePostDraw,
 			FuncExposeData = (settings) =>
 			{
@@ -673,6 +696,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.StatCache",
 			Desc = "YaOpt.Setting.Option.StatCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -692,6 +716,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.LearningStatCache",
 			Desc = "YaOpt.Setting.Option.LearningStatCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
 			Default = true,
 		};
 
@@ -710,8 +735,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ImmunityStatCache",
 			Desc = "YaOpt.Setting.Option.ImmunityStatCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.ImmunityStatCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
 			Default = true,
 		};
 
@@ -731,8 +756,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.NutritionStatCache",
 			Desc = "YaOpt.Setting.Option.NutritionStatCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.NutritionStatCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
 			Default = true,
 		};
 
@@ -757,8 +782,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.DrugPolicyCache",
 			Desc = "YaOpt.Setting.Option.DrugPolicyCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.DrugPolicyCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
 			Default = true,
 		};
 
@@ -778,8 +803,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.DrugScheduleCache",
 			Desc = "YaOpt.Setting.Option.DrugScheduleCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.DrugScheduleCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
 			Default = true,
 		};
 
@@ -798,8 +823,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.PrioritySorterSnapshot",
 			Desc = "YaOpt.Setting.Option.PrioritySorterSnapshot.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.PrioritySorterSnapshot.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay",
 			Default = true,
 		};
 
@@ -820,6 +845,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.MoodThoughtDedup",
 			Desc = "YaOpt.Setting.Option.MoodThoughtDedup.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay",
 			Default = true,
 		};
 
@@ -838,6 +864,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.LocalDateCache",
 			Desc = "YaOpt.Setting.Option.LocalDateCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld"
 		};
 
 		/// <summary>
@@ -850,6 +877,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.RecipeUsersCache",
 			Desc = "YaOpt.Setting.Option.RecipeUsersCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -889,7 +917,6 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.BiomeAnimalIndex",
 			Desc = "YaOpt.Setting.Option.BiomeAnimalIndex.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.BiomeAnimalIndex.Compatibility",
 			SubCategory = "Startup",
 			Category = OptimizationCategory.Misc,
 		};
@@ -933,8 +960,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ThingDefBaseStatCache",
 			Desc = "YaOpt.Setting.Option.ThingDefBaseStatCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.ThingDefBaseStatCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -953,8 +980,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.TerrainBeautyCache",
 			Desc = "YaOpt.Setting.Option.TerrainBeautyCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.TerrainBeautyCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -972,6 +999,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.WorldPawnsListCache",
 			Desc = "YaOpt.Setting.Option.WorldPawnsListCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -984,6 +1012,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.StorableDefsCache",
 			Desc = "YaOpt.Setting.Option.StorableDefsCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -1002,6 +1031,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.RoomThingsCache",
 			Desc = "YaOpt.Setting.Option.RoomThingsCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms",
 			Default = true,
 		};
 
@@ -1024,6 +1054,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.AlertThrottle.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.AlertThrottle.Compatibility",
 			Category = OptimizationCategory.Fps,
+			SubCategory = "Interface",
 			Default = true,
 		};
 
@@ -1045,6 +1076,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.RoomStatsThrottle.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.RoomStatsThrottle.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms",
 			Default = true,
 		};
 
@@ -1067,6 +1099,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.MoveSpeedStatCache",
 			Desc = "YaOpt.Setting.Option.MoveSpeedStatCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
 			Default = true,
 		};
 
@@ -1078,8 +1111,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.PsychicEntropyCache",
 			Desc = "YaOpt.Setting.Option.PsychicEntropyCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.PsychicEntropyCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -1091,6 +1124,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.CelestialSunGlowCache",
 			Desc = "YaOpt.Setting.Option.CelestialSunGlowCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld"
 		};
 
 		/// <summary>
@@ -1102,6 +1136,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.FrameWorkToBuildCache",
 			Desc = "YaOpt.Setting.Option.FrameWorkToBuildCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -1121,8 +1156,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ThingSetMakerSampleCache",
 			Desc = "YaOpt.Setting.Option.ThingSetMakerSampleCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.ThingSetMakerSampleCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ItemGeneration"
 		};
 
 		/// <summary>
@@ -1142,8 +1177,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath",
 			Desc = "YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.ThingSetMakerCanGenerateFastPath.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ItemGeneration"
 		};
 
 		/// <summary>
@@ -1163,6 +1198,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ThingSetMakerStatCache",
 			Desc = "YaOpt.Setting.Option.ThingSetMakerStatCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ItemGeneration"
 		};
 
 		/// <summary>
@@ -1182,6 +1218,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.GenerationDefCache",
 			Desc = "YaOpt.Setting.Option.GenerationDefCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ItemGeneration"
 		};
 
 		/// <summary>
@@ -1206,6 +1243,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.PawnGearSessionCache.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.PawnGearSessionCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "PawnGeneration"
 		};
 
 		/// <summary>
@@ -1227,6 +1265,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.PawnGenerationIndex.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.PawnGenerationIndex.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "PawnGeneration"
 		};
 
 		/// <summary>
@@ -1250,6 +1289,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.PawnGenerationFailureGuard.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.PawnGenerationFailureGuard.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "PawnGeneration"
 		};
 
 		/// <summary>
@@ -1278,6 +1318,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.PawnGearRebuild.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.PawnGearRebuild.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "PawnGeneration",
 			Default = false
 		};
 
@@ -1297,6 +1338,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.PawnGearEnvironment",
 			Desc = "YaOpt.Setting.Option.PawnGearEnvironment.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "PawnGeneration",
 			Default = false,
 			FuncShow = settings => settings.OptPawnGearRebuild.Enabled
 		};
@@ -1321,6 +1363,7 @@ namespace YaOpt
 			NoteCompatibility = "YaOpt.Setting.Option.PawnGearHarFastPath.Compatibility",
 			RequiredMod = "erdelf.HumanoidAlienRaces",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ModIntegration"
 		};
 
 		/// <summary>
@@ -1338,8 +1381,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.PawnApparelPairCache",
 			Desc = "YaOpt.Setting.Option.PawnApparelPairCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.PawnApparelPairCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "PawnGeneration"
 		};
 
 		/// <summary>
@@ -1356,8 +1399,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.PawnBackstoryMatchCache",
 			Desc = "YaOpt.Setting.Option.PawnBackstoryMatchCache.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.PawnBackstoryMatchCache.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "PawnGeneration"
 		};
 
 		/// <summary>
@@ -1379,6 +1422,7 @@ namespace YaOpt
 			NoteCompatibility = "YaOpt.Setting.Option.PawnTraitsHarFastPath.Compatibility",
 			RequiredMod = "erdelf.HumanoidAlienRaces",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ModIntegration"
 		};
 
 		/// <summary>
@@ -1390,6 +1434,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.QuestLodgerFastPath",
 			Desc = "YaOpt.Setting.Option.QuestLodgerFastPath.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Quests"
 		};
 
 		/// <summary>
@@ -1409,8 +1454,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.QuestSelectionFastPath",
 			Desc = "YaOpt.Setting.Option.QuestSelectionFastPath.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.QuestSelectionFastPath.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Quests"
 		};
 
 		/// <summary>
@@ -1422,6 +1467,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.QuestAncientComplexFallback",
 			Desc = "YaOpt.Setting.Option.QuestAncientComplexFallback.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Quests"
 		};
 
 		/// <summary>
@@ -1439,6 +1485,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.QuestPointsNormalize",
 			Desc = "YaOpt.Setting.Option.QuestPointsNormalize.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Quests"
 		};
 
 		/// <summary>
@@ -1450,6 +1497,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.TeetotalerFastPath",
 			Desc = "YaOpt.Setting.Option.TeetotalerFastPath.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay"
 		};
 
 		/// <summary>
@@ -1517,6 +1565,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.IdeoCheck",
 			Desc = "YaOpt.Setting.Option.IdeoCheck.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay"
 		};
 
 		/// <summary>
@@ -1531,6 +1580,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.WindUpdate",
 			Desc = "YaOpt.Setting.Option.WindUpdate.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld"
 		};
 
 		/// <summary>
@@ -1556,6 +1606,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.FastListerRemove.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.FastListerRemove.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -1569,6 +1620,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.FastSpawnedThingsRemove",
 			Desc = "YaOpt.Setting.Option.FastSpawnedThingsRemove.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -1579,7 +1631,7 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.GenTypesLockFree",
 			Desc = "YaOpt.Setting.Option.GenTypesLockFree.Desc",
-			Category = OptimizationCategory.Tps,
+			Category = OptimizationCategory.Tps
 		};
 
 		/// <summary>
@@ -1611,6 +1663,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ConnectivityUpdate",
 			Desc = "YaOpt.Setting.Option.ConnectivityUpdate.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld"
 		};
 
 		/// <summary>
@@ -1625,6 +1678,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.HARNeedCondition.Desc",
 			RequiredMod = "erdelf.HumanoidAlienRaces",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ModIntegration"
 		};
 
 		/// <seealso cref="Patches.Verse_GenTicks_GetCameraUpdateRate"/>
@@ -1633,6 +1687,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.CameraUpdateRate",
 			Desc = "YaOpt.Setting.Option.CameraUpdateRate.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay"
 		};
 
 		/// <seealso cref="Patches.RimWorld_GenHostility_HostileTo"/>
@@ -1644,6 +1699,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.AttackTargetFinder",
 			Desc = "YaOpt.Setting.Option.AttackTargetFinder.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Combat"
 		};
 
 		/// <summary>
@@ -1664,6 +1720,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ListerBuildingsCache",
 			Desc = "YaOpt.Setting.Option.ListerBuildingsCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -1681,6 +1738,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ImmunityCache",
 			Desc = "YaOpt.Setting.Option.ImmunityCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -1705,6 +1763,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.InvisibilityCache",
 			Desc = "YaOpt.Setting.Option.InvisibilityCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches"
 		};
 
 		/// <summary>
@@ -1721,6 +1780,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ShamblerIdleThrottle",
 			Desc = "YaOpt.Setting.Option.ShamblerIdleThrottle.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Combat"
 		};
 
 		/// <summary>
@@ -1742,6 +1802,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.RefuelSearchCache",
 			Desc = "YaOpt.Setting.Option.RefuelSearchCache.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -1760,6 +1821,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.DeathThoughts.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.DeathThoughts.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Gameplay"
 		};
 
 		/// <summary>
@@ -1772,6 +1834,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.TurretTargetPrune.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.TurretTargetPrune.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "Combat"
 		};
 
 		/// <summary>
@@ -1793,6 +1856,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.TempTerrainMerge.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.TempTerrainMerge.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld",
 			FuncShow = (_) => ModsConfig.OdysseyActive,
 			Default = true,
 		};
@@ -1813,6 +1877,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.TempTerrainPrune",
 			Desc = "YaOpt.Setting.Option.TempTerrainPrune.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld",
 			FuncShow = (s) => ModsConfig.OdysseyActive && !s.OptTempTerrainMerge.Enabled,
 		};
 
@@ -1835,6 +1900,7 @@ namespace YaOpt
 			Desc = "YaOpt.Setting.Option.RegionQueryFast.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.RegionQueryFast.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "MapAndWorld",
 			Default = true,
 		};
 
@@ -1847,8 +1913,8 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.GetMapPawns",
 			Desc = "YaOpt.Setting.Option.GetMapPawns.Desc",
-			NoteCompatibility = "YaOpt.Setting.Option.GetMapPawns.Compatibility",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -1859,6 +1925,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.AppendThingHolders",
 			Desc = "YaOpt.Setting.Option.AppendThingHolders.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -1876,6 +1943,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.ConstructDeliverResources",
 			Desc = "YaOpt.Setting.Option.ConstructDeliverResources.Desc",
 			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms"
 		};
 
 		/// <summary>
@@ -1886,7 +1954,7 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.LazyTextureLoad",
 			Desc = "YaOpt.Setting.Option.LazyTextureLoad.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.LazyTextureLoad.Compatibility",
-			Category = OptimizationCategory.Misc,
+			Category = OptimizationCategory.Misc
 		};
 
 		/// <summary>
