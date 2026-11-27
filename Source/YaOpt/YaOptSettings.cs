@@ -1024,6 +1024,33 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Replaces <see cref="BeautyUtility.AverageBeautyPerceptible"/> with a single pass over
+		/// precomputed def-level tables.
+		/// </summary>
+		/// <remarks>
+		/// Every call samples 241 cells, resolves a room twice per cell and evaluates the full
+		/// <c>StatWorker</c> pipeline for every beauty-relevant thing, because neither <c>Beauty</c>
+		/// stat is immutable or cacheable and the default <c>GetStatValue</c> call passes
+		/// <c>cacheStaleAfterTicks = -1</c>. The rewrite keeps the sampling and the arithmetic and
+		/// removes the repeated work, so results are unchanged.
+		/// <para/>
+		/// Off by default because it replaces the method body: another mod's patch on
+		/// <c>AverageBeautyPerceptible</c> would be bypassed. <see cref="Helpers.PatchConflictDetector"/>
+		/// lowers the default automatically when such a patch is present.
+		/// </remarks>
+		/// <seealso cref="Patches.RimWorld_BeautyUtility_AverageBeautyPerceptible"/>
+		/// <seealso cref="Helpers.BeautyFastPath"/>
+		public OptimizationOption OptBeautyFastPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.BeautyFastPath",
+			Desc = "YaOpt.Setting.Option.BeautyFastPath.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.BeautyFastPath.Compatibility",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "StatsAndCaches",
+			Default = false
+		};
+
+		/// <summary>
 		/// Skips the rebuild of <c>WorldPawns.AllPawnsAlive</c> and <c>WorldPawns.AllPawnsAliveOrDead</c>
 		/// while the backing pawn sets are unchanged.
 		/// </summary>

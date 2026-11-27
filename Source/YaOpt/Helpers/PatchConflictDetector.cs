@@ -40,6 +40,7 @@ namespace YaOpt.Helpers
 			CheckDrugScheduleCache();
 			CheckPrioritySorterSnapshot();
 			CheckRegionQueryFast();
+			CheckBeautyFastPath();
 			CheckTempTerrainMerge();
 			CheckPawnComputeMatrix();
 			CheckPawnRenderPreparation();
@@ -184,6 +185,16 @@ namespace YaOpt.Helpers
 			Check(nameof(YaOptSettings.OptRegionQueryFast), includeAll: true,
 				AccessTools.Method(typeof(RegionAndRoomQuery), nameof(RegionAndRoomQuery.RegionAt)),
 				AccessTools.Method(typeof(RegionGrid), nameof(RegionGrid.GetValidRegionAt)));
+		}
+
+		/// <summary>
+		/// The beauty fast path replaces the body of <c>AverageBeautyPerceptible</c> outright, so any
+		/// foreign patch on it - prefix, postfix or transpiler - would be bypassed.
+		/// </summary>
+		private static void CheckBeautyFastPath()
+		{
+			Check(nameof(YaOptSettings.OptBeautyFastPath), includeAll: true,
+				AccessTools.Method(typeof(BeautyUtility), nameof(BeautyUtility.AverageBeautyPerceptible)));
 		}
 
 		/// <summary>
