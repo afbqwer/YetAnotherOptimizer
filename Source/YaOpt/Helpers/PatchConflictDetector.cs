@@ -197,7 +197,13 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(FreezeManager),
 					nameof(FreezeManager.DoCellSteadyEffects)),
 				AccessTools.Method(typeof(FreezeManager), "DoWaterFreezing"),
-				AccessTools.Method(typeof(FreezeManager), "DoIceMelting"));
+				AccessTools.Method(typeof(FreezeManager), "DoIceMelting"),
+				AccessTools.Method(typeof(FreezeManager), "CanFreeze"),
+				AccessTools.Method(typeof(FreezeManager), "CanMelt"),
+				AccessTools.Method(typeof(FreezeManager), nameof(FreezeManager.CanEverFreeze)),
+				AccessTools.Method(typeof(FreezeManager), nameof(FreezeManager.CanEverMelt)),
+				AccessTools.Method(typeof(FreezeManager), "SurroundedByIce"),
+				AccessTools.Method(typeof(FreezeManager), "SurroundedByWater"));
 		}
 
 		/// <summary>

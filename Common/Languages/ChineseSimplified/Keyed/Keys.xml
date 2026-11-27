@@ -223,7 +223,7 @@
 	<YaOpt.Setting.Option.TempTerrainPrune.Desc>当地形不可结冰时，跳过该格的水面结冰处理。原版会先读取温度和房间，再检查地形是否可结冰；对大多数陆地格来说，此检查避免了这部分工作，可结冰的格子仍走原版逻辑。仅在关闭“临时地形合并”时显示。</YaOpt.Setting.Option.TempTerrainPrune.Desc>
 	<YaOpt.Setting.Option.TempTerrainMerge>临时地形合并</YaOpt.Setting.Option.TempTerrainMerge>
 	<YaOpt.Setting.Option.TempTerrainMerge.Desc>把每格的结冰与融化处理合并为一次：温度只读取一次，房间查询推迟到对应随机判定成功之后，径向扫描先检查地形再查询房间。随机序列、结冰概率与最终生成的冰面均保持不变。</YaOpt.Setting.Option.TempTerrainMerge.Desc>
-	<YaOpt.Setting.Option.TempTerrainMerge.Compatibility>若其他模组修改了 DoCellSteadyEffects、DoWaterFreezing 或 DoIceMelting，本选项可能绕过它们。</YaOpt.Setting.Option.TempTerrainMerge.Compatibility>
+	<YaOpt.Setting.Option.TempTerrainMerge.Compatibility>若其他模组修改了结冰/融化流程或其地形判定，本选项可能绕过它们。</YaOpt.Setting.Option.TempTerrainMerge.Compatibility>
 	<YaOpt.Setting.Option.RegionQueryFast>区域查询快速路径</YaOpt.Setting.Option.RegionQueryFast>
 	<YaOpt.Setting.Option.RegionQueryFast.Desc>当区域网格没有待重建内容时，直接读取区域数组，省去每次区域/房间查询的重建检查和重复边界检查。区域为脏、更新器禁用、网格已释放或越界时仍走原版逻辑（包括日志）。不缓存任何结果，因此无需失效处理。</YaOpt.Setting.Option.RegionQueryFast.Desc>
 	<YaOpt.Setting.Option.RegionQueryFast.Compatibility>若其他模组修改了 RegionAt 或 GetValidRegionAt，本选项可能绕过它们。</YaOpt.Setting.Option.RegionQueryFast.Compatibility>

@@ -30,8 +30,6 @@ namespace YaOpt.Helpers
 	{
 		private const float FreezeRadius = 2.9f;
 
-		[ThreadStatic] private static List<IntVec3> _cells;
-
 		internal static void DoCell(FreezeManager manager, IntVec3 c)
 		{
 			Map map = manager.map;
@@ -51,7 +49,7 @@ namespace YaOpt.Helpers
 				if (Rand.Chance(chance))
 				{
 					Room room = c.GetRoom(map);
-					List<IntVec3> cells = Cells();
+					List<IntVec3> cells = manager.tmpCellsToAffect;
 					cells.Clear();
 					CollectFreezingCells(manager, map, c, room, cells);
 
@@ -70,7 +68,7 @@ namespace YaOpt.Helpers
 			if (!(temperature < 2f) && Rand.Chance(0.001f * ((temperature + 5f) / 5f)))
 			{
 				Room room = c.GetRoom(map);
-				List<IntVec3> cells = Cells();
+				List<IntVec3> cells = manager.tmpCellsToAffect;
 				cells.Clear();
 				CollectMeltingCells(manager, map, c, room, cells);
 
@@ -79,20 +77,8 @@ namespace YaOpt.Helpers
 			}
 		}
 
-		private static List<IntVec3> Cells()
-		{
-			List<IntVec3> cells = _cells;
-			if (cells == null)
-			{
-				cells = new List<IntVec3>();
-				_cells = cells;
-			}
-			return cells;
-		}
-
 		/// <summary>
-		/// Same cells as vanilla's <c>CanFreeze(item)</c> filter, but the cheap terrain check runs
-		/// before the region lookup. <c>CanFreeze</c> is <c>CanEverFreeze &amp;&amp; !SurroundedByWater</c>.
+		/// Runs the vanilla freeze filter before the room lookup so non-freezable cells stay cheap.
 		/// </summary>
 		private static void CollectFreezingCells(FreezeManager manager, Map map, IntVec3 center,
 			Room room, List<IntVec3> cells)
@@ -101,10 +87,10 @@ namespace YaOpt.Helpers
 			for (int i = 0; i < count; i++)
 			{
 				IntVec3 cell = center + GenRadial.RadialPattern[i];
-				if (!cell.InBounds(map) || !FreezeManager.CanEverFreeze(cell, map))
+				if (!cell.InBounds(map) || !manager.CanFreeze(cell))
 					continue;
 
-				if (cell.GetRoom(map) != room || manager.SurroundedByWater(cell))
+				if (cell.GetRoom(map) != room)
 					continue;
 
 				cells.Add(cell);
@@ -112,8 +98,7 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
-		/// Same cells as vanilla's <c>CanEverMelt(item) &amp;&amp; CanMelt(item)</c> filter, with the
-		/// terrain check first. <c>CanMelt</c> is <c>CanEverMelt &amp;&amp; !SurroundedByIce</c>.
+		/// Runs the vanilla melt filter before the room lookup so non-ice cells stay cheap.
 		/// </summary>
 		private static void CollectMeltingCells(FreezeManager manager, Map map, IntVec3 center,
 			Room room, List<IntVec3> cells)
@@ -122,10 +107,10 @@ namespace YaOpt.Helpers
 			for (int i = 0; i < count; i++)
 			{
 				IntVec3 cell = center + GenRadial.RadialPattern[i];
-				if (!cell.InBounds(map) || !manager.CanEverMelt(cell))
+				if (!cell.InBounds(map) || !manager.CanMelt(cell))
 					continue;
 
-				if (cell.GetRoom(map) != room || manager.SurroundedByIce(cell))
+				if (cell.GetRoom(map) != room)
 					continue;
 
 				cells.Add(cell);
