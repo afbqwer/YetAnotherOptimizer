@@ -20,15 +20,17 @@ namespace YaOpt.Helpers
 		private static NodeEnumerator _singletonEnumerator;
 		private static bool _available;
 
+		// The predicate name may start with "@" for an attribute ([@Class="..."]) or not for a child
+		// element ([defName="..."]). Only one predicate per step and double-quoted values are handled.
 		private static readonly Regex _xPathRegex = new Regex(
 			"^" +
 			"(?:/(" + IDENTITY + "*" +
-			"(?:" + @"\[" + ANY_SPACE + IDENTITY + "+" + EQUALITY + @"""[^""]*""" + ANY_SPACE + @"\])?" +
+			"(?:" + @"\[" + ANY_SPACE + "@?" + IDENTITY + "+" + EQUALITY + @"""[^""]*""" + ANY_SPACE + @"\])?" +
 			"))+$",
 			RegexOptions.Compiled);
 
 		private static readonly Regex _queryRegex = new Regex(
-			"^(?:(" + IDENTITY + @"*)\[" + ANY_SPACE + "(" + IDENTITY + "+)" + EQUALITY +
+			"^(?:(" + IDENTITY + @"*)\[" + ANY_SPACE + "(@?" + IDENTITY + "+)" + EQUALITY +
 			@"""([^""]*)""" + ANY_SPACE + @"\])$",
 			RegexOptions.Compiled);
 
@@ -149,18 +151,10 @@ namespace YaOpt.Helpers
 											if (!(obj is XmlElement childNode))
 												continue;
 
-											if (childNode.Name == nodeName)
+											if (childNode.Name == nodeName &&
+												MatchesPredicate(childNode, queryName, queryValue))
 											{
-												foreach (object subObj in childNode.ChildNodes)
-												{
-													if (subObj is XmlElement subElem &&
-														subElem.Name == queryName &&
-														subElem.InnerText == queryValue)
-													{
-														_tmpQueue.Enqueue((childNode, i));
-														break;
-													}
-												}
+												_tmpQueue.Enqueue((childNode, i));
 											}
 										}
 									}
@@ -210,6 +204,47 @@ namespace YaOpt.Helpers
 			if (enumerator.MoveNext())
 				return enumerator.Current as XmlNode;
 			return null;
+		}
+
+		/// <summary>
+		/// Materializes the same nodes as <c>xml.SelectNodes(xpath).Cast&lt;XmlNode&gt;().ToArray()</c>.
+		/// </summary>
+		/// <remarks>
+		/// Replace, Remove and SetName delete or rename the matched nodes, so they snapshot the
+		/// result before iterating. The shared scratch enumerator is drained immediately here, which
+		/// keeps the returned array independent of later lookups.
+		/// </remarks>
+		public static XmlNode[] GetXmlNodes(XmlDocument xml, string xpath)
+		{
+			var enumerator = GetXmlEnumerator(xml, xpath);
+			var nodes = new List<XmlNode>();
+			while (enumerator.MoveNext())
+			{
+				if (enumerator.Current is XmlNode node)
+					nodes.Add(node);
+			}
+			return nodes.ToArray();
+		}
+
+		/// <summary>
+		/// Matches one <c>[name="value"]</c> predicate. A leading "@" means an attribute, otherwise a
+		/// child element's text must equal the value, which mirrors XPath's string-value comparison
+		/// closely enough for the def fields these patches use.
+		/// </summary>
+		private static bool MatchesPredicate(XmlElement element, string queryName, string queryValue)
+		{
+			if (queryName[0] == '@')
+			{
+				var attribute = element.GetAttributeNode(queryName.Substring(1));
+				return attribute != null && attribute.Value == queryValue;
+			}
+
+			foreach (object obj in element.ChildNodes)
+			{
+				if (obj is XmlElement child && child.Name == queryName && child.InnerText == queryValue)
+					return true;
+			}
+			return false;
 		}
 	}
 }
