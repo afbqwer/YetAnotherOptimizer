@@ -262,7 +262,10 @@ namespace YaOpt.Settings
 			// player sees it without having to hover.
 			var isSkipped = option == _settings.OptFastListerRemove &&
 							ListerThingsHelper.FastRemoveConflict != null;
-			if (hasNoteS || hasNoteC || hasNoteMT || hasConflict || isSkipped)
+			// An inert beauty rewrite counts as skipped too: the checkbox is on, the patch is not.
+			var isBlocked = option == _settings.OptBeautyFastPath &&
+							!string.IsNullOrEmpty(BeautyFastPath.FailReason);
+			if (hasNoteS || hasNoteC || hasNoteMT || hasConflict || isSkipped || isBlocked)
 			{
 				var sb = new StringBuilder(label);
 				if (hasNoteS)
@@ -271,7 +274,7 @@ namespace YaOpt.Settings
 					sb.Append(" <color=#DEB0D0>[C]</color>");
 				if (hasNoteMT)
 					sb.Append(" <color=#0044FF>[MT]</color>");
-				if (hasConflict || isSkipped)
+				if (hasConflict || isSkipped || isBlocked)
 					sb.Append(" <color=#FF9020>[!]</color>");
 				label = sb.ToString();
 			}
@@ -363,6 +366,16 @@ namespace YaOpt.Settings
 				sb.AppendLine("</color>");
 			}
 
+			// The beauty rewrite decided once, at load, whether it can reproduce the stat's part list.
+			// A refusal leaves the option usable but inert, so say so instead of going quiet.
+			if (option == _settings.OptBeautyFastPath && !string.IsNullOrEmpty(BeautyFastPath.FailReason))
+			{
+				sb.Append("<color=#FF4040>")
+					.Append("YaOpt.Setting.BeautyFastPath.Blocked".Translate())
+					.AppendLine("</color>");
+				sb.Append("<color=#FF4040>").Append(BeautyFastPath.FailReason).AppendLine("</color>");
+			}
+
 			sb.AppendLine(option.Desc.Translate());
 
 			if (!string.IsNullOrWhiteSpace(option.NoteStability))
@@ -421,6 +434,27 @@ namespace YaOpt.Settings
 			{
 				_checkOptionChanged = true;
 			}
+		}
+
+		/// <summary>
+		/// Prints the reason the beauty rewrite is inert directly under its checkbox, so it is visible
+		/// without hovering. The layout check already ran once at load, so this only reads the verdict.
+		/// </summary>
+		public static void BeautyFastPathPostDraw(SettingsPanel panel, Listing_Standard listing,
+			OptimizationOption option)
+		{
+			var reason = BeautyFastPath.FailReason;
+			if (string.IsNullOrEmpty(reason))
+				return;
+
+			listing.Indent();
+			listing.Gap(1);
+			var oldColor = GUI.color;
+			GUI.color = new Color(1f, 0.42f, 0.42f);
+			listing.Label("YaOpt.Setting.BeautyFastPath.Blocked".Translate());
+			listing.Label(reason);
+			GUI.color = oldColor;
+			listing.Outdent();
 		}
 
 		public static void MapMeshUpdateThrottlePostDraw(SettingsPanel panel,

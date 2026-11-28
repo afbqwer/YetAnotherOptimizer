@@ -1173,7 +1173,8 @@ namespace YaOpt
 			NoteCompatibility = "YaOpt.Setting.Option.BeautyFastPath.Compatibility",
 			Category = OptimizationCategory.Tps,
 			SubCategory = "StatsAndCaches",
-			Default = false
+			Default = false,
+			FuncPostDraw = SettingsPanel.BeautyFastPathPostDraw
 		};
 
 		/// <summary>

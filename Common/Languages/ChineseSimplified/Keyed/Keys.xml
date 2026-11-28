@@ -373,6 +373,7 @@
 	<YaOpt.Setting.Option.BeautyFastPath>美观采样快速路径</YaOpt.Setting.Option.BeautyFastPath>
 	<YaOpt.Setting.Option.BeautyFastPath.Desc>用一次遍历取代感知美观值的采样，数据来自读档时按 Def 预先算好的表。原版每次采样 241 格，每格查两次房间，并对每个相关物品跑完整属性计算，因为 Beauty 属性既不是 immutable 也不缓存。采样范围与数值都不变，只是把重复的查询去掉了。物品和建筑的材料、品质、内容物与组件仍然照常计入。</YaOpt.Setting.Option.BeautyFastPath.Desc>
 	<YaOpt.Setting.Option.BeautyFastPath.Compatibility>重写整个美观采样方法，其他 Mod 对该方法的补丁会被绕过。因此默认关闭；检测到冲突补丁时会自动关掉。</YaOpt.Setting.Option.BeautyFastPath.Compatibility>
+	<YaOpt.Setting.BeautyFastPath.Blocked>本次游戏未生效，Beauty 属性的结构不是本优化能重现的形式：</YaOpt.Setting.BeautyFastPath.Blocked>
 	<YaOpt.Setting.Option.WorldPawnsListCache>世界 pawn 列表缓存</YaOpt.Setting.Option.WorldPawnsListCache>
 	<YaOpt.Setting.Option.WorldPawnsListCache.Desc>复用世界 pawn 列表，不再每次访问都重建。原版每次都会清空并从存活、封存、死亡三个集合重新填充，即使内容没有变化。只要有 pawn 增删列表就会正常重建，调用方拿到的内容与原版一致。</YaOpt.Setting.Option.WorldPawnsListCache.Desc>
 	<YaOpt.Setting.Option.StorableDefsCache>可存储物品列表缓存</YaOpt.Setting.Option.StorableDefsCache>

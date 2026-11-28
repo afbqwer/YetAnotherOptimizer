@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using HarmonyLib;
 using RimWorld;
 using UnityEngine;
@@ -30,6 +31,19 @@ namespace YaOpt.Helpers
 	/// is hoisted to one lookup per sampled position instead of one per thing. The arithmetic below
 	/// reproduces vanilla term by term, including its <c>v &gt; 0</c> / <c>!(v &lt;= 0)</c> asymmetry,
 	/// the offset-before-factor comp order and the two-stage rounding, so results are bit-identical.
+	/// </para>
+	/// <para>
+	/// The tables only describe the first two <c>StatPart</c>s (<c>StatPart_Quality</c> and
+	/// <c>StatPart_ContentsBeauty</c>), which is all vanilla declares. Mods commonly append their own
+	/// parts, though, and those read per-thing state no table can hold. They are therefore kept as an
+	/// ordered tail and replayed in place with their own <c>TransformValue</c> after the modelled pair,
+	/// so any implementation is supported without naming it here. Only a tail part that would have to
+	/// run before the modelled pair is refused.
+	/// </para>
+	/// <para>
+	/// The layout is validated once per process, because vanilla fixes <c>stat.parts</c> when the defs
+	/// finish loading and never rebuilds it afterwards. A failure is reported through
+	/// <see cref="FailReason"/> so the settings window can show why the option does nothing.
 	/// </para>
 	/// <para>
 	/// Tables are rebuilt lazily after <see cref="Current.Game"/> exists and again whenever the def
@@ -88,6 +102,31 @@ namespace YaOpt.Helpers
 		/// both loops outright.
 		/// </summary>
 		private static bool[] _needsCompScan;
+
+		/// <summary>
+		/// Parts declared after the modelled pair, replayed in order. Null when the stat declares none,
+		/// which keeps the vanilla case free of any per-thing request object.
+		/// </summary>
+		private static StatPart[] _beautyTail;
+
+		private static StatPart[] _beautyOutdoorsTail;
+
+		/// <summary>
+		/// <c>StatPart_Quality.applyToNegativeValues</c> per stat. The inline quality step reproduces
+		/// <c>TransformValue</c>, and this is the only branch of it the tables cannot derive.
+		/// </summary>
+		private static bool _beautyQualityNegative;
+
+		private static bool _beautyOutdoorsQualityNegative;
+
+		/// <summary>Set once the layout has been read; the def part lists never change after that.</summary>
+		private static bool _layoutResolved;
+
+		/// <summary>
+		/// Why the layout was refused, or null. Surfaced in the settings window, so a player who sees
+		/// the option checked but inactive gets the reason instead of a silent fallback.
+		/// </summary>
+		private static string _failReason;
 
 		private static float[] _stuffFactor;
 
@@ -175,6 +214,8 @@ namespace YaOpt.Helpers
 			_thingCount = -1;
 			_terrainCount = -1;
 			_disabled = false;
+			// The layout verdict survives: stat.parts is built while the defs load and never rebuilt,
+			// so re-reading it after a reload would only repeat the same comparison.
 			CompStatContributors.Clear();
 		}
 
@@ -357,7 +398,7 @@ namespace YaOpt.Helpers
 			}
 
 			// StatPart_Quality tests `!(val <= 0f)`, not `val > 0f`; the two differ for NaN.
-			if (!(value <= 0f))
+			if ((useOutdoors ? _beautyOutdoorsQualityNegative : _beautyQualityNegative) || !(value <= 0f))
 			{
 				var slot = (useOutdoors ? BeautyOutdoorsSlot : 0) + qualityIndex;
 				value += Mathf.Min(value * QualityMultiplier[slot] - value, QualityMaxGain[slot]);
@@ -365,6 +406,16 @@ namespace YaOpt.Helpers
 
 			if (thing is IBeautyContainer container)
 				value += container.BeautyOffset;
+
+			// Everything a mod appended after the modelled pair runs here, in declaration order and
+			// with its own TransformValue, so its semantics are honoured without this code knowing it.
+			var tail = useOutdoors ? _beautyOutdoorsTail : _beautyTail;
+			if (tail != null)
+			{
+				var request = StatRequest.For(thing);
+				for (var i = 0; i < tail.Length; i++)
+					tail[i].TransformValue(request, ref value);
+			}
 
 			value *= useOutdoors ? scenarioBeautyOutdoors : scenarioBeauty;
 			return Finalize(value, useOutdoors);
@@ -442,7 +493,14 @@ namespace YaOpt.Helpers
 				return true;
 
 			if (!Build(thingCount, terrainCount))
+			{
+				// A layout the fast path cannot reproduce is fixed for the process; retrying would only
+				// repeat the same conclusion on every tick. A partially loaded def list leaves the
+				// layout unresolved, so Build is simply tried again.
+				if (_layoutResolved)
+					_disabled = true;
 				return false;
+			}
 
 			_thingCount = thingCount;
 			_terrainCount = terrainCount;
@@ -451,17 +509,8 @@ namespace YaOpt.Helpers
 
 		private static bool Build(int thingCount, int terrainCount)
 		{
-			_beautyStat = StatDefOf.Beauty;
-			_beautyOutdoorsStat = StatDefOf.BeautyOutdoors;
-			if (_beautyStat == null || _beautyOutdoorsStat == null)
+			if (!EnsureLayout())
 				return false;
-
-			if (!LoadStatParameters(_beautyStat, 0, out _beautyParams)
-				|| !LoadStatParameters(_beautyOutdoorsStat, BeautyOutdoorsSlot, out _beautyOutdoorsParams))
-			{
-				_disabled = true;
-				return false;
-			}
 
 			var beautyBase = new float[thingCount];
 			var beautyOutdoorsBase = new float[thingCount];
@@ -522,10 +571,18 @@ namespace YaOpt.Helpers
 					continue;
 
 				// A terrain request has no thing, so no comps and no contents; only the quality part
-				// runs, always at QualityCategory.Normal.
-				terrainBeauty[index] = ApplyQualityPart(BaseValue(def.statBases, _beautyStat), 0);
-				terrainBeautyOutdoors[index] =
-					ApplyQualityPart(BaseValue(def.statBases, _beautyOutdoorsStat), BeautyOutdoorsSlot);
+				// runs, always at QualityCategory.Normal. Appended parts still run, with the same
+				// def-level request vanilla passes, because one of them could react to the terrain.
+				var beauty = ApplyQualityPart(BaseValue(def.statBases, _beautyStat), 0,
+					_beautyQualityNegative);
+				ApplyTail(_beautyTail, def, ref beauty);
+				terrainBeauty[index] = beauty;
+
+				var beautyOutdoors = ApplyQualityPart(BaseValue(def.statBases, _beautyOutdoorsStat),
+					BeautyOutdoorsSlot, _beautyOutdoorsQualityNegative);
+				ApplyTail(_beautyOutdoorsTail, def, ref beautyOutdoors);
+				terrainBeautyOutdoors[index] = beautyOutdoors;
+
 				terrainBeautyOutdoorsDefined[index] = def.StatBaseDefined(_beautyOutdoorsStat);
 			}
 
@@ -552,44 +609,83 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
-		/// Reads the two <c>StatPart</c>s this rewrite reproduces and refuses to run if the stat no
-		/// longer looks like what the arithmetic below assumes.
+		/// Why the layout was refused, or null when the fast path is usable. Displayed next to the
+		/// option so a player is not left guessing why an enabled patch does nothing.
 		/// </summary>
-		private static bool LoadStatParameters(StatDef stat, int slot, out StatParams parameters)
+		internal static string FailReason
+		{
+			get
+			{
+				EnsureLayout();
+				return _failReason;
+			}
+		}
+
+		/// <summary>
+		/// Validates both stats once and caches the verdict for the rest of the process.
+		/// </summary>
+		/// <remarks>
+		/// Vanilla builds <c>stat.parts</c> while the defs load and never rebuilds it afterwards; the
+		/// entries are instances, so a mod cannot legitimately change the list once the game is
+		/// running. Re-checking on every table rebuild would repeat the same comparison and the same
+		/// log line for no benefit.
+		/// </remarks>
+		/// <returns>True when the fast path can run. False also means "not ready yet".</returns>
+		internal static bool EnsureLayout()
+		{
+			if (_layoutResolved)
+				return _failReason == null;
+
+			// Defs are still loading. Leave the layout unresolved so the next call retries instead of
+			// freezing a verdict derived from a half-populated database.
+			if (StatDefOf.Beauty == null || StatDefOf.BeautyOutdoors == null)
+				return false;
+
+			_layoutResolved = true;
+			_beautyStat = StatDefOf.Beauty;
+			_beautyOutdoorsStat = StatDefOf.BeautyOutdoors;
+
+			return ReadStatLayout(_beautyStat, 0, out _beautyParams,
+					out _beautyQualityNegative, out _beautyTail)
+				&& ReadStatLayout(_beautyOutdoorsStat, BeautyOutdoorsSlot, out _beautyOutdoorsParams,
+					out _beautyOutdoorsQualityNegative, out _beautyOutdoorsTail);
+		}
+
+		/// <summary>
+		/// Reads everything the hot path needs from one stat: the quality part it models inline, the
+		/// finalize settings, and the parts that follow the modelled pair.
+		/// </summary>
+		/// <param name="tail">
+		/// Parts declared after <c>[StatPart_Quality, StatPart_ContentsBeauty]</c>, replayed in order at
+		/// runtime. Null when there are none.
+		/// </param>
+		private static bool ReadStatLayout(StatDef stat, int slot, out StatParams parameters,
+			out bool qualityNegative, out StatPart[] tail)
 		{
 			parameters = default;
+			qualityNegative = false;
+			tail = null;
 
-			StatPart_Quality quality = null;
-			var hasContentsBeauty = false;
-			if (stat.parts != null)
+			var parts = stat.parts;
+
+			// The two modelled parts must be first: the arithmetic below computes them from tables, so
+			// a part that has to see the value before them would change the result.
+			if (parts == null || parts.Count < 2
+				|| !(parts[0] is StatPart_Quality quality)
+				|| !(parts[1] is StatPart_ContentsBeauty))
 			{
-				for (var i = 0; i < stat.parts.Count; i++)
-				{
-					if (stat.parts[i] is StatPart_Quality part)
-						quality = part;
-					else if (stat.parts[i] is StatPart_ContentsBeauty)
-						hasContentsBeauty = true;
-				}
+				return Reject(stat, "parts do not start with [StatPart_Quality, StatPart_ContentsBeauty]",
+					parts);
 			}
 
-			if (stat.parts == null || stat.parts.Count != 2
-				|| quality == null || !hasContentsBeauty)
-			{
-				YaOptMod.Error($"{stat.defName} no longer has exactly [StatPart_Quality, " +
-					"StatPart_ContentsBeauty]; the beauty fast path is disabled.");
-				return false;
-			}
-
-			// applyFactorsIfNegative decides whether the stuff factor branch is taken for negative
-			// values, so it cannot be deferred to the runtime tables.
+			// applyFactorsIfNegative selects the stuff factor branch for negative values, and the
+			// post-processing hooks run inside FinalizeValue where this rewrite does not go.
 			if (stat.applyFactorsIfNegative
 				|| stat.postProcessCurve != null
 				|| (stat.postProcessStatFactors != null && stat.postProcessStatFactors.Count > 0)
 				|| (stat.statFactors != null && stat.statFactors.Count > 0))
 			{
-				YaOptMod.Error($"{stat.defName} enables post-processing the beauty fast path does not " +
-					"reproduce; the beauty fast path is disabled.");
-				return false;
+				return Reject(stat, "enables post-processing the fast path does not reproduce", parts);
 			}
 
 			QualityMultiplier[slot + 0] = quality.factorAwful;
@@ -612,16 +708,122 @@ namespace YaOpt.Helpers
 			parameters.Max = stat.maxValue;
 			parameters.RoundToFiveOver = stat.roundToFiveOver;
 			parameters.RoundValue = stat.roundValue;
+			qualityNegative = quality.applyToNegativeValues;
+
+			if (parts.Count > 2)
+			{
+				tail = new StatPart[parts.Count - 2];
+				for (var i = 0; i < tail.Length; i++)
+					tail[i] = parts[i + 2];
+			}
+
+			YaOptMod.Debug($"Beauty stat layout {stat.defName} into slot {slot}: " +
+				$"tail={tail?.Length ?? 0} qualityNegative={qualityNegative} " +
+				$"min={parameters.Min} max={parameters.Max} roundToFiveOver={parameters.RoundToFiveOver} " +
+				$"roundValue={parameters.RoundValue} factors={DescribeQualityMultipliers(slot)} " +
+				$"maxGains={DescribeQualityMaxGains(slot)}");
 			return true;
+		}
+
+		/// <summary>
+		/// Records why the layout cannot be reproduced and reports it once.
+		/// </summary>
+		private static bool Reject(StatDef stat, string reason, List<StatPart> parts)
+		{
+			_failReason = $"{stat.defName}: {reason}. Parts: {DescribeParts(parts)}";
+			YaOptMod.Error($"Beauty fast path is unavailable, checked once at load. {_failReason}. " +
+				"The option stays on but falls back to vanilla; nothing is recomputed for this session.");
+			return false;
+		}
+
+		/// <summary>
+		/// Replays the parts declared after the modelled pair, in order, with the request vanilla would
+		/// have handed them. The terrain tables use the def-level form, which has no thing, exactly as
+		/// <c>BuildableDef.GetStatValueAbstract</c> does.
+		/// </summary>
+		private static void ApplyTail(StatPart[] tail, BuildableDef def, ref float value)
+		{
+			if (tail == null)
+				return;
+
+			var request = StatRequest.For(def, null);
+			for (var i = 0; i < tail.Length; i++)
+				tail[i].TransformValue(request, ref value);
+		}
+
+		/// <summary>
+		/// Dumps the runtime type and defining assembly of every part. A part that is declared with
+		/// the expected <c>Class</c> name in XML but defined by a different assembly still loads,
+		/// and then fails the <c>is</c> test, so the assembly name is what tells the two cases apart.
+		/// </summary>
+		private static string DescribeParts(List<StatPart> parts)
+		{
+			if (parts == null)
+				return "<null>";
+
+			var builder = new StringBuilder();
+			builder.Append('[');
+			for (var i = 0; i < parts.Count; i++)
+			{
+				if (i > 0)
+					builder.Append(", ");
+
+				var part = parts[i];
+				if (part == null)
+				{
+					builder.Append("<null>");
+					continue;
+				}
+
+				var type = part.GetType();
+				var assembly = type.Assembly.GetName();
+				builder.Append(type.FullName ?? type.Name);
+				builder.Append(" @ ");
+				builder.Append(assembly.Name);
+				builder.Append(' ');
+				builder.Append(assembly.Version);
+			}
+
+			return builder.Append(']').ToString();
+		}
+
+		private static string DescribeQualityMultipliers(int slot)
+		{
+			var builder = new StringBuilder();
+			for (var i = 0; i < QualityStride; i++)
+			{
+				if (i > 0)
+					builder.Append('/');
+				builder.Append(QualityMultiplier[slot + i].ToString("0.###"));
+			}
+
+			return builder.ToString();
+		}
+
+		private static string DescribeQualityMaxGains(int slot)
+		{
+			var builder = new StringBuilder();
+			for (var i = 0; i < QualityStride; i++)
+			{
+				if (i > 0)
+					builder.Append('/');
+				builder.Append(QualityMaxGain[slot + i].ToString("0.###"));
+			}
+
+			return builder.ToString();
 		}
 
 		/// <summary>
 		/// Applies <c>StatPart_Quality.TransformValue</c> at <see cref="QualityCategory.Normal"/>,
 		/// which is what every abstract request uses.
 		/// </summary>
-		private static float ApplyQualityPart(float value, int slot)
+		/// <param name="applyToNegative">
+		/// <c>StatPart_Quality.applyToNegativeValues</c>. False in vanilla, where a non-positive value
+		/// skips the part entirely.
+		/// </param>
+		private static float ApplyQualityPart(float value, int slot, bool applyToNegative)
 		{
-			if (value <= 0f)
+			if (!applyToNegative && value <= 0f)
 				return value;
 
 			var index = slot + (int)QualityCategory.Normal;

@@ -373,6 +373,7 @@
 	<YaOpt.Setting.Option.BeautyFastPath>美觀取樣快速路徑</YaOpt.Setting.Option.BeautyFastPath>
 	<YaOpt.Setting.Option.BeautyFastPath.Desc>用一次走訪取代感知美觀值的取樣，資料來自讀檔時依 Def 預先算好的表。原版每次取樣 241 格，每格查兩次房間，並對每個相關物品跑完整屬性計算，因為 Beauty 屬性既不是 immutable 也不快取。取樣範圍與數值都不變，只是把重複的查詢去掉了。物品和建築的材料、品質、內容物與組件仍然照常計入。</YaOpt.Setting.Option.BeautyFastPath.Desc>
 	<YaOpt.Setting.Option.BeautyFastPath.Compatibility>重寫整個美觀取樣方法，其他 Mod 對該方法的補丁會被繞過。因此預設關閉；偵測到衝突補丁時會自動關掉。</YaOpt.Setting.Option.BeautyFastPath.Compatibility>
+	<YaOpt.Setting.BeautyFastPath.Blocked>本次遊戲未生效，Beauty 屬性的結構不是本最佳化能重現的形式：</YaOpt.Setting.BeautyFastPath.Blocked>
 	<YaOpt.Setting.Option.WorldPawnsListCache>世界 pawn 清單快取</YaOpt.Setting.Option.WorldPawnsListCache>
 	<YaOpt.Setting.Option.WorldPawnsListCache.Desc>重用世界 pawn 清單，不再每次存取都重建。原版每次都會清空並從存活、封存、死亡三個集合重新填充，即使內容沒有變化。只要有 pawn 增刪清單就會正常重建，呼叫方拿到的內容與原版一致。</YaOpt.Setting.Option.WorldPawnsListCache.Desc>
 	<YaOpt.Setting.Option.StorableDefsCache>可儲存物品清單快取</YaOpt.Setting.Option.StorableDefsCache>
