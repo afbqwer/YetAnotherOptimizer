@@ -1308,7 +1308,7 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Caches <see cref="StatDefOf.PsychicEntropyMax"/> for 20 ticks at the neural heat getters.
+		/// Caches <see cref="StatDefOf.PsychicEntropyMax"/> for 60 ticks at the neural heat getters.
 		/// </summary>
 		/// <seealso cref="Patches.MultiTargets_PsychicEntropyStatCache"/>
 		public OptimizationOption OptPsychicEntropyCache { get; } = new OptimizationOption
@@ -1316,7 +1316,8 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.PsychicEntropyCache",
 			Desc = "YaOpt.Setting.Option.PsychicEntropyCache.Desc",
 			Category = OptimizationCategory.Tps,
-			SubCategory = "StatsAndCaches"
+			SubCategory = "StatsAndCaches",
+			Default = false,
 		};
 
 		/// <summary>

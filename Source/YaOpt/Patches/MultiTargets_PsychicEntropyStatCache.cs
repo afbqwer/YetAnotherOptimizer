@@ -12,12 +12,13 @@ namespace YaOpt.Patches
 	/// </summary>
 	/// <remarks>
 	/// The matching XML patch marks PsychicEntropyMax cacheable. Vanilla then reuses the value for
-	/// 20 ticks instead of evaluating the full stat at every getter call.
+	/// 60 ticks instead of evaluating the full stat at every getter call.
 	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptPsychicEntropyCache"/>
+	[HarmonyPatch]
 	internal static class MultiTargets_PsychicEntropyStatCache
 	{
-		private const int CacheInterval = 20;
+		private const int CacheInterval = 60;
 
 		static IEnumerable<MethodBase> TargetMethods()
 		{

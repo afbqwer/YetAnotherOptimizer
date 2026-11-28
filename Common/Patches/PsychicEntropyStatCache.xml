@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Patch>
-	<Operation Class="YaOpt.Patches.Xml.PatchOperationSettingGate">
-		<setting>OptPsychicEntropyCache</setting>
-		<match Class="PatchOperationAdd">
-			<xpath>/Defs/StatDef[defName="PsychicEntropyMax" and not(cacheable)]</xpath>
-			<value>
-				<cacheable>true</cacheable>
-			</value>
-		</match>
+	<!-- VPE already caches these getters and its cacheable patch cannot follow an existing text node. -->
+	<Operation Class="PatchOperationFindMod">
+		<mods>
+			<li>Vanilla Psycasts Expanded</li>
+		</mods>
+		<nomatch Class="YaOpt.Patches.Xml.PatchOperationSettingGate">
+			<setting>OptPsychicEntropyCache</setting>
+			<match Class="PatchOperationAdd">
+				<xpath>/Defs/StatDef[defName="PsychicEntropyMax" and not(cacheable)]</xpath>
+				<value>
+					<cacheable>true</cacheable>
+				</value>
+			</match>
+		</nomatch>
 	</Operation>
 </Patch>

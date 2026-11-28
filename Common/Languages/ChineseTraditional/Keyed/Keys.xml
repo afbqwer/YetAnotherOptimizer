@@ -297,7 +297,7 @@
 	<YaOpt.Setting.Option.MoveSpeedStatCache>移動速度屬性快取</YaOpt.Setting.Option.MoveSpeedStatCache>
 	<YaOpt.Setting.Option.MoveSpeedStatCache.Desc>在移動呼叫點為移動速度屬性快取20 tick。原版每走一格都會重新求值一次移動速度，而它極少變化。啟用後同一數值最多沿用20 tick（約三分之一秒）。亡靈被排除，因為其速度隨可見時間曲線變化。剛發生的裝備、健康或光照變化最多需20 tick 才會反映到移動速度上。</YaOpt.Setting.Option.MoveSpeedStatCache.Desc>
 	<YaOpt.Setting.Option.PsychicEntropyCache>Entropy屬性快取</YaOpt.Setting.Option.PsychicEntropyCache>
-	<YaOpt.Setting.Option.PsychicEntropyCache.Desc>在 MaxEntropy 和 MaxPotentialEntropy 讀取處快取Entropy上限 20 tick，避免Entropy Gizmo 和施法路徑重複進行完整屬性計算。預設關閉，因為裝備、基因或 Hediff 的變化最多可能需要 20 tick 才會反映。</YaOpt.Setting.Option.PsychicEntropyCache.Desc>
+	<YaOpt.Setting.Option.PsychicEntropyCache.Desc>在 MaxEntropy 和 MaxPotentialEntropy 讀取處快取Entropy上限 60 tick（約 1 秒），避免Entropy Gizmo 和施法路徑重複進行完整屬性計算。預設關閉，因為裝備、基因或 Hediff 的變化最多可能需要 60 tick 才會反映。</YaOpt.Setting.Option.PsychicEntropyCache.Desc>
 	<YaOpt.Setting.Option.CelestialSunGlowCache>太陽光照快取</YaOpt.Setting.Option.CelestialSunGlowCache>
 	<YaOpt.Setting.Option.CelestialSunGlowCache.Desc>在同一個 tick 內重用目前地圖的太陽光照值。天空、光照、陰影和天氣程式碼經常重複請求完全相同的結果。快取以地圖物件和絕對 tick 為鍵，不產生延遲，重力船移動也無需額外檢查 Tile。</YaOpt.Setting.Option.CelestialSunGlowCache.Desc>
 	<YaOpt.Setting.Option.FrameWorkToBuildCache>施工框架工作量快取</YaOpt.Setting.Option.FrameWorkToBuildCache>
