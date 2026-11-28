@@ -34,6 +34,11 @@ namespace YaOpt.Helpers
 			@"""([^""]*)""" + ANY_SPACE + @"\])$",
 			RegexOptions.Compiled);
 
+		// One [name="value"] or [@name="value"] predicate inside a descendant path.
+		private static readonly Regex _predicateRegex = new Regex(
+			"^(@?" + IDENTITY + "*)" + EQUALITY + @"""([^""]*)""$",
+			RegexOptions.Compiled);
+
 		private class NodeEnumerator : IEnumerator
 		{
 			public bool MoveNext()
@@ -104,9 +109,16 @@ namespace YaOpt.Helpers
 			if (!_available)
 				return xml.SelectNodes(xpath).GetEnumerator();
 
-			var shouldFallback = true;
 			if (xpath.StartsWith("Defs/", StringComparison.Ordinal))
 				xpath = "/" + xpath;
+
+			// Descendant steps ("//") are evaluated by a document-order walk instead of the forward
+			// child-step path below. A native XPath descendant scan over the unified document costs
+			// 100+ ms; the walk is the same query without the navigator overhead.
+			if (xpath.IndexOf("//", StringComparison.Ordinal) >= 0)
+				return GetDescendantEnumerator(xml, xpath);
+
+			var shouldFallback = true;
 			try
 			{
 				_tmpQueue.Clear();
@@ -224,6 +236,207 @@ namespace YaOpt.Helpers
 					nodes.Add(node);
 			}
 			return nodes.ToArray();
+		}
+
+		private static IEnumerator GetDescendantEnumerator(XmlDocument xml, string xpath)
+		{
+			try
+			{
+				_tmpQueue.Clear();
+				if (TryRunDescendantPath(xml, xpath))
+				{
+					_singletonEnumerator.Reset();
+					return _singletonEnumerator;
+				}
+			}
+			catch (Exception ex)
+			{
+				_tmpQueue.Clear();
+				YaOptMod.Error("Error when optimized descendant patching. Fallback to vanilla method. " +
+							   $"Exception: {ex}");
+			}
+			return xml.SelectNodes(xpath).GetEnumerator();
+		}
+
+		private readonly struct Step
+		{
+			internal readonly bool Descendant;
+			internal readonly string Name;
+			internal readonly string QueryName;
+			internal readonly string QueryValue;
+
+			internal Step(bool descendant, string name, string queryName, string queryValue)
+			{
+				Descendant = descendant;
+				Name = name;
+				QueryName = queryName;
+				QueryValue = queryValue;
+			}
+		}
+
+		/// <summary>
+		/// Parses a path made of child ("/") and descendant ("//") steps, each with at most one
+		/// equality predicate. Anything else (positions, functions, wildcards, unions) is rejected so
+		/// the caller falls back to the native XPath engine.
+		/// </summary>
+		private static bool TryParsePath(string xpath, out List<Step> steps)
+		{
+			steps = new List<Step>(4);
+			var i = 0;
+			while (i < xpath.Length)
+			{
+				if (xpath[i] != '/')
+					return false;
+				var descendant = i + 1 < xpath.Length && xpath[i + 1] == '/';
+				i += descendant ? 2 : 1;
+
+				if (i >= xpath.Length || !IsNameStart(xpath[i]))
+					return false;
+				var nameStart = i++;
+				while (i < xpath.Length && IsNameChar(xpath[i]))
+					i++;
+				var name = xpath.Substring(nameStart, i - nameStart);
+
+				string queryName = null;
+				string queryValue = null;
+				if (i < xpath.Length && xpath[i] == '[')
+				{
+					var start = ++i;
+					var inQuote = false;
+					while (i < xpath.Length)
+					{
+						var ch = xpath[i];
+						if (ch == '"')
+							inQuote = !inQuote;
+						else if (ch == ']' && !inQuote)
+							break;
+						i++;
+					}
+					if (i >= xpath.Length)
+						return false;
+
+					var predicate = _predicateRegex.Match(xpath.Substring(start, i - start).Trim());
+					if (!predicate.Success)
+						return false;
+					queryName = predicate.Groups[1].Value;
+					queryValue = predicate.Groups[2].Value;
+					i++;
+				}
+
+				steps.Add(new Step(descendant, name, queryName, queryValue));
+			}
+			return steps.Count > 0;
+		}
+
+		/// <summary>
+		/// Evaluates the parsed path against the live document. Child steps keep document order;
+		/// descendant steps walk each context subtree in document order. With several overlapping
+		/// contexts the concatenation can repeat a node, so duplicates are dropped keeping the first
+		/// occurrence, which is still document order.
+		/// </summary>
+		private static bool TryRunDescendantPath(XmlDocument xml, string xpath)
+		{
+			if (!TryParsePath(xpath, out var steps))
+				return false;
+
+			var first = steps[0];
+			List<XmlElement> current;
+			if (first.Descendant)
+			{
+				current = new List<XmlElement>();
+				Descend(xml, first, current);
+			}
+			else
+			{
+				if (!string.Equals(first.Name, "Defs", StringComparison.Ordinal) || _xmlDefs == null)
+					return false;
+				if (first.QueryName != null && !MatchesPredicate(_xmlDefs, first.QueryName, first.QueryValue))
+					return true;
+				current = new List<XmlElement>(1) { _xmlDefs };
+			}
+
+			for (var s = 1; s < steps.Count; s++)
+			{
+				var step = steps[s];
+				var next = new List<XmlElement>();
+				if (step.Descendant)
+				{
+					for (var i = 0; i < current.Count; i++)
+						Descend(current[i], step, next);
+					if (current.Count > 1)
+						Dedupe(next);
+				}
+				else
+				{
+					for (var i = 0; i < current.Count; i++)
+					{
+						var parent = current[i];
+						// Top-level defs are unique by name; the cache turns a 57k-child scan into a
+						// dictionary lookup. The parent check keeps deeper "defName" elements exact.
+						if (step.QueryName == "defName" && _xmlCache.TryGetValue(step.Name, out var byName) &&
+							byName.TryGetValue(step.QueryValue, out var cached) && cached.ParentNode == parent)
+						{
+							next.Add(cached);
+							continue;
+						}
+
+						foreach (object obj in parent.ChildNodes)
+						{
+							if (obj is XmlElement child && MatchesStep(child, step))
+								next.Add(child);
+						}
+					}
+				}
+
+				current = next;
+				if (current.Count == 0)
+					break;
+			}
+
+			for (var i = 0; i < current.Count; i++)
+				_tmpQueue.Enqueue((current[i], 0));
+			return true;
+		}
+
+		private static void Descend(XmlNode node, Step step, List<XmlElement> result)
+		{
+			for (var child = node.FirstChild; child != null; child = child.NextSibling)
+			{
+				if (!(child is XmlElement element))
+					continue;
+				if (MatchesStep(element, step))
+					result.Add(element);
+				Descend(element, step, result);
+			}
+		}
+
+		private static bool MatchesStep(XmlElement element, Step step)
+		{
+			return element.Name == step.Name &&
+				   (step.QueryName == null || MatchesPredicate(element, step.QueryName, step.QueryValue));
+		}
+
+		private static void Dedupe(List<XmlElement> nodes)
+		{
+			var seen = new HashSet<XmlElement>();
+			var write = 0;
+			for (var read = 0; read < nodes.Count; read++)
+			{
+				if (seen.Add(nodes[read]))
+					nodes[write++] = nodes[read];
+			}
+			if (write < nodes.Count)
+				nodes.RemoveRange(write, nodes.Count - write);
+		}
+
+		private static bool IsNameStart(char c)
+		{
+			return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
+		}
+
+		private static bool IsNameChar(char c)
+		{
+			return IsNameStart(c) || (c >= '0' && c <= '9') || c == '-' || c == '.';
 		}
 
 		/// <summary>
