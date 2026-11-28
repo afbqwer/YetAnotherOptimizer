@@ -195,6 +195,46 @@ namespace YaOpt.Helpers
 			}
 		}
 
+		/// <summary>
+		/// Appends the foreign patches that a short-circuiting prefix at
+		/// <paramref name="prefixPriority"/> would skip: every foreign transpiler (the body never runs)
+		/// and every foreign prefix ordered after it.
+		/// </summary>
+		internal static void CollectForeignSkippedByPrefix(MethodBase target, int prefixPriority,
+			List<string> results, Func<MethodBase, Patch, bool> compatiblePatch = null)
+		{
+			if (target == null || YaOptMod.Instance == null)
+				return;
+
+			var info = Harmony.GetPatchInfo(target);
+			if (info == null)
+				return;
+
+			var mod = YaOptMod.Instance;
+			var harmonyId = mod.Harmony.Id;
+			var earlyId = mod.EarlyHarmony.Id;
+
+			foreach (var patch in info.Transpilers)
+			{
+				if (patch.owner != harmonyId && patch.owner != earlyId &&
+					(compatiblePatch == null || !compatiblePatch(target, patch)))
+				{
+					results.Add(Describe(patch.owner, "transpiler", target));
+				}
+			}
+
+			foreach (var patch in info.Prefixes)
+			{
+				if (patch.owner == harmonyId || patch.owner == earlyId)
+					continue;
+				if (patch.priority <= prefixPriority &&
+					(compatiblePatch == null || !compatiblePatch(target, patch)))
+				{
+					results.Add(Describe(patch.owner, "prefix", target));
+				}
+			}
+		}
+
 		private static string Describe(string owner, string kind, MethodBase target)
 		{
 			return owner + " (" + kind + ") → " + target.DeclaringType?.Name + "." + target.Name;

@@ -1101,6 +1101,20 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Removes the quadratic collision retry when <c>ThinkTreeDef.ResolveReferences</c> assigns save
+		/// keys to the think node copies. Keys stay identical to vanilla.
+		/// </summary>
+		/// <seealso cref="Helpers.ThinkKeyAssignFastPath"/>
+		/// <seealso cref="Patches.Early.Verse_ThinkTreeKeyAssigner_AssignSingleKey"/>
+		public OptimizationOption OptFastThinkKeyAssign { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FastThinkKeyAssign",
+			Desc = "YaOpt.Setting.Option.FastThinkKeyAssign.Desc",
+			SubCategory = "Startup",
+			Category = OptimizationCategory.Misc,
+		};
+
+		/// <summary>
 		/// Memoises <see cref="ThingDef.BaseMass"/>, <see cref="ThingDef.BaseFlammability"/> and
 		/// <see cref="ThingDef.BaseMaxHitPoints"/>.
 		/// </summary>
@@ -2210,6 +2224,26 @@ namespace YaOpt
 		{
 			Name = "YaOpt.Setting.Option.FastPatchOperation",
 			Desc = "YaOpt.Setting.Option.FastPatchOperation.Desc",
+			SubCategory = "Startup",
+			Category = OptimizationCategory.Misc
+		};
+
+		/// <summary>
+		/// Evaluates <c>Defs/DefType[...]</c> patch queries whose predicates use functions
+		/// (<c>not()</c>, <c>contains(translate(...))</c>) or relative child paths directly over the
+		/// top-level defs instead of the native XPath engine.
+		/// </summary>
+		/// <remarks>
+		/// The native engine takes seconds for such queries on the unified document. The bow rotation
+		/// patch shipped by Patch Operation Collection spends about 19 s on
+		/// <c>Defs/ThingDef[not(rotateInShelves)][not(apparel)][verbs/li][equipmentType="Primary"]...</c>.
+		/// Queries outside the supported subset still fall back to the native engine.
+		/// </remarks>
+		/// <seealso cref="Helpers.XPathReducer"/>
+		public OptimizationOption OptFastDefPredicateXPath { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FastDefPredicateXPath",
+			Desc = "YaOpt.Setting.Option.FastDefPredicateXPath.Desc",
 			SubCategory = "Startup",
 			Category = OptimizationCategory.Misc
 		};

@@ -112,7 +112,9 @@
 	<YaOpt.Setting.Option.LazyTextureLoad.Radical>更激进的延迟加载</YaOpt.Setting.Option.LazyTextureLoad.Radical>
 	<YaOpt.Setting.Option.LazyTextureLoad.Radical.Desc>基础优化仅会延迟加载角色和物品的纹理，由于游戏特性，建筑贴图始终会在游戏启动时载入，以便生成贴图集以及作为预览图标。开启此选项后，对于尺寸超过256的纹理，游戏启动载入时都会将其缩小至256，并在游戏中实际用到时才会加载完整纹理。由于需要在创建物体时进行加载检测，会略微增加创建物体的开销，表现就是少许增加载入游戏时和地图上刷新大量物体时的卡顿。建议仅在开启基础优化后显存占用依旧紧张时才启用此选项。此外此选项仅支持DDS（以及Zstd压缩DDS）贴图。</YaOpt.Setting.Option.LazyTextureLoad.Radical.Desc>
 	<YaOpt.Setting.Option.FastPatchOperation>简化XPath</YaOpt.Setting.Option.FastPatchOperation>
-	<YaOpt.Setting.Option.FastPatchOperation.Desc>如果XML补丁中XPath表达式比较简单，形如Defs/定义类型[defName = "定义名"]，那么这个优化将会将XPath表达式简化为简单的节点查询，提高游戏启动速度。</YaOpt.Setting.Option.FastPatchOperation.Desc>
+	<YaOpt.Setting.Option.FastPatchOperation.Desc>对形如 Defs/类型[defName="..."] 的简单 XPath 直接按定义名查缓存，并加速 // 后代查询；缓存从补丁阶段保留到定义解析开始，延迟执行的补丁也能用上。</YaOpt.Setting.Option.FastPatchOperation.Desc>
+	<YaOpt.Setting.Option.FastDefPredicateXPath>加速带谓词函数的XPath</YaOpt.Setting.Option.FastDefPredicateXPath>
+	<YaOpt.Setting.Option.FastDefPredicateXPath.Desc>带 not()、contains(translate(...)) 或子路径谓词的 Def XPath 直接遍历顶层定义求值，不再交给原生引擎；大型整合包里这类查询原本要十几秒。不支持的形式自动回退。</YaOpt.Setting.Option.FastDefPredicateXPath.Desc>
 	<YaOpt.Setting.Option.FastTranslationInjection>优化文本注入</YaOpt.Setting.Option.FastTranslationInjection>
 	<YaOpt.Setting.Option.FastTranslationInjection.Desc>游戏在启动时会将文本文件注入到XML数据中，在此过程中还会检查有无文本文件错误，例如重复对一个字段注入文本。然而这个检查过程是个时间复杂度为O(N^2)的操作，该优化将其中一段循环对比优化成了查表，将时间复杂度降为O(N)。它能加速游戏启动速度，在非英文语言中效果更明显。</YaOpt.Setting.Option.FastTranslationInjection.Desc>
 	<YaOpt.Setting.Option.FastTranslationInjection.Compatibility>与[WG] WOWGAG's Performance Patch的「复用类型名查找结果」（加载页签）重复：本项删掉整段重复检查循环，对方只让扫描落空，因此同时装上时只有本项生效。无需关闭任何一项，也不必为此关掉对方那项。</YaOpt.Setting.Option.FastTranslationInjection.Compatibility>
@@ -361,7 +363,9 @@
 	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>
 	<YaOpt.Setting.Option.ExosuitXmlFast.Desc>用一次只遍历取值的查表替换 Exosuit 的全文档类名替换补丁操作，XML 补丁阶段不再为每个节点重建类名字典。</YaOpt.Setting.Option.ExosuitXmlFast.Desc>
 	<YaOpt.Setting.Option.FastPostInheritanceMerge>PostInheritanceOperation 继承合并加速</YaOpt.Setting.Option.FastPostInheritanceMerge>
-	<YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>用一次重建顶层 Def 列表替换 PostInheritanceOperation 的继承合并。原版每换一个继承 Def 都要向父节点索取前一个兄弟，而这一步要从第一个子节点开始遍历，Def 越多越慢，开销随数量平方增长。本项按原顺序一次性移除再追加同一批节点，线性时间完成，结果列表与原版相同。</YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>
+	<YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>把 PostInheritanceOperation 的继承合并改成一次线性重建。原版每替换一个 Def 都要从头重找前一个兄弟节点，Def 越多越慢；本项结果与原来相同。</YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>
+	<YaOpt.Setting.Option.FastThinkKeyAssign>思维树保存键分配加速</YaOpt.Setting.Option.FastThinkKeyAssign>
+	<YaOpt.Setting.Option.FastThinkKeyAssign.Desc>ThinkTreeDef 解析时为深拷贝的节点分配保存键。原版会反复重试已占用的键，同类型节点越多越慢；本项跳过已试过的候选，分配的键与原版完全相同。</YaOpt.Setting.Option.FastThinkKeyAssign.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基础属性缓存</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在游戏开始后记住每个物品 Def 的基础质量、基础易燃性和基础耐久。原版每次读取都要走完整属性系统重算一遍。主要帮助在批量读取这些值的模组，原版自身很少用到。读档时会重新计算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
 	<YaOpt.Setting.Option.TerrainBeautyCache>地板美观属性缓存</YaOpt.Setting.Option.TerrainBeautyCache>

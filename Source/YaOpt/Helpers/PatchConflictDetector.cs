@@ -49,6 +49,8 @@ namespace YaOpt.Helpers
 			CheckPawnComputeMatrix();
 			CheckPawnRenderPreparation();
 			CheckEarlyRenderPrepare();
+			CheckFastThinkKeyAssign();
+			CheckPostInheritanceMerge();
 		}
 
 		/// <summary>
@@ -315,6 +317,46 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(DynamicDrawManager), "ComputeCulledThings"),
 				AccessTools.Method(typeof(DynamicDrawManager), "PreDrawVisibleThings"),
 				AccessTools.Method(typeof(Map), nameof(Map.MapUpdate)));
+		}
+
+		/// <summary>
+		/// The key assignment prefix runs last and returns false, which skips every prefix ordered after
+		/// it and the original body. A foreign prefix or transpiler on <c>AssignSingleKey</c> would be
+		/// silently lost.
+		/// </summary>
+		private static void CheckFastThinkKeyAssign()
+		{
+			var reasons = new List<string>();
+			var target = AccessTools.Method(typeof(ThinkTreeKeyAssigner),
+				nameof(ThinkTreeKeyAssigner.AssignSingleKey));
+			if (target == null)
+				reasons.Add("目标方法缺失：" + nameof(YaOptSettings.OptFastThinkKeyAssign));
+			else
+				PatchConflictGuard.CollectForeignSkippedByPrefix(target, Priority.Low, reasons);
+
+			if (reasons.Count > 0)
+				CompatibilityDefines.PatchConflict(nameof(YaOptSettings.OptFastThinkKeyAssign), reasons);
+		}
+
+		/// <summary>
+		/// The merge replacement discards the original body, so a foreign transpiler on it would be lost.
+		/// </summary>
+		private static void CheckPostInheritanceMerge()
+		{
+			var queueType = AccessTools.TypeByName("PostInheritanceOperation.PatchQueue");
+			if (queueType == null)
+				return;
+
+			var target = AccessTools.Method(queueType, "ApplyXmlInheritanceOnDocument",
+				new[] { typeof(System.Xml.XmlDocument) });
+			var reasons = new List<string>();
+			if (target == null)
+				reasons.Add("目标方法缺失：" + nameof(YaOptSettings.OptFastPostInheritanceMerge));
+			else
+				PatchConflictGuard.CollectForeignTranspilers(target, reasons);
+
+			if (reasons.Count > 0)
+				CompatibilityDefines.PatchConflict(nameof(YaOptSettings.OptFastPostInheritanceMerge), reasons);
 		}
 
 		private static void CheckReplacement(string settingId, params MethodBase[] targets)

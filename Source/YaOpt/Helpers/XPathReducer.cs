@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -17,6 +18,8 @@ namespace YaOpt.Helpers
 		private static Dictionary<string, Dictionary<string, XmlElement>> _xmlCache;
 		private static XmlElement _xmlDefs;
 		private static Queue<(XmlElement, int)> _tmpQueue;
+		private static List<XmlElement> _tmpDefs;
+		private static List<XmlElement> _tmpDefsNext;
 		private static NodeEnumerator _singletonEnumerator;
 		private static bool _available;
 
@@ -59,6 +62,8 @@ namespace YaOpt.Helpers
 			_available = false;
 			_xmlCache = null;
 			_tmpQueue = null;
+			_tmpDefs = null;
+			_tmpDefsNext = null;
 			_singletonEnumerator = null;
 			if (_xmlDefs == null)
 				return;
@@ -66,6 +71,8 @@ namespace YaOpt.Helpers
 			var nameSet = new HashSet<(string, string)>();
 			_xmlCache = new Dictionary<string, Dictionary<string, XmlElement>>();
 			_tmpQueue = new Queue<(XmlElement, int)>();
+			_tmpDefs = new List<XmlElement>();
+			_tmpDefsNext = new List<XmlElement>();
 			_singletonEnumerator = new NodeEnumerator();
 			foreach (object obj in _xmlDefs.ChildNodes)
 			{
@@ -98,6 +105,8 @@ namespace YaOpt.Helpers
 			_xmlCache = null;
 			_xmlDefs = null;
 			_tmpQueue = null;
+			_tmpDefs = null;
+			_tmpDefsNext = null;
 			_singletonEnumerator = null;
 			GC.Collect(0, GCCollectionMode.Optimized, false);
 		}
@@ -112,18 +121,22 @@ namespace YaOpt.Helpers
 			if (xpath.StartsWith("Defs/", StringComparison.Ordinal))
 				xpath = "/" + xpath;
 
+			var settings = YaOptGlobal.Settings;
+			var fastSimple = settings == null || settings.OptFastPatchOperation.Enabled;
+			var fastPredicates = settings != null && settings.OptFastDefPredicateXPath.Enabled;
+
 			// Descendant steps ("//") are evaluated by a document-order walk instead of the forward
 			// child-step path below. A native XPath descendant scan over the unified document costs
 			// 100+ ms; the walk is the same query without the navigator overhead.
-			if (xpath.IndexOf("//", StringComparison.Ordinal) >= 0)
+			if (fastSimple && xpath.IndexOf("//", StringComparison.Ordinal) >= 0)
 				return GetDescendantEnumerator(xml, xpath);
 
 			var shouldFallback = true;
 			try
 			{
 				_tmpQueue.Clear();
-				var matches = _xPathRegex.Match(xpath);
-				if (matches.Success)
+				var matches = fastSimple ? _xPathRegex.Match(xpath) : null;
+				if (matches != null && matches.Success)
 				{
 					shouldFallback = false;
 					var captures = matches.Groups[1].Captures;
@@ -192,6 +205,11 @@ namespace YaOpt.Helpers
 						}
 					}
 				}
+				// Predicate-function paths ("not()", "contains(translate())", child paths) are rejected
+				// by the regex above, but the native engine takes seconds over the unified document.
+				// Evaluate the supported subset directly over the Defs children instead.
+				if (shouldFallback && fastPredicates && TryRunDefPredicatePath(xpath))
+					shouldFallback = false;
 			}
 			catch (Exception ex)
 			{
@@ -458,6 +476,481 @@ namespace YaOpt.Helpers
 					return true;
 			}
 			return false;
+		}
+
+		/// <summary>
+		/// Evaluates the XPath 1.0 subset <c>/Defs/DefType[predicate...]/child/.../leaf[predicate...]</c>
+		/// that the simple regex rejects. Supported predicates: child existence/absence, relative child
+		/// paths, <c>@attr</c>/child equality and <c>contains(translate(...))</c>, optionally negated.
+		/// Any other shape returns false so the native engine handles the query. The native engine is
+		/// pathologically slow on these predicates after inheritance, because it walks the children of
+		/// every resolved def (tens of thousands of nodes whose bodies are fully merged).
+		/// </summary>
+		private static bool TryRunDefPredicatePath(string xpath)
+		{
+			var position = 0;
+			if (!TryConsumeChar(xpath, ref position, '/'))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!string.Equals(ReadName(xpath, ref position), "Defs", StringComparison.Ordinal))
+				return false;
+			if (!TryConsumeChar(xpath, ref position, '/'))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			var defName = ReadName(xpath, ref position);
+			if (defName == null)
+				return false;
+
+			if (!TryParsePredicateList(xpath, ref position, out var predicates))
+				return false;
+
+			// Trailing child path, e.g. /building/fixedStorageSettings/filter[not(x)]. The result set is
+			// the elements matched by the last step, so the query cannot just return the defs.
+			List<DefPathStep> steps = null;
+			while (true)
+			{
+				SkipWhitespace(xpath, ref position);
+				if (position >= xpath.Length)
+					break;
+				if (!TryConsumeChar(xpath, ref position, '/'))
+					return false;
+				SkipWhitespace(xpath, ref position);
+				var stepName = ReadName(xpath, ref position);
+				if (stepName == null)
+					return false;
+				if (!TryParsePredicateList(xpath, ref position, out var stepPredicates))
+					return false;
+				if (steps == null)
+					steps = new List<DefPathStep>(2);
+				steps.Add(new DefPathStep(stepName, stepPredicates));
+			}
+
+			if ((predicates == null || predicates.Count == 0) && (steps == null || !HasAnyPredicate(steps)))
+				return false;
+
+			_tmpDefs.Clear();
+			for (var child = _xmlDefs.FirstChild; child != null; child = child.NextSibling)
+			{
+				if (child is XmlElement element && element.Name == defName &&
+					MatchesDefPredicates(element, predicates))
+				{
+					_tmpDefs.Add(element);
+				}
+			}
+
+			if (steps != null)
+			{
+				for (var i = 0; i < steps.Count; i++)
+				{
+					var step = steps[i];
+					_tmpDefsNext.Clear();
+					for (var parent = 0; parent < _tmpDefs.Count; parent++)
+					{
+						for (var child = _tmpDefs[parent].FirstChild; child != null; child = child.NextSibling)
+						{
+							if (child is XmlElement element && element.Name == step.Name &&
+								MatchesDefPredicates(element, step.Predicates))
+							{
+								_tmpDefsNext.Add(element);
+							}
+						}
+					}
+					var swap = _tmpDefs;
+					_tmpDefs = _tmpDefsNext;
+					_tmpDefsNext = swap;
+				}
+			}
+
+			for (var i = 0; i < _tmpDefs.Count; i++)
+				_tmpQueue.Enqueue((_tmpDefs[i], 0));
+			return true;
+		}
+
+		private static bool HasAnyPredicate(List<DefPathStep> steps)
+		{
+			for (var i = 0; i < steps.Count; i++)
+			{
+				var predicates = steps[i].Predicates;
+				if (predicates != null && predicates.Count > 0)
+					return true;
+			}
+			return false;
+		}
+
+		private static bool TryParsePredicateList(string xpath, ref int position,
+			out List<DefPredicate> predicates)
+		{
+			predicates = null;
+			while (true)
+			{
+				SkipWhitespace(xpath, ref position);
+				if (position >= xpath.Length || xpath[position] != '[')
+					return true;
+				position++;
+				if (predicates == null)
+					predicates = new List<DefPredicate>(4);
+				if (!TryParsePredicate(xpath, ref position, predicates))
+					return false;
+				SkipWhitespace(xpath, ref position);
+				if (!TryConsumeChar(xpath, ref position, ']'))
+					return false;
+			}
+		}
+
+		private readonly struct DefPathStep
+		{
+			internal readonly string Name;
+			internal readonly List<DefPredicate> Predicates;
+
+			internal DefPathStep(string name, List<DefPredicate> predicates)
+			{
+				Name = name;
+				Predicates = predicates;
+			}
+		}
+
+		private enum DefPredicateKind : byte
+		{
+			ChildExists,
+			ChildAbsent,
+			PathExists,
+			PathAbsent,
+			AttributeEquals,
+			ChildEquals,
+			ContainsTranslate,
+			NotContainsTranslate
+		}
+
+		private readonly struct DefPredicate
+		{
+			internal readonly DefPredicateKind Kind;
+			internal readonly string Name;
+			internal readonly string Value;
+			internal readonly string From;
+			internal readonly string To;
+			internal readonly string[] Path;
+
+			internal DefPredicate(DefPredicateKind kind, string name, string value = null,
+				string from = null, string to = null, string[] path = null)
+			{
+				Kind = kind;
+				Name = name;
+				Value = value;
+				From = from;
+				To = to;
+				Path = path;
+			}
+		}
+
+		private static bool TryParsePredicate(string xpath, ref int position, List<DefPredicate> result)
+		{
+			SkipWhitespace(xpath, ref position);
+			if (TryConsumeWord(xpath, ref position, "not"))
+			{
+				SkipWhitespace(xpath, ref position);
+				if (!TryConsumeChar(xpath, ref position, '('))
+					return false;
+				SkipWhitespace(xpath, ref position);
+				if (TryConsumeWord(xpath, ref position, "contains"))
+				{
+					SkipWhitespace(xpath, ref position);
+					if (!TryConsumeChar(xpath, ref position, '('))
+						return false;
+					if (!TryParseContainsTranslate(xpath, ref position, out var inner))
+						return false;
+					SkipWhitespace(xpath, ref position);
+					// Closes contains(...).
+					if (!TryConsumeChar(xpath, ref position, ')'))
+						return false;
+					SkipWhitespace(xpath, ref position);
+					// Closes not(...).
+					if (!TryConsumeChar(xpath, ref position, ')'))
+						return false;
+					result.Add(new DefPredicate(DefPredicateKind.NotContainsTranslate, inner.Name,
+						inner.Value, inner.From, inner.To));
+					return true;
+				}
+
+				SkipWhitespace(xpath, ref position);
+				var first = ReadName(xpath, ref position);
+				if (first == null)
+					return false;
+				var path = ParseChildPath(xpath, ref position, first);
+				if (path == null)
+					return false;
+				SkipWhitespace(xpath, ref position);
+				if (!TryConsumeChar(xpath, ref position, ')'))
+					return false;
+				if (path.Length == 1)
+					result.Add(new DefPredicate(DefPredicateKind.ChildAbsent, path[0]));
+				else
+					result.Add(new DefPredicate(DefPredicateKind.PathAbsent, null, null, null, null, path));
+				return true;
+			}
+
+			if (TryConsumeWord(xpath, ref position, "contains"))
+			{
+				SkipWhitespace(xpath, ref position);
+				if (!TryConsumeChar(xpath, ref position, '('))
+					return false;
+				if (!TryParseContainsTranslate(xpath, ref position, out var predicate))
+					return false;
+				SkipWhitespace(xpath, ref position);
+				if (!TryConsumeChar(xpath, ref position, ')'))
+					return false;
+				result.Add(predicate);
+				return true;
+			}
+
+			if (position < xpath.Length && xpath[position] == '@')
+			{
+				position++;
+				var attributeName = ReadName(xpath, ref position);
+				if (attributeName == null)
+					return false;
+				SkipWhitespace(xpath, ref position);
+				if (!TryConsumeChar(xpath, ref position, '='))
+					return false;
+				SkipWhitespace(xpath, ref position);
+				if (!TryReadQuoted(xpath, ref position, out var attributeValue))
+					return false;
+				result.Add(new DefPredicate(DefPredicateKind.AttributeEquals, attributeName, attributeValue));
+				return true;
+			}
+
+			var name = ReadName(xpath, ref position);
+			if (name == null)
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (TryConsumeChar(xpath, ref position, '='))
+			{
+				SkipWhitespace(xpath, ref position);
+				if (!TryReadQuoted(xpath, ref position, out var value))
+					return false;
+				result.Add(new DefPredicate(DefPredicateKind.ChildEquals, name, value));
+				return true;
+			}
+
+			if (position < xpath.Length && xpath[position] == '/')
+			{
+				var path = ParseChildPath(xpath, ref position, name);
+				if (path == null)
+					return false;
+				result.Add(new DefPredicate(DefPredicateKind.PathExists, null, null, null, null, path));
+				return true;
+			}
+
+			result.Add(new DefPredicate(DefPredicateKind.ChildExists, name));
+			return true;
+		}
+
+		private static string[] ParseChildPath(string xpath, ref int position, string firstName)
+		{
+			var path = new List<string>(2) { firstName };
+			while (position < xpath.Length && xpath[position] == '/')
+			{
+				position++;
+				SkipWhitespace(xpath, ref position);
+				var name = ReadName(xpath, ref position);
+				if (name == null)
+					return null;
+				path.Add(name);
+				SkipWhitespace(xpath, ref position);
+			}
+			return path.ToArray();
+		}
+
+		private static bool TryParseContainsTranslate(string xpath, ref int position,
+			out DefPredicate predicate)
+		{
+			predicate = default;
+			if (!TryConsumeWord(xpath, ref position, "translate"))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryConsumeChar(xpath, ref position, '('))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			var name = ReadName(xpath, ref position);
+			if (name == null)
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryConsumeChar(xpath, ref position, ','))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryReadQuoted(xpath, ref position, out var from))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryConsumeChar(xpath, ref position, ','))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryReadQuoted(xpath, ref position, out var to))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryConsumeChar(xpath, ref position, ')'))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryConsumeChar(xpath, ref position, ','))
+				return false;
+			SkipWhitespace(xpath, ref position);
+			if (!TryReadQuoted(xpath, ref position, out var value))
+				return false;
+			predicate = new DefPredicate(DefPredicateKind.ContainsTranslate, name, value, from, to);
+			return true;
+		}
+
+		private static bool MatchesDefPredicates(XmlElement element, List<DefPredicate> predicates)
+		{
+			if (predicates == null || predicates.Count == 0)
+				return true;
+			for (var i = 0; i < predicates.Count; i++)
+			{
+				var predicate = predicates[i];
+				bool matched;
+				switch (predicate.Kind)
+				{
+					case DefPredicateKind.ChildExists:
+						matched = FirstChildElement(element, predicate.Name) != null;
+						break;
+					case DefPredicateKind.ChildAbsent:
+						matched = FirstChildElement(element, predicate.Name) == null;
+						break;
+					case DefPredicateKind.PathExists:
+						matched = HasChildPath(element, predicate.Path);
+						break;
+					case DefPredicateKind.PathAbsent:
+						matched = !HasChildPath(element, predicate.Path);
+						break;
+					case DefPredicateKind.AttributeEquals:
+						var attribute = element.GetAttributeNode(predicate.Name);
+						matched = attribute != null && attribute.Value == predicate.Value;
+						break;
+					case DefPredicateKind.ChildEquals:
+						matched = AnyChildEquals(element, predicate.Name, predicate.Value);
+						break;
+					case DefPredicateKind.ContainsTranslate:
+						matched = ContainsTranslated(element, predicate);
+						break;
+					case DefPredicateKind.NotContainsTranslate:
+						matched = !ContainsTranslated(element, predicate);
+						break;
+					default:
+						matched = false;
+						break;
+				}
+				if (!matched)
+					return false;
+			}
+			return true;
+		}
+
+		private static bool ContainsTranslated(XmlElement element, DefPredicate predicate)
+		{
+			var child = FirstChildElement(element, predicate.Name);
+			var text = child != null ? child.InnerText : string.Empty;
+			var translated = Translate(text, predicate.From, predicate.To);
+			return translated.IndexOf(predicate.Value, StringComparison.Ordinal) >= 0;
+		}
+
+		private static bool HasChildPath(XmlNode node, string[] path)
+		{
+			for (var i = 0; i < path.Length; i++)
+			{
+				node = FirstChildElement(node, path[i]);
+				if (node == null)
+					return false;
+			}
+			return true;
+		}
+
+		private static XmlElement FirstChildElement(XmlNode node, string name)
+		{
+			for (var child = node.FirstChild; child != null; child = child.NextSibling)
+			{
+				if (child is XmlElement element && element.Name == name)
+					return element;
+			}
+			return null;
+		}
+
+		// XPath equality against a node-set is existential, so any child with that name may match.
+		private static bool AnyChildEquals(XmlNode node, string name, string value)
+		{
+			for (var child = node.FirstChild; child != null; child = child.NextSibling)
+			{
+				if (child is XmlElement element && element.Name == name && element.InnerText == value)
+					return true;
+			}
+			return false;
+		}
+
+		private static string Translate(string value, string from, string to)
+		{
+			if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(from))
+				return value ?? string.Empty;
+			var builder = new StringBuilder(value.Length);
+			for (var i = 0; i < value.Length; i++)
+			{
+				var index = from.IndexOf(value[i]);
+				if (index < 0)
+					builder.Append(value[i]);
+				else if (index < to.Length)
+					builder.Append(to[index]);
+			}
+			return builder.ToString();
+		}
+
+		private static void SkipWhitespace(string text, ref int position)
+		{
+			while (position < text.Length && char.IsWhiteSpace(text[position]))
+				position++;
+		}
+
+		private static bool TryConsumeChar(string text, ref int position, char expected)
+		{
+			if (position < text.Length && text[position] == expected)
+			{
+				position++;
+				return true;
+			}
+			return false;
+		}
+
+		private static bool TryConsumeWord(string text, ref int position, string word)
+		{
+			if (position + word.Length > text.Length)
+				return false;
+			if (string.CompareOrdinal(text, position, word, 0, word.Length) != 0)
+				return false;
+			var next = position + word.Length;
+			if (next < text.Length && IsNameChar(text[next]))
+				return false;
+			position = next;
+			return true;
+		}
+
+		private static bool TryReadQuoted(string text, ref int position, out string value)
+		{
+			value = null;
+			if (!TryConsumeChar(text, ref position, '"'))
+				return false;
+			var start = position;
+			while (position < text.Length && text[position] != '"')
+				position++;
+			if (position >= text.Length)
+				return false;
+			value = text.Substring(start, position - start);
+			position++;
+			return true;
+		}
+
+		private static string ReadName(string text, ref int position)
+		{
+			if (position >= text.Length || !IsNameStart(text[position]))
+				return null;
+			var start = position++;
+			while (position < text.Length && IsNameChar(text[position]))
+				position++;
+			return text.Substring(start, position - start);
 		}
 	}
 }

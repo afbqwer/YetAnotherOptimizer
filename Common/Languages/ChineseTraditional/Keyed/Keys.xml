@@ -112,7 +112,9 @@
 	<YaOpt.Setting.Option.LazyTextureLoad.Radical>更激進的延遲載入</YaOpt.Setting.Option.LazyTextureLoad.Radical>
 	<YaOpt.Setting.Option.LazyTextureLoad.Radical.Desc>基礎最佳化僅會延遲載入角色和物品的紋理，由於遊戲特性，建築貼圖始終會在遊戲啟動時載入，以便生成貼圖集以及作為預覽圖示。開啟此選項後，對於尺寸超過256的紋理，遊戲啟動載入時都會將其縮小至256，並在遊戲中實際用到時才會載入完整紋理。由於需要在創建物體時進行載入檢測，會略微增加創建物體的開銷，表現就是少許增加載入遊戲時和地圖上重新整理大量物體時的卡頓。建議僅在開啟基礎最佳化後顯示卡記憶體佔用依舊緊張時才啟用此選項。此外此選項僅支援DDS（以及Zstd壓縮DDS）貼圖。</YaOpt.Setting.Option.LazyTextureLoad.Radical.Desc>
 	<YaOpt.Setting.Option.FastPatchOperation>簡化XPath</YaOpt.Setting.Option.FastPatchOperation>
-	<YaOpt.Setting.Option.FastPatchOperation.Desc>如果XML修補程式中XPath運算式比較簡單，形如Defs/定義類型[defName = "定義名"]，那麼這個最佳化將會將XPath運算式簡化為簡單的節點查詢，提高遊戲啟動速度。</YaOpt.Setting.Option.FastPatchOperation.Desc>
+	<YaOpt.Setting.Option.FastPatchOperation.Desc>對形如 Defs/類型[defName="..."] 的簡單 XPath 直接按定義名查快取，並加速 // 後代查詢；快取從補丁階段保留到定義解析開始，延遲執行的補丁也能用上。</YaOpt.Setting.Option.FastPatchOperation.Desc>
+	<YaOpt.Setting.Option.FastDefPredicateXPath>加速帶述詞函式的XPath</YaOpt.Setting.Option.FastDefPredicateXPath>
+	<YaOpt.Setting.Option.FastDefPredicateXPath.Desc>帶 not()、contains(translate(...)) 或子路徑述詞的 Def XPath 直接走訪頂層定義求值，不再交給原生引擎；大型整合包裡這類查詢原本要十幾秒。不支援的形式自動退回。</YaOpt.Setting.Option.FastDefPredicateXPath.Desc>
 	<YaOpt.Setting.Option.FastTranslationInjection>最佳化文本注入</YaOpt.Setting.Option.FastTranslationInjection>
 	<YaOpt.Setting.Option.FastTranslationInjection.Desc>遊戲在啟動時會將文本檔案注入到XML資料中，在此過程中還會檢查有無文本檔案錯誤，例如重複對一個欄位注入文本。然而這個檢查過程是個時間複雜度為O(N^2)的操作，該最佳化將其中一段迴圈對比最佳化成了查表，將時間複雜度降為O(N)。它能加速遊戲啟動速度，在非英文語言中效果更明顯。</YaOpt.Setting.Option.FastTranslationInjection.Desc>
 	<YaOpt.Setting.Option.FastTranslationInjection.Compatibility>與[WG] WOWGAG's Performance Patch的「複用類型名查找結果」（載入標籤頁）重複：本項刪掉整段重複檢查迴圈，對方只讓掃描落空，因此同時裝上時只有本項生效。無需關閉任何一項，也不必為此關掉對方那項。</YaOpt.Setting.Option.FastTranslationInjection.Compatibility>
@@ -361,7 +363,9 @@
 	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>
 	<YaOpt.Setting.Option.ExosuitXmlFast.Desc>用一次只走訪取值的查表取代 Exosuit 的全文件類名取代補丁操作，XML 補丁階段不再為每個節點重建類名字典。</YaOpt.Setting.Option.ExosuitXmlFast.Desc>
 	<YaOpt.Setting.Option.FastPostInheritanceMerge>PostInheritanceOperation 繼承合併加速</YaOpt.Setting.Option.FastPostInheritanceMerge>
-	<YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>用一次重建頂層 Def 列表取代 PostInheritanceOperation 的繼承合併。原版每換一個繼承 Def 都要向父節點索取前一個兄弟，而這一步要從第一個子節點開始走訪，Def 越多越慢，開銷隨數量平方成長。本項按原順序一次性移除再追加同一批節點，以線性時間完成，結果列表與原版相同。</YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>
+	<YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>把 PostInheritanceOperation 的繼承合併改成一次線性重建。原版每替換一個 Def 都要從頭重找前一個兄弟節點，Def 越多越慢；本項結果與原來相同。</YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>
+	<YaOpt.Setting.Option.FastThinkKeyAssign>思維樹保存鍵分配加速</YaOpt.Setting.Option.FastThinkKeyAssign>
+	<YaOpt.Setting.Option.FastThinkKeyAssign.Desc>ThinkTreeDef 解析時為深拷貝的節點分配保存鍵。原版會反覆重試已佔用的鍵，同類型節點越多越慢；本項跳過已試過的候選，分配的鍵與原版完全相同。</YaOpt.Setting.Option.FastThinkKeyAssign.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基礎屬性快取</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在遊戲開始後記住每個物品 Def 的基礎質量、基礎易燃性和基礎耐久。原版每次讀取都要走完整屬性系統重算一遍。主要幫助在批次讀取這些值的模組，原版自身很少用到。讀檔時會重新計算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
 	<YaOpt.Setting.Option.TerrainBeautyCache>地板美觀屬性快取</YaOpt.Setting.Option.TerrainBeautyCache>

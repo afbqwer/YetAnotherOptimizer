@@ -39,7 +39,8 @@ namespace YaOpt.Patches.Early
 
 		static bool Prepare()
 		{
-			return YaOptGlobal.Settings.OptFastPatchOperation.Enabled;
+			return YaOptGlobal.Settings.OptFastPatchOperation.Enabled ||
+				   YaOptGlobal.Settings.OptFastDefPredicateXPath.Enabled;
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
