@@ -12,6 +12,8 @@
 		<Nullable>disable</Nullable>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<DefineConstants>$(DefineConstants);RIMWORLD_1_7</DefineConstants>
+		<!-- Diagnostic XML load timing probes; see Source/Settings.props. -->
+		<DefineConstants Condition="'$(YaOptXmlTiming)' == 'true'">$(DefineConstants);YAOPT_XML_TIMING</DefineConstants>
 		<!-- Assembly-CSharp is publicized so non-public vanilla members are reachable at compile
 		     time. Publicizing only rewrites the copy the compiler sees; at runtime the original
 		     assembly is loaded, so access checks still apply. IgnoresAccessChecksTo is the

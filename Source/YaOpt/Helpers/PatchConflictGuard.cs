@@ -125,6 +125,38 @@ namespace YaOpt.Helpers
 		}
 
 		/// <summary>
+		/// Appends every foreign transpiler that touches <paramref name="target"/>.
+		/// </summary>
+		/// <remarks>
+		/// Used by body-replacement transpilers. A foreign prefix is harmless there (it runs around the
+		/// replacement and can still skip the method exactly as it would skip the original), but a
+		/// foreign transpiler edits the instruction list that a replacement would discard.
+		/// </remarks>
+		internal static void CollectForeignTranspilers(MethodBase target, List<string> results,
+			Func<MethodBase, Patch, bool> compatiblePatch = null)
+		{
+			if (target == null || YaOptMod.Instance == null)
+				return;
+
+			var info = Harmony.GetPatchInfo(target);
+			if (info == null)
+				return;
+
+			var mod = YaOptMod.Instance;
+			var harmonyId = mod.Harmony.Id;
+			var earlyId = mod.EarlyHarmony.Id;
+
+			foreach (var patch in info.Transpilers)
+			{
+				if (patch.owner != harmonyId && patch.owner != earlyId &&
+					(compatiblePatch == null || !compatiblePatch(target, patch)))
+				{
+					results.Add(Describe(patch.owner, "transpiler", target));
+				}
+			}
+		}
+
+		/// <summary>
 		/// Appends every foreign prefix at or below normal priority and every transpiler that touches
 		/// <paramref name="target"/>. A replacement prefix that returns false skips every prefix ordered
 		/// after it, including plain void instrumentation, so those methods cannot safely be replaced.

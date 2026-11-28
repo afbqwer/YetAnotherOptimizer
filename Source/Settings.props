@@ -1,5 +1,10 @@
 <Project>
   <PropertyGroup>
     <GameVersion>1.7</GameVersion>
+
+    <!-- Diagnostic XML def-load timing probes (Temp_XmlLoadTimingProbe.cs). Off in normal builds.
+         Enable per build with -p:YaOptXmlTiming=true, or set it in the gitignored
+         UserSettings.props. It must never be on for a shipped assembly. -->
+    <YaOptXmlTiming Condition="'$(YaOptXmlTiming)' == ''">false</YaOptXmlTiming>
   </PropertyGroup>
 </Project>

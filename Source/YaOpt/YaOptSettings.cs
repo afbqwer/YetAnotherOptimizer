@@ -1080,6 +1080,27 @@ namespace YaOpt
 		};
 
 		/// <summary>
+		/// Rebuilds the unified document's top-level def list once instead of swapping each inherited
+		/// def in place.
+		/// </summary>
+		/// <remarks>
+		/// PostInheritanceOperation's pass calls <c>InsertAfter</c> and <c>RemoveChild</c> per
+		/// inherited def. Both walk the parent's singly linked child list through
+		/// <c>PreviousSibling</c>, so the pass is O(n²); this option produces the same list in one
+		/// remove-all/append-all pass instead.
+		/// </remarks>
+		/// <seealso cref="Helpers.PostInheritanceFastMerge"/>
+		/// <seealso cref="Patches.Early.PostInheritanceOperation_PatchQueue_ApplyXmlInheritanceOnDocument"/>
+		public OptimizationOption OptFastPostInheritanceMerge { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.FastPostInheritanceMerge",
+			Desc = "YaOpt.Setting.Option.FastPostInheritanceMerge.Desc",
+			SubCategory = "Startup",
+			Category = OptimizationCategory.Misc,
+			FuncShow = (_) => YaOptGlobal.HasType("PostInheritanceOperation.PatchQueue"),
+		};
+
+		/// <summary>
 		/// Memoises <see cref="ThingDef.BaseMass"/>, <see cref="ThingDef.BaseFlammability"/> and
 		/// <see cref="ThingDef.BaseMaxHitPoints"/>.
 		/// </summary>

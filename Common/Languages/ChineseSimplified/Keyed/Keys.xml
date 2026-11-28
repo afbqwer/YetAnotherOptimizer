@@ -360,6 +360,8 @@
 	<YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>持久化 GiddyUp 每次启动都会重新计算的绘制偏移。GiddyUp 每次启动都会渲染并逐像素扫描每个生命阶段的贴图；本项会从校验过的文件恢复其会话缓存，只丢弃贴图发生变化的条目。</YaOpt.Setting.Option.GiddyUpOffsetCache.Desc>
 	<YaOpt.Setting.Option.ExosuitXmlFast>Exosuit XML 改名加速</YaOpt.Setting.Option.ExosuitXmlFast>
 	<YaOpt.Setting.Option.ExosuitXmlFast.Desc>用一次只遍历取值的查表替换 Exosuit 的全文档类名替换补丁操作，XML 补丁阶段不再为每个节点重建类名字典。</YaOpt.Setting.Option.ExosuitXmlFast.Desc>
+	<YaOpt.Setting.Option.FastPostInheritanceMerge>PostInheritanceOperation 继承合并加速</YaOpt.Setting.Option.FastPostInheritanceMerge>
+	<YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>用一次重建顶层 Def 列表替换 PostInheritanceOperation 的继承合并。原版每换一个继承 Def 都要向父节点索取前一个兄弟，而这一步要从第一个子节点开始遍历，Def 越多越慢，开销随数量平方增长。本项按原顺序一次性移除再追加同一批节点，线性时间完成，结果列表与原版相同。</YaOpt.Setting.Option.FastPostInheritanceMerge.Desc>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache>物品基础属性缓存</YaOpt.Setting.Option.ThingDefBaseStatCache>
 	<YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>在游戏开始后记住每个物品 Def 的基础质量、基础易燃性和基础耐久。原版每次读取都要走完整属性系统重算一遍。主要帮助在批量读取这些值的模组，原版自身很少用到。读档时会重新计算。</YaOpt.Setting.Option.ThingDefBaseStatCache.Desc>
 	<YaOpt.Setting.Option.TerrainBeautyCache>地板美观属性缓存</YaOpt.Setting.Option.TerrainBeautyCache>
