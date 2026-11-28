@@ -14,6 +14,7 @@ Source
 .analysis
 AGENTS.md
 1.7-MIGRATION-AUDIT.md
+*.code-workspace
 
 # source code and build output are not needed in the workshop package
 Source
