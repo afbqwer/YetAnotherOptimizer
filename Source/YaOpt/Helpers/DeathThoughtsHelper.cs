@@ -90,6 +90,13 @@ namespace YaOpt.Helpers
 		private static void RebuildUnknownOwners()
 		{
 			UnknownDeathMemoryOwners.Clear();
+
+			// Game.ClearCaches also runs while setting up a quick-test game, before
+			// Current.Game is assigned. PawnsFinder then dereferences Find.CurrentGravship
+			// (Current.Game.Gravship) and throws. There is no pawn to register in that state.
+			if (Current.Game == null)
+				return;
+
 			var pawns = PawnsFinder.All_AliveOrDead;
 			for (var i = 0; i < pawns.Count; i++)
 			{
