@@ -23,7 +23,23 @@
 		<li>wowgag.guiperformancepatch</li>
 	</forceLoadBefore>
 	<description>
-YetAnotherOptimizer is a high-performance optimization mod for RimWorld.
-It is designed to significantly increase game frame rates (both FPS and TPS) and make the late-game colonies run smoother.
+[b]Yet another Optimizer[/b]
+YetAnotherOptimizer (YaOpt) is a performance optimization mod for RimWorld. It uses Harmony patches and targeted caching to improve FPS and TPS, keeping large late-game colonies running smoothly. All optimizations can be toggled and adjusted individually by category in the in-game mod settings.
+
+[hr][/hr]
+[b]Changes from 1.6 to 1.7[/b]
+[list]
+[*][b]Removed optimizations with poor mod compatibility, including multithreading optimizations.[/b]
+[*][b]Removed optimizations that no longer apply to 1.7.[/b]
+[*][b]Rewrote many optimizations for the 1.7 codebase.[/b]
+[*][b]Added a large number of optimizations, including pathfinding job and grid optimizations, Extended Stat Caching, Alert Update Throttling, Fast Def XPath Predicates, and Def Lookup Index.[/b]
+[/list]
+
+[hr][/hr]
+[b]Effect on Saves[/b]
+This mod does not affect saves. It can be added to an existing save or safely removed at any time. Most optimizations preserve vanilla calculation results; the few that change vanilla behavior are noted in the settings. Most options take effect immediately; options marked "requires a save reload or game restart" take effect after loading a save or restarting the game.
+
+[b]Compatibility[/b]
+Compatible with most optimization mods for 1.7, including [WG] WOWGAG's Performance Patch, Performance Esmolas, and Overclock. If you find an incompatibility, please report it.
 	</description>
 </ModMetaData>
