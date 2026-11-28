@@ -16,14 +16,17 @@ namespace YaOpt.Patches
 	/// Vanilla calls <c>ReachabilityWithinRegion.ThingFromRegionListerReachable</c> for every Thing
 	/// in a Region, then computes the priority and distance and short-circuits on the distance
 	/// limits. The transpiler prepends a guard that rejects a Thing on arithmetic alone when it is
-	/// beyond <c>maxDistSquared</c> or cannot beat the current <c>closestDistSquared</c>. The
-	/// remaining body, including the reachability call, validator and result assignment, is left
-	/// byte-for-byte intact for every Thing that can still be selected.
+	/// beyond <c>maxDistSquared</c>, and on unprioritized searches also when it cannot beat the
+	/// current <c>closestDistSquared</c>. The remaining body, including the reachability call,
+	/// validator and result assignment, is left byte-for-byte intact for every Thing that can still
+	/// be selected.
 	/// </para>
 	/// <para>
-	/// The guard only applies when <c>priorityGetter</c> is null. With a priority getter the
-	/// acceptance test allows a farther Thing with a higher priority, so the distance alone cannot
-	/// prove rejection.
+	/// The absolute maximum-distance bound is safe on either path because vanilla's acceptance test
+	/// always requires the squared distance to be below <c>maxDistSquared</c>. The best-candidate
+	/// comparison is only safe when <c>priorityGetter</c> is null; with a priority getter a farther
+	/// Thing with a higher priority can still win. The two scopes are controlled by separate options
+	/// and cached in <see cref="RegionProcessorDistanceFilter.Configure"/>.
 	/// </para>
 	/// <para>
 	/// The method body is fixed: one <c>ThingFromRegionListerReachable</c> call and no exception
@@ -31,6 +34,7 @@ namespace YaOpt.Patches
 	/// </para>
 	/// </remarks>
 	/// <seealso cref="YaOptSettings.OptRegionProcessorDistFilter"/>
+	/// <seealso cref="YaOptSettings.OptRegionProcessorPriorityDistFilter"/>
 	/// <seealso cref="RegionProcessorDistanceFilter"/>
 	[HarmonyPatch]
 	internal static class Verse_RegionProcessorClosestThingReachable_ProcessThing
@@ -46,8 +50,12 @@ namespace YaOpt.Patches
 
 		static bool Prepare()
 		{
-			return TargetMethod() != null &&
-				   YaOptGlobal.Settings?.OptRegionProcessorDistFilter.Enabled == true;
+			var target = TargetMethod();
+			var settings = YaOptGlobal.Settings;
+			var filterUnprioritized = settings?.OptRegionProcessorDistFilter.Enabled == true;
+			var filterPrioritized = settings?.OptRegionProcessorPriorityDistFilter.Enabled == true;
+			RegionProcessorDistanceFilter.Configure(filterUnprioritized, filterPrioritized);
+			return target != null && (filterUnprioritized || filterPrioritized);
 		}
 
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,

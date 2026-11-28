@@ -234,8 +234,11 @@
 	<YaOpt.Setting.Option.RegionQueryFast.Desc>当区域网格没有待重建内容时，直接读取区域数组，省去每次区域/房间查询的重建检查和重复边界检查。区域为脏、更新器禁用、网格已释放或越界时仍走原版逻辑（包括日志）。不缓存任何结果，因此无需失效处理。</YaOpt.Setting.Option.RegionQueryFast.Desc>
 	<YaOpt.Setting.Option.RegionQueryFast.Compatibility>若其他模组修改了 RegionAt 或 GetValidRegionAt，本选项可能绕过它们。</YaOpt.Setting.Option.RegionQueryFast.Compatibility>
 	<YaOpt.Setting.Option.RegionProcessorDistFilter>最近物品搜索优先算距离</YaOpt.Setting.Option.RegionProcessorDistFilter>
-	<YaOpt.Setting.Option.RegionProcessorDistFilter.Desc>无优先级的最近可达物品搜索中，先按距离平方过滤，再做可达性检查。超出最大距离、或不可能优于当前最优候选的物品会在路径网格与禁止检查之前被跳过。验证器调用与搜索顺序不变，带优先级的搜索仍走原版逻辑。</YaOpt.Setting.Option.RegionProcessorDistFilter.Desc>
+	<YaOpt.Setting.Option.RegionProcessorDistFilter.Desc>无优先级的最近可达物品搜索中，先按距离平方过滤，再做可达性检查。超出最大距离、或不可能优于当前最优候选的物品会在路径网格与禁止检查之前被跳过。验证器调用与搜索顺序不变；带优先级的搜索由单独的选项控制。</YaOpt.Setting.Option.RegionProcessorDistFilter.Desc>
 	<YaOpt.Setting.Option.RegionProcessorDistFilter.Compatibility>若其他模组修改了 ThingFromRegionListerReachable，被距离过滤掉的物品可能绕过它们。</YaOpt.Setting.Option.RegionProcessorDistFilter.Compatibility>
+	<YaOpt.Setting.Option.RegionProcessorPriorityDistFilter>带优先级搜索优先算距离</YaOpt.Setting.Option.RegionProcessorPriorityDistFilter>
+	<YaOpt.Setting.Option.RegionProcessorPriorityDistFilter.Desc>带优先级的最近可达物品搜索中，先按距离平方过滤，再做可达性与优先级检查。超出最大距离的物品无论优先级多高都不会被选中，因此会跳过它的路径网格、禁止和优先级函数调用。验证器调用与搜索顺序不变；不使用“当前最优候选距离”剪枝，因为更高优先级可以从更远处胜出。</YaOpt.Setting.Option.RegionProcessorPriorityDistFilter.Desc>
+	<YaOpt.Setting.Option.RegionProcessorPriorityDistFilter.Compatibility>若其他模组修改了 ThingFromRegionListerReachable 或 StealAIUtility.GetValue，被距离过滤掉的物品可能绕过它们。其他优先级函数由调用方以委托传入，无法静态检测。</YaOpt.Setting.Option.RegionProcessorPriorityDistFilter.Compatibility>
 	<YaOpt.Setting.Option.CameraUpdateRate>更新速率计算优化</YaOpt.Setting.Option.CameraUpdateRate>
 	<YaOpt.Setting.Option.CameraUpdateRate.Desc>游戏会在每一帧计算物体在屏幕上的可见性，并调低屏幕外物体的更新速率，然而这个计算过于精细了，以至于它本身就有一定的开销。此优化微调了可见性判断，稍微放宽了判定标准，减少了更新速率计算的开销，代价是在一些特定条件下可能有少量接近屏幕边缘但不可见的物体也被误判为可见，让系统增加它们的更新速率导致运行开销。但在大部分情况下，这个优化是值得的。</YaOpt.Setting.Option.CameraUpdateRate.Desc>
 	<YaOpt.Setting.Option.GetMapPawns>地图角色检索优化</YaOpt.Setting.Option.GetMapPawns>

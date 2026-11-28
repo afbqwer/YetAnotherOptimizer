@@ -44,6 +44,7 @@ namespace YaOpt.Helpers
 			CheckShamblerStateCache();
 			CheckRegionQueryFast();
 			CheckRegionProcessorDistFilter();
+			CheckRegionProcessorPriorityDistFilter();
 			CheckBeautyFastPath();
 			CheckTempTerrainMerge();
 			CheckPawnComputeMatrix();
@@ -253,6 +254,20 @@ namespace YaOpt.Helpers
 				AccessTools.Method(typeof(ReachabilityWithinRegion),
 					nameof(ReachabilityWithinRegion.ThingFromRegionListerReachable)),
 				AccessTools.Method(typeof(RegionProcessorClosestThingReachable), "ProcessThing"));
+		}
+
+		/// <summary>
+		/// The prioritized distance guard skips both reachability and the priority getter for things
+		/// beyond the maximum distance. <c>StealAIUtility.GetValue</c> is the known priority getter on
+		/// the hot steal scan; arbitrary delegates passed by other callers cannot be enumerated here.
+		/// </summary>
+		private static void CheckRegionProcessorPriorityDistFilter()
+		{
+			Check(nameof(YaOptSettings.OptRegionProcessorPriorityDistFilter), includeAll: false,
+				AccessTools.Method(typeof(ReachabilityWithinRegion),
+					nameof(ReachabilityWithinRegion.ThingFromRegionListerReachable)),
+				AccessTools.Method(typeof(RegionProcessorClosestThingReachable), "ProcessThing"),
+				AccessTools.Method(typeof(StealAIUtility), nameof(StealAIUtility.GetValue)));
 		}
 
 		/// <summary>

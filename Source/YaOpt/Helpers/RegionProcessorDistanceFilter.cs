@@ -9,24 +9,37 @@ namespace YaOpt.Helpers
 	/// </summary>
 	/// <remarks>
 	/// <para>
-	/// The check is restricted to the unprioritized path (<c>priorityGetter == null</c>), which is
-	/// the path used by <see cref="GenClosest.ClosestThingReachable"/>. On that path
-	/// <c>num = priorityGetter?.Invoke(t) ?? 0f</c> is always zero, so the vanilla acceptance test
-	/// reduces to <c>num2 &lt; maxDistSquared</c> for the first accepted Thing and
-	/// <c>num2 &lt; closestDistSquared &amp;&amp; num2 &lt; maxDistSquared</c> afterwards.
+	/// The checker is split by search shape. Unprioritized searches use both the absolute distance
+	/// bound and the best-candidate comparison. Prioritized searches use only the absolute bound:
+	/// vanilla's acceptance test always includes <c>num2 &lt; maxDistSquared</c>, so a Thing at or
+	/// beyond the maximum distance cannot be selected regardless of its priority. The best-candidate
+	/// comparison is not safe there because a farther Thing with a higher priority can still win.
 	/// </para>
 	/// <para>
-	/// Consequently the two early-out conditions below are exactly the negation of the vanilla
-	/// acceptance test on that path. A Thing rejected here could not have been selected anyway,
-	/// and <c>validator</c> was not called for it in vanilla either. Only the
-	/// <c>ReachabilityWithinRegion.ThingFromRegionListerReachable</c> call is skipped for those
-	/// Things; every Thing that can still win keeps the vanilla call chain, including any foreign
-	/// patches on that method.
+	/// A Thing rejected here could not have been selected anyway, and <c>validator</c> was not called
+	/// for it in vanilla either. For rejected Things only the
+	/// <c>ReachabilityWithinRegion.ThingFromRegionListerReachable</c> call and, on the prioritized
+	/// path, the priority getter invocation are skipped; every Thing that can still win keeps the
+	/// vanilla call chain, including any foreign patches on that method.
+	/// </para>
+	/// <para>
+	/// Both option states are cached by <see cref="Configure"/> during the patch pass, so the hot path
+	/// only reads two booleans.
 	/// </para>
 	/// </remarks>
 	/// <seealso cref="Patches.Verse_RegionProcessorClosestThingReachable_ProcessThing"/>
 	internal static class RegionProcessorDistanceFilter
 	{
+		private static bool _filterUnprioritized;
+
+		private static bool _filterPrioritized;
+
+		internal static void Configure(bool filterUnprioritized, bool filterPrioritized)
+		{
+			_filterUnprioritized = filterUnprioritized;
+			_filterPrioritized = filterPrioritized;
+		}
+
 		/// <summary>
 		/// Returns true when the original <c>ProcessThing</c> body can be skipped for this Thing.
 		/// </summary>
@@ -34,6 +47,15 @@ namespace YaOpt.Helpers
 		internal static bool ShouldSkip(RegionProcessorClosestThingReachable processor, Thing thing)
 		{
 			if (processor.priorityGetter != null)
+			{
+				if (!_filterPrioritized)
+					return false;
+
+				return (thing.PositionHeld - processor.root).LengthHorizontalSquared
+					>= processor.maxDistSquared;
+			}
+
+			if (!_filterUnprioritized)
 				return false;
 
 			float distanceSquared = (thing.PositionHeld - processor.root).LengthHorizontalSquared;

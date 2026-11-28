@@ -2136,16 +2136,17 @@ namespace YaOpt
 		};
 
 		/// <summary>
-		/// Rejects a Thing on squared distance before the reachability check in the closest-thing
-		/// region processor.
+		/// Rejects a Thing on squared distance before the reachability check in unprioritized
+		/// closest-thing region searches.
 		/// </summary>
 		/// <remarks>
 		/// <c>ClosestThingReachable</c> passes no priority getter, so its acceptance test depends on
 		/// distance alone. A Thing beyond <c>maxDistSquared</c>, or one that cannot beat the current
 		/// <c>closestDistSquared</c>, is discarded on arithmetic before the path-grid and forbidden
-		/// checks. The validator call set and BFS order are unchanged; the prioritized path keeps
-		/// vanilla. A foreign patch on the reachability method can be skipped for those discarded
-		/// Things, so such patches disable the option by default.
+		/// checks. The validator call set and BFS order are unchanged. A foreign patch on the
+		/// reachability method can be skipped for those discarded Things, so such patches disable the
+		/// option by default. Prioritized searches are controlled by
+		/// <see cref="OptRegionProcessorPriorityDistFilter"/>.
 		/// </remarks>
 		/// <seealso cref="Patches.Verse_RegionProcessorClosestThingReachable_ProcessThing"/>
 		/// <seealso cref="Helpers.RegionProcessorDistanceFilter"/>
@@ -2154,6 +2155,31 @@ namespace YaOpt
 			Name = "YaOpt.Setting.Option.RegionProcessorDistFilter",
 			Desc = "YaOpt.Setting.Option.RegionProcessorDistFilter.Desc",
 			NoteCompatibility = "YaOpt.Setting.Option.RegionProcessorDistFilter.Compatibility",
+			Category = OptimizationCategory.Tps,
+			SubCategory = "ThingsAndRooms",
+			Default = true,
+		};
+
+		/// <summary>
+		/// Rejects a Thing beyond the maximum distance before the reachability and priority checks in
+		/// prioritized closest-thing region searches.
+		/// </summary>
+		/// <remarks>
+		/// The acceptance test always requires the squared distance to be below <c>maxDistSquared</c>,
+		/// so a Thing at or beyond it cannot be selected regardless of its priority. The
+		/// best-candidate distance check is not applied because a farther Thing with a higher priority
+		/// can still win. The validator call set and BFS order are unchanged. A foreign patch on the
+		/// reachability method or a known priority getter can be skipped for discarded Things, so such
+		/// patches disable the option by default; arbitrary priority getters are delegates and cannot be
+		/// checked statically.
+		/// </remarks>
+		/// <seealso cref="Patches.Verse_RegionProcessorClosestThingReachable_ProcessThing"/>
+		/// <seealso cref="Helpers.RegionProcessorDistanceFilter"/>
+		public OptimizationOption OptRegionProcessorPriorityDistFilter { get; } = new OptimizationOption
+		{
+			Name = "YaOpt.Setting.Option.RegionProcessorPriorityDistFilter",
+			Desc = "YaOpt.Setting.Option.RegionProcessorPriorityDistFilter.Desc",
+			NoteCompatibility = "YaOpt.Setting.Option.RegionProcessorPriorityDistFilter.Compatibility",
 			Category = OptimizationCategory.Tps,
 			SubCategory = "ThingsAndRooms",
 			Default = true,
